@@ -1,0 +1,6 @@
+dist
+node_modules
+.env
+process-env.d.ts
+init.js
+init.js.map

@@ -1,0 +1,21 @@
+{
+    "compilerOptions": {
+        "target": "es6",
+        "module": "esnext",
+        "sourceMap": true,
+        "esModuleInterop": true,
+        "lib": [
+            "es6",
+            "dom"
+        ],
+        "noUnusedLocals": true,
+        "moduleResolution": "node",
+        "rootDir": "./src",
+        "outDir": "./dist",
+
+        "removeComments": true,
+        "forceConsistentCasingInFileNames": true,
+        "skipLibCheck": true
+    },
+    "include": ["src/**/*"]
+}

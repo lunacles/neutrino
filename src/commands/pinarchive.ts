@@ -17,6 +17,7 @@ import {
 import CommandInterface from './default.js'
 import Log from '../utilities/log.js'
 import Icon from '../utilities/icon.js'
+import InteractionObserver from './interactionobserver.js'
 
 const PinArchive: CommandInterface = {
   name: 'archivepins',
@@ -28,13 +29,16 @@ const PinArchive: CommandInterface = {
       .setDescription('The channel to archive pinned messages from.')
       .setRequired(true)
     ),
-
   async execute(interaction: ChatInputCommandInteraction<CacheType>): Promise<void> {
     const targetChannel: TextChannel = interaction.options.getChannel('target')
+    const observer = new InteractionObserver(interaction)
 
-    let archive: GuildBasedChannel = interaction.guild.channels.cache.find(channel =>
-      channel.type === ChannelType.GuildCategory && channel.name.toLowerCase() === `#${targetChannel.name} pin archive`
-    )
+    let archive: GuildBasedChannel = observer
+      .filterChannels()
+      .byChannelType(ChannelType.GuildCategory)
+      .byExactName(`#${targetChannel.name} pin archive`)
+      .finishFilter()
+      .first()
 
     if (archive == undefined) {
       try {
@@ -46,7 +50,10 @@ const PinArchive: CommandInterface = {
         Log.error('Failed to create pin archive category', err)
       }
     }
-    let children: Collection<string, GuildBasedChannel> = interaction.guild.channels.cache.filter(channel => channel.parentId === archive.id)
+    let children: Collection<string, GuildBasedChannel> = observer
+      .filterChannels()
+      .byParentId(archive.id)
+      .finishFilter()
 
     let highestMin: number = 0
     for (let [_, child] of children) {
@@ -83,16 +90,22 @@ const PinArchive: CommandInterface = {
         })
         .setTimestamp(msg.createdTimestamp)
 
-      if (msg.content.length > 0) {
-        pinnedMessage.setDescription(`<@${msg.author.id}>\n>>> ${msg.content.slice(0, 2000)}`)
-      }
+      pinnedMessage.setDescription(`\`Author\` - <@${msg.author.id}>\n\`Content\`\n> ${msg.content.length > 0 ? `${msg.cleanContent.slice(0, 2000)}\n` : ''}\`Message URL\`\n> ${msg.url}\n\n`)
 
       if (msg.type === MessageType.Reply) {
         let repliedMsg = await msg.fetchReference()
         pinnedMessage.addFields({
           name: `Replied to`,
-          value: `<@${repliedMsg.author.id}>\n>>> [${repliedMsg.cleanContent.slice(0, 2000)}](${repliedMsg.url})`,
+          value: `\`Author\` - <@${repliedMsg.author.id}>\n\`Content\`\n> ${repliedMsg.content.length > 0 ? `${repliedMsg.cleanContent.slice(0, 2000)}\n` : ''}\`Message URL\`\n> ${repliedMsg.url}\n\n`
         })
+      }
+
+      let splitArray = (array: Array<any>, groupSize: number): Array<Array<any>> => {
+        let groups: Array<any> = []
+        for (let i: number = 0; i < array.length; i += groupSize)
+          groups.push(array.slice(i, i + groupSize))
+
+        return groups
       }
 
       if (attachments.size > 0) {
@@ -103,10 +116,7 @@ const PinArchive: CommandInterface = {
 
         let fields: Array<APIEmbedField> = []
         let map: Array<Attachment> = attachments.map(message => message)
-        let groups: Array<Array<Attachment>> = []
-        for (let i: number = 0; i < map.length; i += 3)
-          groups.push(map.slice(i, i + 3))
-
+        let groups: Array<Array<Attachment>> = splitArray(map, 3)
         for (let group of groups) {
           let value: string = `>>> `
           for (let attachment of group)
@@ -120,14 +130,17 @@ const PinArchive: CommandInterface = {
         pinnedMessage.addFields(...fields)
       }
 
-      let embeds = [pinnedMessage]
-      for (let attachment of attachments.values()) {
-        embeds.push(new EmbedBuilder().setURL('https://ganyu.io/').setImage(attachment.url))
-      }
+      let embeds: Array<EmbedBuilder> = [pinnedMessage]
+      let embedGroups: Array<Array<Attachment>> = splitArray(attachments.map(message => message), 4)
+      for (let group of embedGroups) {
+        for (let attachment of group)
+          embeds.push(new EmbedBuilder().setURL('https://ganyu.io/').setImage(attachment.url))
 
-      await archiveChannel.send({
-        embeds,
-      })
+        await archiveChannel.send({
+          embeds,
+        })
+        embeds = []
+      }
     }
   },
   test(): boolean {

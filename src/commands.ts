@@ -25,7 +25,7 @@ export const Commands: CommandsInterface = {
 
     await this.locate()
     for (let file of this.folder) {
-      if (file === 'default.ts') continue
+      if (file === 'default.ts' || file === 'interactionobserver.ts') continue
       try {
         let module = await import(path.join(this.directory, file))
 

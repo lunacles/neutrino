@@ -90,13 +90,13 @@ const PinArchive: CommandInterface = {
         })
         .setTimestamp(msg.createdTimestamp)
 
-      pinnedMessage.setDescription(`\`Author\` - <@${msg.author.id}>\n\`Content\`\n> ${msg.content.length > 0 ? `${msg.cleanContent.slice(0, 2000)}\n` : ''}\`Message URL\`\n> ${msg.url}\n\n`)
+      pinnedMessage.setDescription(`<@${msg.author.id}>\n\`Content\`\n> ${msg.content.length > 0 ? `${msg.cleanContent.slice(0, 2000)}\n` : ''}\`Message URL\`\n> ${msg.url}\n\n`)
 
       if (msg.type === MessageType.Reply) {
         let repliedMsg = await msg.fetchReference()
         pinnedMessage.addFields({
           name: `Replied to`,
-          value: `\`Author\` - <@${repliedMsg.author.id}>\n\`Content\`\n> ${repliedMsg.content.length > 0 ? `${repliedMsg.cleanContent.slice(0, 2000)}\n` : ''}\`Message URL\`\n> ${repliedMsg.url}\n\n`
+          value: `<@${repliedMsg.author.id}>\n\`Content\`\n> ${repliedMsg.content.length > 0 ? `${repliedMsg.cleanContent.slice(0, 2000)}\n` : ''}\`Message URL\`\n> ${repliedMsg.url}\n\n`
         })
       }
 

@@ -62,9 +62,8 @@ const PinArchive: CommandInterface = {
         highestMin = min
     }
 
-    let pinnedMessages: Collection<string, Message<true>> = await targetChannel.messages.fetchPinned()
-
-    let archiveChannel: GuildBasedChannel = await interaction.guild.channels.create({
+    const pinnedMessages: Collection<string, Message<true>> = await targetChannel.messages.fetchPinned()
+    const archiveChannel: GuildBasedChannel = await interaction.guild.channels.create({
       name: `${highestMin + 1}-${highestMin + pinnedMessages.size}`,
       type: ChannelType.GuildText,
       parent: archive.id,
@@ -90,13 +89,32 @@ const PinArchive: CommandInterface = {
         })
         .setTimestamp(msg.createdTimestamp)
 
-      pinnedMessage.setDescription(`<@${msg.author.id}>\n\`Content\`\n> ${msg.content.length > 0 ? `${msg.cleanContent.slice(0, 2000)}\n` : ''}\`Message URL\`\n> ${msg.url}\n\n`)
+      pinnedMessage.addFields({
+        name: 'Author',
+        value: `<@${msg.author.id}>`,
+        inline: true,
+      }, {
+        name: 'Message URL',
+        value: msg.url,
+        inline: true,
+      }, {
+        name: 'Content',
+        value: msg.content.length > 0 ? `>>> ${msg.cleanContent.slice(0, 1019)}` : '*None*'
+      })
 
       if (msg.type === MessageType.Reply) {
         let repliedMsg = await msg.fetchReference()
         pinnedMessage.addFields({
           name: `Replied to`,
-          value: `<@${repliedMsg.author.id}>\n\`Content\`\n> ${repliedMsg.content.length > 0 ? `${repliedMsg.cleanContent.slice(0, 2000)}\n` : ''}\`Message URL\`\n> ${repliedMsg.url}\n\n`
+          value: `<@${repliedMsg.author.id}>`,
+          inline: true,
+        }, {
+          name: 'Reply URL',
+          value: repliedMsg.url,
+          inline: true,
+        }, {
+          name: 'Content',
+          value: repliedMsg.content.length > 0 ? `>>> ${repliedMsg.cleanContent.slice(0, 1019)}` : '*None*'
         })
       }
 
@@ -108,6 +126,8 @@ const PinArchive: CommandInterface = {
         return groups
       }
 
+      let map: Array<any> = attachments.map(message => message)
+
       if (attachments.size > 0) {
         pinnedMessage.addFields({
           name: `${attachments.size + 1} Attachment(s)`,
@@ -115,7 +135,6 @@ const PinArchive: CommandInterface = {
         })
 
         let fields: Array<APIEmbedField> = []
-        let map: Array<Attachment> = attachments.map(message => message)
         let groups: Array<Array<Attachment>> = splitArray(map, 3)
         for (let group of groups) {
           let value: string = `>>> `
@@ -130,17 +149,12 @@ const PinArchive: CommandInterface = {
         pinnedMessage.addFields(...fields)
       }
 
-      let embeds: Array<EmbedBuilder> = [pinnedMessage]
-      let embedGroups: Array<Array<Attachment>> = splitArray(attachments.map(message => message), 4)
-      for (let group of embedGroups) {
-        for (let attachment of group)
-          embeds.push(new EmbedBuilder().setURL('https://ganyu.io/').setImage(attachment.url))
+      if (i > 0)
+        await archiveChannel.send('``` ```')
 
-        await archiveChannel.send({
-          embeds,
-        })
-        embeds = []
-      }
+      await archiveChannel.send({
+        embeds: [pinnedMessage], files: map,
+      })
     }
   },
   test(): boolean {

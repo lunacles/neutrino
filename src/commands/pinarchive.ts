@@ -13,6 +13,8 @@ import {
   Attachment,
   User,
   APIEmbedField,
+  DiscordAPIError,
+  SlashCommandChannelOption,
 } from 'discord.js'
 import CommandInterface from './default.js'
 import Log from '../utilities/log.js'
@@ -21,10 +23,9 @@ import InteractionObserver from './interactionobserver.js'
 
 const PinArchive: CommandInterface = {
   name: 'archivepins',
-  description: 'Archives pinned messages of a specified channel!',
+  description: 'Archives pinned messages of a specified channel.',
   data: new SlashCommandBuilder()
-    .addChannelOption(option =>
-      option
+    .addChannelOption((option: SlashCommandChannelOption): SlashCommandChannelOption => option
       .setName('target')
       .setDescription('The channel to archive pinned messages from.')
       .setRequired(true)
@@ -32,6 +33,11 @@ const PinArchive: CommandInterface = {
   async execute(interaction: ChatInputCommandInteraction<CacheType>): Promise<void> {
     const targetChannel: TextChannel = interaction.options.getChannel('target')
     const observer = new InteractionObserver(interaction)
+
+    if (interaction.user.id !== '342038795757027329') {
+      await interaction.reply('you\'re not authorized to use this command :3')
+      return
+    }
 
     let archive: GuildBasedChannel = observer
       .filterChannels()
@@ -68,9 +74,11 @@ const PinArchive: CommandInterface = {
       type: ChannelType.GuildText,
       parent: archive.id,
     })
+    await interaction.reply(`Archiving ${pinnedMessages.size} pin(s) from <#${targetChannel.id}>...`)
 
     let pins: Array<Message> = pinnedMessages.map(message => message).reverse()
     for (let [i, msg] of pins.entries()) {
+
       let author: User = await interaction.client.users.fetch(msg.author.id, {
         force: true
       })
@@ -152,9 +160,24 @@ const PinArchive: CommandInterface = {
       if (i > 0)
         await archiveChannel.send('``` ```')
 
-      await archiveChannel.send({
-        embeds: [pinnedMessage], files: map,
-      })
+      let linkedAttachments = msg.cleanContent.match(/https?:\/\/\S+\.(?:png|mp4|webm|mov|mp3|gif|jpg|jpeg|pdf|docx|xlsx)/ig) ?? []
+      if (linkedAttachments.length > 0)
+        await archiveChannel.send(linkedAttachments.join(' '))
+
+      try {
+        await archiveChannel.send({
+          embeds: [pinnedMessage], files: map,
+        })
+      } catch (err) {
+        // If the attached file(s) is too big do a bandaid fix
+        if (err instanceof DiscordAPIError && err.code === 40005) {
+          for (let attachment of map)
+            await archiveChannel.send(attachment.url)
+
+        } else {
+          throw err
+        }
+      }
     }
   },
   test(): boolean {

@@ -4,6 +4,5 @@ node_modules
 process-env.d.ts
 init.js
 init.js.map
-firebase
 package-lock.json
 serviceaccount.json

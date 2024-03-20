@@ -6,3 +6,4 @@ init.js
 init.js.map
 firebase
 package-lock.json
+serviceaccount.json

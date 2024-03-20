@@ -1,7 +1,7 @@
 import fs from 'fs/promises'
 import path from 'path'
 import Log from './utilities/log.js'
-import CommandInterface from './commands/default.js'
+import CommandInterface from './commands/interface.js'
 import { fileURLToPath } from 'url'
 import bot from './init.js'
 
@@ -25,7 +25,7 @@ export const Commands: CommandsInterface = {
 
     await this.locate()
     for (let file of this.folder) {
-      if (file === 'default.ts' || file === 'interactionobserver.ts') continue
+      if (file === 'interface.ts' || file === 'interactionobserver.ts') continue
       try {
         let module = await import(path.join(this.directory, file))
 

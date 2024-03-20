@@ -10,7 +10,7 @@ import {
   Collection,
   Message,
 } from 'discord.js'
-import CommandInterface from './default.js'
+import CommandInterface from './interface.js'
 
 const RemovePins: CommandInterface = {
   name: 'removepins',

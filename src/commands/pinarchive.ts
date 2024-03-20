@@ -15,11 +15,22 @@ import {
   APIEmbedField,
   DiscordAPIError,
   SlashCommandChannelOption,
+  PermissionsBitField,
 } from 'discord.js'
-import CommandInterface from './default.js'
+import CommandInterface from './interface.js'
 import Log from '../utilities/log.js'
 import Icon from '../utilities/icon.js'
 import InteractionObserver from './interactionobserver.js'
+
+const fixDeletedUsers = (id: string): string => {
+  switch (id) {
+    // stark's banned account (fucking retard)
+    case '456226577798135808':
+      return '554859443867615233'
+    default:
+      return id
+  }
+}
 
 const PinArchive: CommandInterface = {
   name: 'archivepins',
@@ -34,8 +45,8 @@ const PinArchive: CommandInterface = {
     const targetChannel: TextChannel = interaction.options.getChannel('target')
     const observer = new InteractionObserver(interaction)
 
-    if (interaction.user.id !== '342038795757027329') {
-      await interaction.reply('you\'re not authorized to use this command :3')
+    if (!PermissionsBitField.Flags.ManageMessages) {
+      await observer.abort(0)
       return
     }
 
@@ -79,7 +90,7 @@ const PinArchive: CommandInterface = {
     let pins: Array<Message> = pinnedMessages.map(message => message).reverse()
     for (let [i, msg] of pins.entries()) {
 
-      let author: User = await interaction.client.users.fetch(msg.author.id, {
+      let author: User = await interaction.client.users.fetch(fixDeletedUsers(msg.author.id), {
         force: true
       })
       let attachments: Collection<Snowflake, Attachment> = msg.attachments
@@ -91,7 +102,7 @@ const PinArchive: CommandInterface = {
           iconURL: Icon.PinMessage,
         })
         .setURL(msg.url)
-        .setThumbnail(author.avatarURL())
+        .setThumbnail(author.id === '554859443867615233' ? 'https://media.discordapp.net/stickers/933221000970117140.webp?size=160' : author.avatarURL())
         .setFooter({
           text: 'Message created'
         })
@@ -99,7 +110,7 @@ const PinArchive: CommandInterface = {
 
       pinnedMessage.addFields({
         name: 'Author',
-        value: `<@${msg.author.id}>`,
+        value: `<@${fixDeletedUsers(msg.author.id)}>`,
         inline: true,
       }, {
         name: 'Message URL',

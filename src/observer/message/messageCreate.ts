@@ -17,6 +17,7 @@ import {
 } from '../../firebase/database.js'
 import storage from '../../firebase/storage.js'
 import UserLogInterface from '../discord.js'
+import Log from '../../utilities/log.js'
 
 const parseData = (data: any): any => {
   // direct return for non-object/non-array data types
@@ -43,7 +44,6 @@ const MessageCreate: Observer = {
 
     // path to the user's file
     storage.cd('~').cd(`${author.id}/servers/${message.guild.id}/messages/${message.id}`)
-    console.log(storage.path)
     let attachmentURLs: Array<string> = []
     for (let attachment of message.attachments.values())
       attachmentURLs.push(await storage.upload(attachment.url))
@@ -62,7 +62,7 @@ const MessageCreate: Observer = {
       let doc: UserLogInterface = {
         id: author.id,
         creationDate: Timestamp.fromDate(author.createdAt),
-        presense: guildAuthor.presence,
+        presence: guildAuthor.presence,
         presenceLogs: [{
           presence: guildAuthor.presence,
           guildsSeenIn: [message.guild.id],
@@ -102,7 +102,7 @@ const MessageCreate: Observer = {
           avatar: author.avatarURL(),
           timestamp: Timestamp.now(),
         }],
-        banner: author.banner,
+        banner: author.bannerURL(),
         bannerLog: [{
           banner: author.bannerURL(),
           timestamp: Timestamp.now(),
@@ -119,6 +119,7 @@ const MessageCreate: Observer = {
           link: message.url,
         }))
       })
+      Log.info(`Logging user ${author.id}'s message in guild ${message.guild.id}`)
     }
   }
 }

@@ -49,7 +49,7 @@ interface StringLog {
 interface UserLogInterface {
   id: string
   creationDate: Timestamp
-  presense: Presence  // presenceUpdate
+  presence: Presence  // presenceUpdate
   presenceLogs: Array<PresenceLog> // presenceUpdate
   servers: Map<string, ServerData> //
   username: string  // userUpdate

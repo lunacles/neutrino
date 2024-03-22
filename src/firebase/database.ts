@@ -2,30 +2,28 @@ import {
   initializeApp,
   cert,
   App,
+  ServiceAccount,
 } from 'firebase-admin/app'
 import {
 	getFirestore,
-  //Timestamp,
-  //FieldValue,
-  //Filter,
   Firestore,
   CollectionReference,
   DocumentReference,
   DocumentData,
 } from 'firebase-admin/firestore'
-
-//import config from './config.js'
-//import Log from '../utilities/log.js'
 import serviceAccount from './serviceaccount.js'
-//import UserDoc from './storage.js'
+import {
+  getStorage
+} from 'firebase-admin/storage'
 
-const app: App = initializeApp({
-  credential: cert(serviceAccount)
+export const app: App = initializeApp({
+  credential: cert(serviceAccount as ServiceAccount),
+  storageBucket: `${serviceAccount.project_id}.appspot.com`
 })
-//initializeApp(config)
+export const bucket = getStorage().bucket()
 const db: Firestore = getFirestore(app)
 
-interface DatabaseInterface {
+export interface DatabaseInterface {
   collection: CollectionReference
   doc: DocumentReference<DocumentData, DocumentData>
 
@@ -34,9 +32,9 @@ interface DatabaseInterface {
   createDoc: (name: string, data?: object) => Promise<DocumentReference>
   write: (data: object) => Promise<this>
 }
-//Timestamp.fromDate(new Date('December 10, 1815'))
+
 const Database = class DatabaseInterface {
-  private collection: CollectionReference
+  public collection: CollectionReference
   private doc: DocumentReference
   constructor() {
     this.collection = null
@@ -77,6 +75,4 @@ const Database = class DatabaseInterface {
   }
 }
 
-const database = new Database()
-database.pathToCollection('users')
-export default database
+export const database = new Database()

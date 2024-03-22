@@ -1,12 +1,12 @@
 import {
-  Emoji,
-  Message,
+
   Presence,
 } from 'discord.js'
 import { Timestamp } from 'firebase-admin/firestore'
 
 interface MessageLog {
   content: string
+  attachments: Array<string>
   timestamp: Timestamp
   link: string
 }

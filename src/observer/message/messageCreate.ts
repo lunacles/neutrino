@@ -8,13 +8,14 @@ import {
 import {
   DocumentReference,
   DocumentSnapshot,
+  FieldValue,
   Timestamp
 } from 'firebase-admin/firestore'
 import Observer from '../interface.js'
 import {
-  database,
-  DatabaseInterface,
+  database
 } from '../../firebase/database.js'
+import storage from '../../firebase/storage.js'
 import UserLogInterface from '../discord.js'
 
 const parseData = (data: any): any => {
@@ -27,11 +28,9 @@ const parseData = (data: any): any => {
   // handling for Maps and Objects
   let entries: Array<[string, unknown]> = data instanceof Map ? Array.from(data.entries()) : Object.entries(data)
   let result: object = Object.fromEntries(entries.map(([key, value]) => [key, parseData(value)]))
-  console.log(result)
 
   return result
 }
-
 
 const MessageCreate: Observer = {
   eventID: Events.MessageCreate,
@@ -39,12 +38,26 @@ const MessageCreate: Observer = {
   async react(bot: Client, message: Message): Promise<void> {
     const guildAuthor: GuildMember = await message.guild.members.fetch(message.author.id)
     const author: User = await bot.users.fetch(message.author.id, { force: true })
+    // if the user is a bot, ignore them
     if (author.bot) return
 
+    // path to the user's file
+    storage.cd('~').cd(`${author.id}/servers/${message.guild.id}/messages/${message.id}`)
+    console.log(storage.path)
+    let attachmentURLs: Array<string> = []
+    for (let attachment of message.attachments.values())
+      attachmentURLs.push(await storage.upload(attachment.url))
+
+    for (let embed of message.embeds.values()) {
+      if (!embed.data.url.includes('tenor.com/view/') && !embed.data.url.includes('cdn.discordapp.com')) continue
+      if (embed.data.video)
+        attachmentURLs.push(await storage.upload(embed.data.video.url))
+      if (embed.data.image)
+        attachmentURLs.push(await storage.upload(embed.data.image.url))
+    }
     database.pathToCollection('users')
     let userDoc: DocumentSnapshot | DocumentReference = await database.pathToDoc(author.id).get()
 
-    console.log(userDoc, userDoc.exists)
     if (!userDoc.exists) {
       let doc: UserLogInterface = {
         id: author.id,
@@ -65,6 +78,7 @@ const MessageCreate: Observer = {
           }],
           messageLog: [{
             content: message.content,
+            attachments: attachmentURLs,
             timestamp: Timestamp.fromMillis(message.createdTimestamp),
             link: message.url,
           }],
@@ -97,10 +111,21 @@ const MessageCreate: Observer = {
       }
       userDoc = await (await database.createDoc(message.author.id, parseData(doc))).get()
     } else {
-
+      await database.write({
+        [`servers.${message.guild.id}.messageLog`]: FieldValue.arrayUnion(parseData({
+          content: message.content,
+          attachments: attachmentURLs,
+          timestamp: Timestamp.fromMillis(message.createdTimestamp),
+          link: message.url,
+        }))
+      })
     }
-    console.log(userDoc.data())
   }
 }
+/*
+db.collection('users').doc('frank').update({
+  [`favorites.${key}.color`]: true
+});
+*/
 
 export default MessageCreate

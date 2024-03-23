@@ -102,9 +102,9 @@ const MessageCreate: Observer = {
           avatar: author.avatarURL(),
           timestamp: Timestamp.now(),
         }],
-        banner: author.bannerURL(),
+        banner: author.bannerURL() ? author.bannerURL() : null,
         bannerLog: [{
-          banner: author.bannerURL(),
+          banner: author.bannerURL() ? author.bannerURL() : null,
           timestamp: Timestamp.now(),
         }],
         avatarDecoration: author.avatarDecorationURL()
@@ -123,10 +123,5 @@ const MessageCreate: Observer = {
     }
   }
 }
-/*
-db.collection('users').doc('frank').update({
-  [`favorites.${key}.color`]: true
-});
-*/
 
 export default MessageCreate

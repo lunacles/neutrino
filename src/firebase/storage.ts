@@ -15,10 +15,11 @@ import {
 const FireStorage = class {
   private storage: Bucket
   public path: string
+  private homeDir: string
   constructor(storage: Bucket) {
     this.storage = storage
-
     this.path = ''
+    this.homeDir = 'users'
   }
   private normalizePath(path: string): string {
     let parts: Array<string> = path.split('/').reduce((acc: Array<string>, cur: string) => {
@@ -35,7 +36,7 @@ const FireStorage = class {
     if (path.startsWith('/')) {
       this.path = this.normalizePath(path)
     } else if (path.startsWith('~')) {
-      this.path = 'users'
+      this.path = this.homeDir
     } else {
       this.path = this.normalizePath(this.path + '/' + path)
     }

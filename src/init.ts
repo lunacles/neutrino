@@ -77,7 +77,11 @@ const Bot = class extends Client {
 
 const bot = new Bot({
   intents: [
-    GatewayIntentBits.Guilds,
+    GatewayIntentBits.AutoModerationConfiguration,
+    GatewayIntentBits.AutoModerationExecution,
+    GatewayIntentBits.DirectMessageReactions,
+    GatewayIntentBits.DirectMessageTyping,
+    GatewayIntentBits.DirectMessages,
     GatewayIntentBits.GuildEmojisAndStickers,
     GatewayIntentBits.GuildIntegrations,
     GatewayIntentBits.GuildInvites,
@@ -85,13 +89,12 @@ const bot = new Bot({
     GatewayIntentBits.GuildMessageReactions,
     GatewayIntentBits.GuildMessageTyping,
     GatewayIntentBits.GuildMessages,
+    GatewayIntentBits.GuildModeration,
     GatewayIntentBits.GuildPresences,
     GatewayIntentBits.GuildScheduledEvents,
     GatewayIntentBits.GuildVoiceStates,
     GatewayIntentBits.GuildWebhooks,
-    GatewayIntentBits.DirectMessages,
-    GatewayIntentBits.DirectMessageTyping,
-    GatewayIntentBits.DirectMessageReactions,
+    GatewayIntentBits.Guilds,
     GatewayIntentBits.MessageContent,
   ],
   partials: [

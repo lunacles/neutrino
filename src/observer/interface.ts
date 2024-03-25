@@ -1,4 +1,6 @@
-import { Events } from "discord.js"
+import {
+  Events
+} from 'discord.js'
 
 interface Observer {
   eventID: Events

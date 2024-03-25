@@ -10,10 +10,12 @@ interface LoggingConfigInterface {
 }
 
 interface GlobalInterface {
+  ownerId: string
   loggingConfig: LoggingConfigInterface
 }
 
 const global: GlobalInterface = {
+  ownerId: '342038795757027329',
   loggingConfig: {
     avatars: true,
     banners: true,

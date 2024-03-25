@@ -9,7 +9,7 @@ import {
 } from '@google-cloud/storage'
 import Log from '../utilities/log'
 import {
-  bucket
+  bucket,
 } from './database.js'
 
 const FireStorage = class {
@@ -29,21 +29,17 @@ const FireStorage = class {
         acc.push(cur)
       }
       return acc
-    }, [] as Array<string>)
+    }, [] satisfies Array<string>)
     return parts.join('/')
   }
-  public cd(path: string): this {
-    if (path.startsWith('/')) {
-      this.path = this.normalizePath(path)
-    } else if (path.startsWith('~')) {
-      this.path = this.homeDir
+  public cd(dir: string): this {
+    if (dir.startsWith('/')) {
+      this.path = this.normalizePath(dir)
+    } else if (dir.startsWith('~/') || dir === '~') {
+      this.path = this.normalizePath(this.homeDir + dir.slice(1, dir.length))
     } else {
-      this.path = this.normalizePath(this.path + '/' + path)
+      this.path = this.normalizePath(this.path + '/' + dir)
     }
-    return this
-  }
-  public pathTo(path: string): this {
-    this.path = path
     return this
   }
   private fetch(url: string): Promise<Buffer> {
@@ -72,11 +68,10 @@ const FireStorage = class {
       })
     })
   }
-  public async upload(url: string): Promise<string> {
-    let fileName: string = url.match(/([^\/?]+)(?=\?|$)/)[0];
+  public async upload(url: string, fileName?: string): Promise<string> {
     try {
       let buffer: Buffer = await this.fetch(url)
-      let file: File = this.storage.file(`${this.path}/${fileName}`)
+      let file: File = this.storage.file(`${this.path}/${fileName ?? url.match(/([^\/?]+)(?=\?|$)/)[0]}`)
       await this.saveFile(file, buffer)
 
       let uri: string = await getDownloadURL(file)

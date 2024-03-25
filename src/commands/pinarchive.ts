@@ -81,7 +81,7 @@ const PinArchive: CommandInterface = {
     let pins: Array<Message> = pinnedMessages.map(message => message).reverse()
     for (let [i, msg] of pins.entries()) {
       let author: User = await interaction.client.users.fetch(DeletedUsers.fixId(msg.author.id), {
-        force: true
+        force: true,
       })
       let attachments: Collection<Snowflake, Attachment> = msg.attachments
 
@@ -167,7 +167,8 @@ const PinArchive: CommandInterface = {
 
       try {
         await archiveChannel.send({
-          embeds: [pinnedMessage], files: map,
+          embeds: [pinnedMessage],
+          files: map,
         })
       } catch (err) {
         // If the attached file(s) is too big do a bandaid fix

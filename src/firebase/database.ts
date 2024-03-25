@@ -14,7 +14,7 @@ import {
 } from 'firebase-admin/firestore'
 import serviceAccount from './serviceaccount.js'
 import {
-  getStorage
+  getStorage,
 } from 'firebase-admin/storage'
 import Log from '../utilities/log.js'
 
@@ -59,16 +59,15 @@ const Database = class DatabaseInterface {
     }, [] as Array<string>)
     return parts.join('/')
   }
-  public cd(dir: string, collect: boolean = true): this {
+  public cd(dir: string): this {
     if (dir.startsWith('/')) {
       this.path = this.normalizePath(dir)
-    } else if (dir.startsWith('~')) {
+    } else if (dir.startsWith('~/') || dir === '~') {
       this.path = this.normalizePath(this.homeDir + dir.slice(1, dir.length))
     } else {
       this.path = this.normalizePath(this.path + '/' + dir)
     }
-    if (collect)
-      this.collection = db.collection(this.path)
+    this.collection = db.collection(this.path)
 
     return this
   }
@@ -89,10 +88,10 @@ const Database = class DatabaseInterface {
       if (!this.collection) throw new Error('Collection has not been set.')
 
       let doc = await this.collection.doc(name ?? /[^/]+$/.exec(this.path)[0]).get()
-      if (!doc.exists) throw new ReferenceError()
+      if (!doc.exists) throw new ReferenceError('Requested document doesn\'t exist')
       return doc
     } catch (err) {
-      Log.error(`Requested document "${name}" at path "${this.path}" does not exist`, err)
+      //Log.error(`Requested document "${name}" at path "${this.path}" does not exist`, err)
       return null
     }
   }

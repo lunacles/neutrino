@@ -41,7 +41,7 @@ export const Commands: CommandsInterface = {
     }
 
     return commands
-  }
+  },
 }
 
 export default Commands

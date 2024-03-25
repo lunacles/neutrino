@@ -40,11 +40,11 @@ const RemovePins: CommandInterface = {
     const pinnedMessages: Collection<string, Message<true>> = await targetChannel.messages.fetchPinned()
 
     let userAmount = pinnedMessages.filter((value: Message<true>) => value.author.id === user?.id)
-    await interaction.reply(`Unpinning ${user != undefined ? userAmount.size : pinnedMessages.size} message(s) ${user != undefined ? `by <@${user.id}> ` : '' }from <#${targetChannel.id}>...`)
+    await interaction.reply(`Unpinning ${user != null ? userAmount.size : pinnedMessages.size} message(s) ${user != null ? `by <@${user.id}> ` : '' }from <#${targetChannel.id}>...`)
 
     let i: number = 0
     for (let message of pinnedMessages.values()) {
-      if (user != undefined && message.author.id !== user.id) continue
+      if (user != null && message.author.id !== user.id) continue
       await message.unpin('Pruned')
       i++
       if (i >= amount) break

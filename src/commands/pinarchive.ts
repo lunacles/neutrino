@@ -21,16 +21,7 @@ import CommandInterface from './interface.js'
 import Log from '../utilities/log.js'
 import Icon from '../utilities/icon.js'
 import InteractionObserver from './interactionobserver.js'
-
-const fixDeletedUsers = (id: string): string => {
-  switch (id) {
-    // stark's banned account (fucking retard)
-    case '456226577798135808':
-      return '554859443867615233'
-    default:
-      return id
-  }
-}
+import DeletedUsers from '../utilities/deletedusers.js'
 
 const PinArchive: CommandInterface = {
   name: 'archivepins',
@@ -57,11 +48,11 @@ const PinArchive: CommandInterface = {
       .finishFilter()
       .first()
 
-    if (archive == undefined) {
+    if (archive == null) {
       try {
         archive = await interaction.guild.channels.create({
           name: `#${targetChannel.name} Pin Archive`,
-          type: ChannelType.GuildCategory
+          type: ChannelType.GuildCategory,
         })
       } catch (err) {
         Log.error('Failed to create pin archive category', err)
@@ -89,8 +80,7 @@ const PinArchive: CommandInterface = {
 
     let pins: Array<Message> = pinnedMessages.map(message => message).reverse()
     for (let [i, msg] of pins.entries()) {
-
-      let author: User = await interaction.client.users.fetch(fixDeletedUsers(msg.author.id), {
+      let author: User = await interaction.client.users.fetch(DeletedUsers.fixId(msg.author.id), {
         force: true
       })
       let attachments: Collection<Snowflake, Attachment> = msg.attachments
@@ -102,15 +92,15 @@ const PinArchive: CommandInterface = {
           iconURL: Icon.PinMessage,
         })
         .setURL(msg.url)
-        .setThumbnail(author.id === '554859443867615233' ? 'https://media.discordapp.net/stickers/933221000970117140.webp?size=160' : author.avatarURL())
+        .setThumbnail(author.avatarURL())
         .setFooter({
-          text: 'Message created'
+          text: 'Message created',
         })
         .setTimestamp(msg.createdTimestamp)
 
       pinnedMessage.addFields({
         name: 'Author',
-        value: `<@${fixDeletedUsers(msg.author.id)}>`,
+        value: `<@${DeletedUsers.fixId(msg.author.id)}>`,
         inline: true,
       }, {
         name: 'Message URL',
@@ -118,7 +108,7 @@ const PinArchive: CommandInterface = {
         inline: true,
       }, {
         name: 'Content',
-        value: msg.content.length > 0 ? `>>> ${msg.cleanContent.slice(0, 1019)}` : '*None*'
+        value: msg.content.length > 0 ? `>>> ${msg.cleanContent.slice(0, 1024 - 4)}` : '*None*',
       })
 
       if (msg.type === MessageType.Reply) {
@@ -133,7 +123,7 @@ const PinArchive: CommandInterface = {
           inline: true,
         }, {
           name: 'Content',
-          value: repliedMsg.content.length > 0 ? `>>> ${repliedMsg.cleanContent.slice(0, 1019)}` : '*None*'
+          value: repliedMsg.content.length > 0 ? `>>> ${repliedMsg.cleanContent.slice(0, 1024 - 4)}` : '*None*',
         })
       }
 
@@ -149,7 +139,7 @@ const PinArchive: CommandInterface = {
 
       if (attachments.size > 0) {
         pinnedMessage.addFields({
-          name: `${attachments.size + 1} Attachment(s)`,
+          name: `${attachments.size} Attachment${attachments.size === 1 ? '' : 's'}`,
           value: ' ',
         })
 

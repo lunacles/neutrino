@@ -2,12 +2,12 @@
   "name": "eula-bot",
   "version": "1.0.0",
   "description": "",
-  "main": "init.js",
+  "main": "main.js",
   "type": "module",
   "scripts": {
-    "dev": "tsx watch src/init.ts",
-    "start": "node dist/init.js",
-    "build": "tsup src/init.ts --minify"
+    "dev": "tsx watch src/main.ts",
+    "start": "node dist/main.js",
+    "build": "tsup src/main.ts --minify"
   },
   "keywords": [],
   "author": "",

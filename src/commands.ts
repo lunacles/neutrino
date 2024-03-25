@@ -3,7 +3,7 @@ import path from 'path'
 import Log from './utilities/log.js'
 import CommandInterface from './commands/interface.js'
 import { fileURLToPath } from 'url'
-import bot from './init.js'
+import bot from './main.js'
 
 export interface CommandsInterface {
   directory: string
@@ -30,10 +30,11 @@ export const Commands: CommandsInterface = {
         let module = await import(path.join(this.directory, file))
 
         const command = module.default
+        if (!command.test()) throw new Error('Test failed')
+
         command.data.setName(command.name).setDescription(command.description)
         bot.commands.set(command.data.name, command)
         commands.push(command.data.toJSON())
-        if (!command.test()) throw new Error('Test failed')
       } catch (err) {
         Log.error(`Failed to compile command file ${file}`, err)
       }

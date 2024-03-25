@@ -28,7 +28,7 @@ export interface NameLog {
 export interface ServerData {
   nickname: string
   avatar: string
-  joined: number,
+  joined: number
   avatarLog: Array<AvatarLog>
   messageLog: Map<string, MessageLog>
   nicknameLog: Array<NameLog>

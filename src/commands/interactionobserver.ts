@@ -16,7 +16,7 @@ interface InteractionObserver {
   byParentId: (parentId: string) => this
 }
 
-const InteractionObserver = class {
+const InteractionObserver = class InteractionObserver {
   public interaction: CommandInteraction
   public filter: Collection<string, GuildBasedChannel>
   constructor(interaction: CommandInteraction) {
@@ -57,9 +57,10 @@ const InteractionObserver = class {
         break
       case 1:
         reason = 'Command unavailable'
+        break
     }
 
-    await this.interaction.reply(reason + ` ${code}`)
+    await this.interaction.reply(`${reason} ${code}`)
   }
 }
 

@@ -9,7 +9,7 @@ const DeletedUsers: DeletedUsersInterface = {
   ]),
   fixId(id: string): string {
     return this.ids.get(id) ?? id
-  }
+  },
 }
 
 export default DeletedUsers

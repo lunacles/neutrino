@@ -13,7 +13,7 @@ import {
 import CommandInterface from './interface.js'
 
 const RemovePins: CommandInterface = {
-  name: 'removepins',
+  name: 'remove-pins',
   description: 'Removes all or a set amount of pins from a channel.',
   data: new SlashCommandBuilder()
     .addChannelOption((option: SlashCommandChannelOption ): SlashCommandChannelOption => option

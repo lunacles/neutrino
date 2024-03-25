@@ -17,6 +17,11 @@ interface InteractionObserver {
 }
 
 const InteractionObserver = class InteractionObserver {
+  static abortReasons = new Map([
+    [0, 'You have insufficient permissions to run this command!'],
+    [1, 'Command unavailable'],
+    [2, 'Invalid channel type'],
+  ])
   public interaction: CommandInteraction
   public filter: Collection<string, GuildBasedChannel>
   constructor(interaction: CommandInteraction) {
@@ -50,17 +55,7 @@ const InteractionObserver = class InteractionObserver {
     return filter
   }
   async abort(code: number): Promise<void> {
-    let reason: string
-    switch (code) {
-      case 0:
-        reason = 'You have insufficient permissions to run this command!'
-        break
-      case 1:
-        reason = 'Command unavailable'
-        break
-    }
-
-    await this.interaction.reply(`${reason} ${code}`)
+    await this.interaction.reply(`${InteractionObserver.abortReasons.get(code)} (Error code ${code})`)
   }
 }
 

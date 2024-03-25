@@ -23,7 +23,7 @@ const global: GlobalInterface = {
     servers: true,
     messages: false,
     presence: true,
-  }
+  },
 }
 
 export default global

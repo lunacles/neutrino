@@ -17,9 +17,6 @@ import {
   getStorage,
 } from 'firebase-admin/storage'
 import Log from '../utilities/log.js'
-import UserData from './userdoc.js'
-import bot from '../main.js'
-import { User } from 'discord.js'
 import * as util from '../utilities/util.js'
 
 export const app: App = initializeApp({
@@ -27,7 +24,7 @@ export const app: App = initializeApp({
   storageBucket: `${serviceAccount.project_id}.appspot.com`
 })
 export const bucket = getStorage().bucket()
-const db: Firestore = getFirestore(app)
+export const db: Firestore = getFirestore(app)
 
 export interface DatabaseInterface {
   collection: CollectionReference
@@ -39,7 +36,7 @@ export interface DatabaseInterface {
 }
 
 export const Database = class DatabaseInterface {
-  static users: Map<string, DocumentData>
+  static users: Map<string, DocumentData> = new Map()
   public collection: CollectionReference
   private doc: DocumentReference
   private path: string
@@ -97,7 +94,7 @@ export const Database = class DatabaseInterface {
       this.doc = doc
       return data
     } catch (err) {
-      //Log.error(`Requested document "${name}" at path "${this.path}" does not exist`, err)
+      Log.error(`Requested document "${name}" at path "${this.path}" does not exist`, err)
       return null
     }
   }
@@ -112,15 +109,3 @@ export const Database = class DatabaseInterface {
     return this
   }
 }
-
-;(async (): Promise<void> => {
-  let users: Map<string, DocumentData> = new Map()
-  let documents: Array<DocumentReference<DocumentData, DocumentData>> = await db.collection('users').listDocuments()
-  for (let document of documents) {
-    let data: DocumentData = (await document.get()).data()
-    if (!data || data?.placeholder) continue
-    let author: User = await bot.client.users.fetch(data?.id, { force: true })
-    users.set(data?.id, new UserData(author))
-  }
-  Database.users = users
-})()

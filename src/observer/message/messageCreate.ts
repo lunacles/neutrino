@@ -19,7 +19,7 @@ const MessageCreate: Observer = {
     let guild: Guild = await message.guild.fetch()
     let userData = Database.users.get(message.author.id) ?? await UserData.new(message.author.id, guild)
 
-    await userData.guild.log.message(message)
+    await userData.guild?.log.message(message)
   }
 }
 

@@ -12,14 +12,22 @@ import {
   bucket,
 } from './database.js'
 
-const FireStorage = class {
+export interface FireStorageInterface {
+  cd: (dir: string) => this
+  upload: (url: string, fileName?: string) => Promise<string>
+}
+
+export const FireStorage = class FireStorageInterface {
   private storage: Bucket
-  public path: string
+  private path: string
   private homeDir: string
-  constructor(storage: Bucket) {
-    this.storage = storage
+  //private appendedFiles: Map<string, Array<Buffer>>
+  constructor() {
+    this.storage = bucket
     this.path = ''
     this.homeDir = 'users'
+
+    //this.appendedFiles = new Map()
   }
   private normalizePath(path: string): string {
     let parts: Array<string> = path.split('/').reduce((acc: Array<string>, cur: string) => {
@@ -57,6 +65,11 @@ const FireStorage = class {
       })
     })
   }
+  /*private appendFile(id: string, buffer: Buffer): void {
+    let buffers: Array<Buffer> = this.appendedFiles.get(id)
+    buffers.push(buffer)
+    this.appendedFiles.set(id, buffers)
+  }*/
   private saveFile(file: File, buffer: Buffer): Promise<File> {
     return new Promise((resolve, reject) => {
       file.save(buffer, (err: Error) => {
@@ -82,7 +95,3 @@ const FireStorage = class {
     }
   }
 }
-
-const storage = new FireStorage(bucket)
-
-export default storage

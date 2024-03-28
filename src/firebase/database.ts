@@ -33,6 +33,7 @@ export interface DatabaseInterface {
   mkdir: (name: string, data?: object) => Promise<DocumentReference>
   cat: (name?: string) => Promise<DocumentSnapshot | DocumentReference>
   write: (data: object) => Promise<this>
+  rm: (name?: string) => Promise<this>
 }
 
 export const Database = class DatabaseInterface {

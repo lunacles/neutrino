@@ -227,7 +227,7 @@ const UserData = class {
             timestamp: Timestamp.now(),
           } satisfies AvatarLog))
         })
-        Log.info(`Logging user ${self.author.id}'s new avatar in guild ${self.guildAuthor.guild.id}`)
+        Log.info(`Updating user avatar with id "${self.author.id}" in guild ${self.guildAuthor.guild.id}`)
       },
       async storeBanner(guild: Guild, url: string): Promise<void> {
         await self.fetchGuildAuthor(guild)
@@ -246,7 +246,7 @@ const UserData = class {
             timestamp: Timestamp.now(),
           } satisfies BannerLog))
         })
-        Log.info(`Logging user ${self.author.id}'s new banner in guild ${self.guildAuthor.guild.id}`)
+        Log.info(`Updating user banner with id "${self.author.id}" in guild ${self.guildAuthor.guild.id}`)
       },
       async setupGuildLogs(): Promise<void> {
         self.database.cd(`~/${self.author.id}/guilds`)
@@ -307,7 +307,7 @@ const UserData = class {
               link: message.url,
             } satisfies MessageLog)
           })
-          Log.info(`Logging user ${self.author.id}'s message in guild ${message.guild.id}`)
+          Log.info(`Updating user message with id "${self.author.id}:" in guild ${message.guild.id}`)
         },
       }
     }
@@ -342,6 +342,8 @@ const UserData = class {
     await this.global.setupMain()
 
     Database.users.set(this.author.id, await this.database.cat(this.author.id))
+
+    Log.info(`Creating document for user with id "${this.author.id}"`)
 
     return this
   }

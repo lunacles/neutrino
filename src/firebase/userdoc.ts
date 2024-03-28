@@ -317,35 +317,40 @@ const UserData = class {
     this.guildAuthor = await guild.members.fetch(this.author.id)
   }
   public async create(guild?: Guild): Promise<this> {
-    if (guild)
-      await this.fetchGuildAuthor(guild)
+    try {
+      if (guild)
+        await this.fetchGuildAuthor(guild)
 
-    // logs collection
-    await this.global.setupLogs()
+      // logs collection
+      await this.global.setupLogs()
 
-    // guild logs collection
-    await this.guild.setupGuildLogs()
+      // guild logs collection
+      await this.guild.setupGuildLogs()
 
-    // global avatar/banner storage
-    await this.global.storeAvatar(this.author.displayAvatarURL())
-    await this.global.storeBanner(this.author.bannerURL())
+      // global avatar/banner storage
+      await this.global.storeAvatar(this.author.displayAvatarURL())
+      await this.global.storeBanner(this.author.bannerURL())
 
-    // guild avatar/banner storage
-    if (guild) {
-      await this.guild.storeAvatar(guild, this.guildAuthor.avatarURL())
-      /* discord.js v14 for some reason doesn't allow you to get user server banners lol
-      await this.guild.storeBanner(guild, this.guildAuthor.bannerURL())
-      */
+      // guild avatar/banner storage
+      if (guild) {
+        await this.guild.storeAvatar(guild, this.guildAuthor.avatarURL())
+        /* discord.js v14 for some reason doesn't allow you to get user server banners lol
+        await this.guild.storeBanner(guild, this.guildAuthor.bannerURL())
+        */
+      }
+
+      // main doc & user info
+      await this.global.setupMain()
+
+      Database.users.set(this.author.id, await this.database.cat(this.author.id))
+
+      Log.info(`Creating document for user with id "${this.author.id}"`)
+
+      return this
+    } catch (err) {
+      Log.error(`Failed to create document for user with id ${this.author.id}`, err)
+      await this.database.cd('~/').rm(this.author.id)
     }
-
-    // main doc & user info
-    await this.global.setupMain()
-
-    Database.users.set(this.author.id, await this.database.cat(this.author.id))
-
-    Log.info(`Creating document for user with id "${this.author.id}"`)
-
-    return this
   }
   private parseExtension(url: string): string {
     return url.match(/\.([0-9a-z]+)(?:[\?#]|$)/i)[0] ?? 'png'

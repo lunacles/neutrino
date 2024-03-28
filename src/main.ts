@@ -18,7 +18,7 @@ import MessageCreate from './observer/message/messageCreate.js'
 dotenv.config()
 
 const Bot = class {
-  private client: Client
+  public client: Client
   private rest: REST
   public commands: Collection<any, any>
   constructor(client: Client) {

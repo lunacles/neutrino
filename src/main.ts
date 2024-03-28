@@ -8,12 +8,22 @@ import {
   Events,
   Interaction,
   Partials,
+  User,
 } from 'discord.js'
 import Log from './utilities/log.js'
 import {
   Commands,
 } from './commands.js'
 import MessageCreate from './observer/message/messageCreate.js'
+import {
+  Database,
+  db,
+} from './firebase/database.js'
+import {
+  DocumentReference,
+  DocumentData,
+} from 'firebase-admin/firestore'
+import UserData from './firebase/userdoc.js'
 
 dotenv.config()
 
@@ -25,15 +35,29 @@ const Bot = class {
     this.client = client
     this.commands = new Collection()
   }
+  private async loadDatabase(): Promise<void> {
+    let documents: Array<DocumentReference<DocumentData, DocumentData>> = await db.collection('users').listDocuments()
+    for (let document of documents) {
+      let data: DocumentData = (await document.get()).data()
+      if (!data || data?.placeholder) continue
+      let author: User = await bot.client.users.fetch(data?.id, { force: true })
+      Database.users.set(data?.id, new UserData(author))
+    }
+  }
   public async init(): Promise<void> {
+    // login
     await this.client.login(process.env.BOT_TOKEN)
+    // import the database
+    await this.loadDatabase()
 
     this.client.on(Events.ClientReady, async (): Promise<void> => {
       if (!this.client || !this.client.user) throw new Error('User not found')
       Log.info(`Client initialized as ${this.client.user.tag}`)
 
+      // compile & test the commands
       Log.info('Compiling commands...')
       await this.compileCommands()
+
       Log.info(`${this.client.user.tag} is now accepting interactions`)
       this.awaitInteractions()
     })

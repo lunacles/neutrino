@@ -108,4 +108,15 @@ export const Database = class DatabaseInterface {
     }
     return this
   }
+  public async rm(name?: string): Promise<this> {
+    try {
+      if (!this.doc) throw new Error('No doc found.')
+
+      let doc: DocumentReference = this.collection.doc(name)
+      await doc.delete()
+    } catch (err) {
+      Log.error(`Filed to delete document "${this.doc}" at path "${this.path}"`, err)
+    }
+    return this
+  }
 }

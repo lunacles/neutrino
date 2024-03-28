@@ -9,14 +9,18 @@ import {
   Firestore,
   CollectionReference,
   DocumentReference,
-  DocumentData,
   DocumentSnapshot,
+  DocumentData,
 } from 'firebase-admin/firestore'
 import serviceAccount from './serviceaccount.js'
 import {
   getStorage,
 } from 'firebase-admin/storage'
 import Log from '../utilities/log.js'
+import UserData from './userdoc.js'
+import bot from '../main.js'
+import { User } from 'discord.js'
+import * as util from '../utilities/util.js'
 
 export const app: App = initializeApp({
   credential: cert(serviceAccount as ServiceAccount),
@@ -27,17 +31,15 @@ const db: Firestore = getFirestore(app)
 
 export interface DatabaseInterface {
   collection: CollectionReference
-  doc: DocumentReference<DocumentData, DocumentData>
-  path: string
-  homeDir: string
 
   cd: (dir: string) => this
   mkdir: (name: string, data?: object) => Promise<DocumentReference>
-  pathToDoc: (name: string) => DocumentReference
+  cat: (name?: string) => Promise<DocumentSnapshot | DocumentReference>
   write: (data: object) => Promise<this>
 }
 
-const Database = class DatabaseInterface {
+export const Database = class DatabaseInterface {
+  static users: Map<string, DocumentData>
   public collection: CollectionReference
   private doc: DocumentReference
   private path: string
@@ -47,6 +49,8 @@ const Database = class DatabaseInterface {
     this.doc = null
     this.path = ''
     this.homeDir = 'users'
+
+    this.cd('~')
   }
   private normalizePath(path: string): string {
     let parts: Array<string> = path.split('/').reduce((acc: Array<string>, cur: string) => {
@@ -76,7 +80,7 @@ const Database = class DatabaseInterface {
       if (!this.collection) throw new Error('Collection has not been set.')
 
       let doc: DocumentReference = this.collection.doc(name)
-      await doc.set(structuredClone(data))
+      await doc.set(util.structureData(data))
       this.doc = doc
       return doc
     } catch (err) {
@@ -87,9 +91,11 @@ const Database = class DatabaseInterface {
     try {
       if (!this.collection) throw new Error('Collection has not been set.')
 
-      let doc = await this.collection.doc(name ?? /[^/]+$/.exec(this.path)[0]).get()
-      if (!doc.exists) throw new ReferenceError('Requested document doesn\'t exist')
-      return doc
+      let doc = this.collection.doc(name ?? /[^/]+$/.exec(this.path)[0])
+      let data = await doc.get()
+      if (!data.exists) throw new ReferenceError('Requested document doesn\'t exist')
+      this.doc = doc
+      return data
     } catch (err) {
       //Log.error(`Requested document "${name}" at path "${this.path}" does not exist`, err)
       return null
@@ -99,12 +105,22 @@ const Database = class DatabaseInterface {
     try {
       if (!this.doc) throw new Error('Doc has not been concatenated.')
 
-      await this.doc.update(data)
+      await this.doc.update(util.structureData(data))
     } catch (err) {
-      Log.error(`Filed to write data to document "${name}" at path "${this.path}"`, err)
+      Log.error(`Filed to write data to document "${this.doc}" at path "${this.path}"`, err)
     }
     return this
   }
 }
 
-export const database = new Database()
+;(async (): Promise<void> => {
+  let users: Map<string, DocumentData> = new Map()
+  let documents: Array<DocumentReference<DocumentData, DocumentData>> = await db.collection('users').listDocuments()
+  for (let document of documents) {
+    let data: DocumentData = (await document.get()).data()
+    if (!data || data?.placeholder) continue
+    let author: User = await bot.client.users.fetch(data?.id, { force: true })
+    users.set(data?.id, new UserData(author))
+  }
+  Database.users = users
+})()

@@ -350,6 +350,7 @@ const UserData = class {
     } catch (err) {
       Log.error(`Failed to create document for user with id ${this.author.id}`, err)
       await this.database.cd('~/').rm(this.author.id)
+      await this.storage.cd('~/').rm(this.author.id)
     }
   }
   private parseExtension(url: string): string {

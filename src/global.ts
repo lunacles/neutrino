@@ -7,6 +7,7 @@ interface LoggingConfigInterface {
   servers: boolean
   messages: boolean
   presence: boolean
+  roles: boolean
 }
 
 interface GlobalInterface {
@@ -25,6 +26,7 @@ const global: GlobalInterface = {
     servers: true,
     messages: false,
     presence: true,
+    roles: true,
   },
 }
 

@@ -14,6 +14,7 @@ import {
 
 export interface FireStorageInterface {
   cd: (dir: string) => this
+  rm: (name?: string) => Promise<this>
   upload: (url: string, fileName?: string) => Promise<string>
 }
 
@@ -93,5 +94,14 @@ export const FireStorage = class FireStorageInterface {
       Log.error(`Operation failed: ${err}`)
       return ''
     }
+  }
+  public async rm(name?: string): Promise<this> {
+    try {
+      let file: File = this.storage.file(`${this.path}/${name}`)
+      await file.delete()
+    } catch (err) {
+      Log.error(`Filed to delete storage at path "${this.path}"`, err)
+    }
+    return this
   }
 }

@@ -28,6 +28,7 @@ export const db: Firestore = getFirestore(app)
 
 export interface DatabaseInterface {
   collection: CollectionReference
+  doc: DocumentReference
 
   cd: (dir: string) => this
   mkdir: (name: string, data?: object) => Promise<DocumentReference>
@@ -39,7 +40,7 @@ export interface DatabaseInterface {
 export const Database = class DatabaseInterface {
   static users: Map<string, DocumentData> = new Map()
   public collection: CollectionReference
-  private doc: DocumentReference
+  public doc: DocumentReference
   private path: string
   private homeDir: string
   constructor() {

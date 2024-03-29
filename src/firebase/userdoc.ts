@@ -491,6 +491,18 @@ const UserData = class {
           }))
 
           self.data.scoregame.data.cooldown[type] = time
+        },
+        async setScore(guild: Guild, amount: number): Promise<void> {
+          self.fetchGuildAuthor(guild)
+          //if (guild.id !== global.arrasDiscordId || self.guildAuthor.joinedAt.getMilliseconds() > 1711954800) return
+
+          await self.database.cd(`~/${self.author.id}/scoregame`).cat('data')
+
+          await self.database.write(util.structureData({
+            ['score']: amount
+          }))
+
+          self.data.scoregame.data.score = amount
         }
       }
     }

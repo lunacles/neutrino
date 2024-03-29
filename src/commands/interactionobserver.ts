@@ -21,6 +21,7 @@ const InteractionObserver = class InteractionObserver {
     [0, 'You have insufficient permissions to run this command!'],
     [1, 'Command unavailable'],
     [2, 'Invalid channel type'],
+    [3, 'Command is not available in this server'],
   ])
   public interaction: CommandInteraction
   public filter: Collection<string, GuildBasedChannel>

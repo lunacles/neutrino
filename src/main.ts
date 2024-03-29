@@ -40,19 +40,23 @@ const Bot = class {
     for (let document of documents) {
       let data: DocumentData = (await document.get()).data()
       if (!data || data?.placeholder) continue
-      let author: User = await bot.client.users.fetch(data?.id, { force: true })
-      Database.users.set(data?.id, new UserData(author))
+
+      let author: User = await this.client.users.fetch(data?.id, { force: true })
+      let user = await new UserData(author).getData()
+      Database.users.set(data?.id, user)
     }
   }
   public async init(): Promise<void> {
     // login
     await this.client.login(process.env.BOT_TOKEN)
-    // import the database
-    await this.loadDatabase()
 
     this.client.on(Events.ClientReady, async (): Promise<void> => {
       if (!this.client || !this.client.user) throw new Error('User not found')
       Log.info(`Client initialized as ${this.client.user.tag}`)
+
+      // import the database
+      Log.info('Collecting database...')
+      await this.loadDatabase()
 
       // compile & test the commands
       Log.info('Compiling commands...')
@@ -60,6 +64,8 @@ const Bot = class {
 
       Log.info(`${this.client.user.tag} is now accepting interactions`)
       this.awaitInteractions()
+
+      this.events()
     })
   }
   private async compileCommands(): Promise<void> {
@@ -133,5 +139,5 @@ const bot = new Bot(new Client({
   },
 }))
 bot.init()
-bot.events()
+//bot.events()
 export default bot

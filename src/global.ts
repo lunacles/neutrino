@@ -12,11 +12,13 @@ interface LoggingConfigInterface {
 
 interface GlobalInterface {
   ownerId: string
+  arrasDiscordId: string
   loggingConfig: LoggingConfigInterface
 }
 
 const global: GlobalInterface = {
   ownerId: '342038795757027329',
+  arrasDiscordId: '366661839620407297',
   loggingConfig: {
     avatars: true,
     banners: true,

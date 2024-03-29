@@ -14,3 +14,21 @@ export const structureData = (data: any): any => {
   let result: object = Object.fromEntries(entries.map(([key, value]) => [key, structureData(value)]))
   return result
 }
+
+export const formatSeconds = (seconds: number, s: boolean = false): string => {
+  let minutes: number = Math.floor(seconds / 60)
+  let remainder: number = seconds % 60
+  let result: string = ''
+
+  if (minutes > 0)
+    result += `${minutes} minute${s ? minutes > 1 ? 's' : '' : ''}`
+
+  if (remainder > 0) {
+    if (result.length > 0)
+      result += ', '
+
+    result += `${remainder} second${s ? remainder > 1 ? 's' : '' : ''}`
+  }
+
+  return result || '0 seconds'
+}

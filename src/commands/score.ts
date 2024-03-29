@@ -30,7 +30,7 @@ const Score: CommandInterface = {
     let user = Database.users.get(targetUser)
     let cooldown: number = Math.floor((Date.now() - user.data.scoregame.data.cooldown.score) / 1e3)
     if (cooldown < global.cooldown.score) {
-      interaction.reply(`This command is on cooldown for **${global.cooldown.score - cooldown} seconds!**`)
+      interaction.reply(`This command is on cooldown for **${util.formatSeconds(global.cooldown.score - cooldown, true)}!**`)
       return
     } else {
       interaction.reply(`Your current balance is **${user.data.scoregame.data.score.toLocaleString()}!**`)

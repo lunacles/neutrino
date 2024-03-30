@@ -9,6 +9,7 @@ import {
 } from 'discord.js'
 import {
   DocumentData,
+  DocumentReference,
   FieldValue,
   Timestamp,
 } from 'firebase-admin/firestore'
@@ -72,6 +73,12 @@ interface GuildInterface {
   log: GuildLogsInterface
 }
 
+interface OperationInterface {
+  type: string
+  ref: DocumentReference
+  data: object
+}
+
 type Cooldown = 'score' | 'leaderboard' | 'claim' | 'steal' | 'gamble' | 'shield'
 
 enum BaseScore {
@@ -91,6 +98,7 @@ const UserData = class {
     let author: User = await bot.client.users.fetch(id, { force: true })
     return new UserData(author).create(guild)
   }
+  private operations: Array<OperationInterface>
   private storage: FireStorageInterface
   private database: DatabaseInterface
   private author: User
@@ -102,12 +110,17 @@ const UserData = class {
   public data: DocumentData
   constructor(author: User) {
     const self = this
+    this.operations = []
 
     this.storage = new FireStorage()
     this.database = new Database()
 
     this.author = author
     this.guildAuthor = null
+
+    this.data = {
+      guilds: {}
+    }
 
     this.global = {
       avatarURL: null,
@@ -118,8 +131,6 @@ const UserData = class {
         status: null,
       },
       async setupMain(): Promise<void> {
-        self.database.cd('~/')
-
         this.presence = {
           activities: self.guildAuthor.presence?.activities.map((activity: Activity) => ({
             id: activity.applicationId,
@@ -149,27 +160,85 @@ const UserData = class {
           status: self.guildAuthor.presence?.status ?? 'Offline',
         } satisfies UserPresence
 
-        await this.log.avatar(false)
-        await this.log.banner(false)
-
+        /*
+        await Promise.all([
+          this.log.avatar(false),
+          this.log.banner(false),
+        ])
+        */
         let data: UserInfo = {
           id: self.author.id,
           creationDate: Timestamp.fromDate(self.author.createdAt),
           username: self.author.username,
           presence: this.presence,
           displayName: self.author.globalName,
-          avatar: this.avatarURL,
-          banner: this.bannerURL,
+          avatar: self.author.avatarURL(),
+          banner: self.author.bannerURL(),
           avatarDecoration: self.author.avatarDecorationURL(),
         }
 
-        await self.database.mkdir(self.author.id, util.structureData(data))
+
+        self.operations.push({
+          type: 'set',
+          ref: self.database.cd('~/').getdoc(self.author.id),
+          data: util.structureData(data),
+        })
+        //await self.database.mkdir(self.author.id, util.structureData(data))
 
         self.data = data
       },
       async setupLogs(): Promise<void> {
         self.database.cd(`~/${self.author.id}/logs`)
 
+        self.operations.push({
+          type: 'set',
+          ref: self.database.getdoc('presence'),
+          data: util.structureData(global.loggingConfig.presence ? {
+            log: [{
+              presence: this.presence,
+              guildsSeenIn: [self.guildAuthor.guild.id],
+              timestamp: Timestamp.now()
+            } satisfies PresenceLog],
+          } : {}),
+        } satisfies OperationInterface, {
+          type: 'set',
+          ref: self.database.getdoc('usernames'),
+          data: util.structureData(global.loggingConfig.usernames ? {
+            log: [{
+              name: self.author.username,
+              timestamp: Timestamp.now(),
+            } satisfies NameLog],
+          } : {}),
+        } satisfies OperationInterface, {
+          type: 'set',
+          ref: self.database.getdoc('displayNames'),
+          data: util.structureData(global.loggingConfig.displayNames ? {
+            log: [{
+              name: self.author.displayName,
+              timestamp: Timestamp.now(),
+            } satisfies NameLog],
+          } : {})
+        } satisfies OperationInterface, {
+          type: 'set',
+          ref: self.database.getdoc('avatars'),
+          data: util.structureData(global.loggingConfig.avatars ? {
+            log: [{
+              avatar: self.author.avatarURL(),
+              timestamp: Timestamp.now(),
+            } satisfies AvatarLog],
+          } : {})
+        } satisfies OperationInterface, {
+          type: 'set',
+          ref: self.database.getdoc('avatars'),
+          data: util.structureData(global.loggingConfig.banners ? {
+            log: [{
+              banner: self.author.bannerURL(),
+              timestamp: Timestamp.now(),
+            } satisfies BannerLog],
+          } : {})
+        } satisfies OperationInterface)
+
+        /*
         await self.database.mkdir('presence', util.structureData(global.loggingConfig.presence ? {
           log: [{
             presence: this.presence,
@@ -200,7 +269,7 @@ const UserData = class {
             banner: this.bannerURL,
             timestamp: Timestamp.now(),
           } satisfies BannerLog],
-        } : {}))
+        } : {}))*/
       },
       log: {
         async presence(): Promise<void> {
@@ -282,6 +351,7 @@ const UserData = class {
 
           self.data.logs.avatars.log = data
 
+
           Log.info(`Logging user avatar with id "${self.author.id}"`)
         },
         async banner(write: boolean = true): Promise<void> {
@@ -308,6 +378,7 @@ const UserData = class {
 
           self.data.logs.banners.log = data
 
+
           Log.info(`Logging user banner with id "${self.author.id}"`)
         },
       },
@@ -318,10 +389,9 @@ const UserData = class {
       async setupGuildLogs(guild: Guild): Promise<void> {
         await self.fetchGuildAuthor(guild)
         if (!global.loggingConfig.servers) return
-        self.database.cd(`~/${self.author.id}/guilds`)
 
         // guild avatar/banner storage
-        await this.log.avatar(guild, false)
+        //await this.log.avatar(guild, false)
         /* discord.js v14 for some reason doesn't allow you to get user server banners lol
         await this.log.banner(guild, false)
         */
@@ -336,10 +406,10 @@ const UserData = class {
               icon: role.iconURL(),
             } satisfies GuildRole
           ]))) : {},
-          avatar:  this.avatarURL,
+          avatar:  self.guildAuthor.avatarURL(),
           nickname: self.guildAuthor.nickname,
           avatarLog: global.loggingConfig.avatars ? [{
-            avatar: this.avatarURL,
+            avatar: self.guildAuthor.avatarURL(),
             timestamp: Timestamp.now(),
           }] : [],
           nicknameLog: global.loggingConfig.nicknames ? [{
@@ -347,9 +417,16 @@ const UserData = class {
             timestamp: Timestamp.now(),
           }] : [],
         }
-        await self.database.mkdir(self.guildAuthor.guild.id, util.structureData(log))
+
+        self.operations.push({
+          type: 'set',
+          ref: self.database.cd(`~/${self.author.id}/guilds`).getdoc(self.guildAuthor.guild.id),
+          data: util.structureData(log)
+        })
+        //await self.database.mkdir(self.guildAuthor.guild.id, util.structureData(log))
 
         self.data.guilds = log
+
       },
       log: {
         async message(message: Message): Promise<void> {
@@ -512,14 +589,19 @@ const UserData = class {
     this.guildAuthor = await guild.members.fetch(this.author.id)
   }
   public async getData(): Promise<this> {
-    await this.database.cd('~/').cat(this.author.id)
-    let doc = await this.database.doc.get()
+    this.database.cd('~/')
+    let doc = await this.database.getdoc(this.author.id).get()
     this.data = doc.data()
-    await this.database.cd(`~/${this.author.id}/scoregame`).cat('data')
-    let scoregame = await this.database.doc.get()
+
+    return this
+  }
+  public async getScoregame(): Promise<this> {
+    this.database.cd(`~/${this.author.id}/scoregame`)
+    let scoregame = await this.database.getdoc('data').get()
     this.data.scoregame = {
       data: scoregame.data()
     }
+
     return this
   }
   public async create(guild?: Guild): Promise<this> {
@@ -527,23 +609,20 @@ const UserData = class {
       if (guild)
         await this.fetchGuildAuthor(guild)
 
-      // main doc & user info
-      await this.global.setupMain()
 
-      // logs collection
-      await this.global.setupLogs()
+      await Promise.all([
+        this.global.setupMain(),
+        this.global.setupLogs(),
+        this.misc.scoreGame.setup(guild),
+        guild ? this.guild.setupGuildLogs(guild) : Promise.resolve(),
+      ])
 
-      // setup scoregame
-      //if (guild.id === global.arrasDiscordId)
-        await this.misc.scoreGame.setup(guild)
-
-      // guild logs collection
-      if (guild)
-        await this.guild.setupGuildLogs(guild)
+      await Database.batchWrite(this.operations)
 
       Log.info(`Creating document for user with id "${this.author.id}"`)
 
       await this.getData()
+      await this.getScoregame()
 
       return this
     } catch (err) {

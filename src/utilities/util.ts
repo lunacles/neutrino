@@ -32,3 +32,7 @@ export const formatSeconds = (seconds: number, s: boolean = false): string => {
 
   return result || '0 seconds'
 }
+
+export const averageArray = (array: Array<number>): number => array.length ? array.reduce((a: number, b: number) => a + b) / array.length : 0
+
+export const sumArray = (array: Array<number>): number => array.reduce((a: number, b: number) => a + b, 0)

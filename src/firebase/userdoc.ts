@@ -96,7 +96,7 @@ enum BaseScore {
 const UserData = class {
   static async new(id: string, guild?: Guild) {
     let author: User = await bot.client.users.fetch(id, { force: true })
-    return new UserData(author).create(guild)
+    return await new UserData(author).create(guild)
   }
   private operations: Array<OperationInterface>
   private storage: FireStorageInterface
@@ -183,7 +183,6 @@ const UserData = class {
           ref: self.database.cd('~/').getdoc(self.author.id),
           data: util.structureData(data),
         })
-        //await self.database.mkdir(self.author.id, util.structureData(data))
 
         self.data = data
       },
@@ -238,38 +237,6 @@ const UserData = class {
           } : {})
         } satisfies OperationInterface)
 
-        /*
-        await self.database.mkdir('presence', util.structureData(global.loggingConfig.presence ? {
-          log: [{
-            presence: this.presence,
-            guildsSeenIn: [self.guildAuthor.guild.id],
-            timestamp: Timestamp.now()
-          } satisfies PresenceLog],
-        } : {}))
-        await self.database.mkdir('usernames', util.structureData(global.loggingConfig.usernames ? {
-          log: [{
-            name: self.author.username,
-            timestamp: Timestamp.now(),
-          } satisfies NameLog],
-        } : {}))
-        await self.database.mkdir('displayNames', util.structureData(global.loggingConfig.displayNames ? {
-          log: [{
-            name: self.author.displayName,
-            timestamp: Timestamp.now(),
-          } satisfies NameLog],
-      } : {}))
-        await self.database.mkdir('avatars', util.structureData(global.loggingConfig.avatars ? {
-          log: [{
-            avatar: this.avatarURL,
-            timestamp: Timestamp.now(),
-          } satisfies AvatarLog],
-        } : {}))
-        await self.database.mkdir('banners', util.structureData(global.loggingConfig.banners ? {
-          log: [{
-            banner: this.bannerURL,
-            timestamp: Timestamp.now(),
-          } satisfies BannerLog],
-        } : {}))*/
       },
       log: {
         async presence(): Promise<void> {
@@ -423,7 +390,6 @@ const UserData = class {
           ref: self.database.cd(`~/${self.author.id}/guilds`).getdoc(self.guildAuthor.guild.id),
           data: util.structureData(log)
         })
-        //await self.database.mkdir(self.guildAuthor.guild.id, util.structureData(log))
 
         self.data.guilds = log
 
@@ -531,8 +497,6 @@ const UserData = class {
           self.fetchGuildAuthor(guild)
           //if (guild.id !== global.arrasDiscordId || self.guildAuthor.joinedAt.getMilliseconds() > 1711954800) return
 
-          self.database.cd(`~/${self.author.id}/scoregame`)
-
           let roles: Collection<string, Role> = self.guildAuthor.roles.cache.filter((role: Role): boolean => Object.keys(BaseScore).includes(role.id))
           let score: number = roles.size === 0 ? BaseScore['878403773066784839'] :BaseScore[
             [...roles.values()].reduce((highest: Role, current: Role): Role => BaseScore[current.id] > BaseScore[highest.id] ? current : highest).id
@@ -551,7 +515,11 @@ const UserData = class {
             shieldEnd: null,
           }
 
-          await self.database.mkdir('data', util.structureData(data))
+          self.operations.push({
+            type: 'set',
+            ref: self.database.cd(`~/${self.author.id}/scoregame`).getdoc('data'),
+            data: util.structureData(data)
+          })
 
           self.data.scoregame = {
             data
@@ -595,7 +563,7 @@ const UserData = class {
 
     return this
   }
-  public async getScoregame(): Promise<this> {
+  public async getScoreGame(): Promise<this> {
     this.database.cd(`~/${this.author.id}/scoregame`)
     let scoregame = await this.database.getdoc('data').get()
     this.data.scoregame = {
@@ -609,20 +577,21 @@ const UserData = class {
       if (guild)
         await this.fetchGuildAuthor(guild)
 
-
       await Promise.all([
         this.global.setupMain(),
         this.global.setupLogs(),
-        this.misc.scoreGame.setup(guild),
         guild ? this.guild.setupGuildLogs(guild) : Promise.resolve(),
+        this.misc.scoreGame.setup(guild),
       ])
 
       await Database.batchWrite(this.operations)
 
       Log.info(`Creating document for user with id "${this.author.id}"`)
 
-      await this.getData()
-      await this.getScoregame()
+      //await this.getData()
+      //await this.getScoreGame()
+
+      Database.users.set(this.author.id, this.data)
 
       return this
     } catch (err) {

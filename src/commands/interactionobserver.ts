@@ -56,7 +56,7 @@ const InteractionObserver = class InteractionObserver {
     return filter
   }
   async abort(code: number): Promise<void> {
-    await this.interaction.reply(`${InteractionObserver.abortReasons.get(code)} (Error code ${code})`)
+    await this.interaction.editReply(`${InteractionObserver.abortReasons.get(code)} (Error code ${code})`)
   }
 }
 

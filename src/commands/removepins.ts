@@ -33,6 +33,7 @@ const RemovePins: CommandInterface = {
     ),
 
   async execute(interaction: ChatInputCommandInteraction<CacheType>): Promise<void> {
+    await interaction.deferReply()
     const targetChannel: TextChannel = interaction.options.getChannel('target')
     const amount: number = interaction.options.getInteger('amount') ?? 50
     const user: User = interaction.options.getUser('user')
@@ -40,7 +41,7 @@ const RemovePins: CommandInterface = {
     const pinnedMessages: Collection<string, Message<true>> = await targetChannel.messages.fetchPinned()
 
     let userAmount = pinnedMessages.filter((value: Message<true>) => value.author.id === user?.id)
-    await interaction.reply(`Unpinning ${user != null ? userAmount.size : pinnedMessages.size} message(s) ${user != null ? `by <@${user.id}> ` : '' }from <#${targetChannel.id}>...`)
+    await interaction.editReply(`Unpinning ${user != null ? userAmount.size : pinnedMessages.size} message(s) ${user != null ? `by <@${user.id}> ` : '' }from <#${targetChannel.id}>...`)
 
     let i: number = 0
     for (let message of pinnedMessages.values()) {

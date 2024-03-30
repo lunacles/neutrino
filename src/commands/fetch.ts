@@ -26,6 +26,7 @@ const FetchUserData: CommandInterface = {
       .setDescription('The user id to fetch.')
     ),
   async execute(interaction: ChatInputCommandInteraction<CacheType>): Promise<void> {
+    await interaction.deferReply()
     const targetUserOption = interaction.options.getUser('user', false)
     const targetUserId = interaction.options.getString('user-id', false)
     const observer = new InteractionObserver(interaction)
@@ -45,7 +46,7 @@ const FetchUserData: CommandInterface = {
     for (let i = 0; i < userData.length; i += 1900)
       dataChunks.push(userData.substring(i, i + 1900))
 
-    await interaction.reply(`Here is the data of user <@${targetUser}>\n\`\`\`json\n${dataChunks[0]}\n\`\`\``)
+    await interaction.editReply(`Here is the data of user <@${targetUser}>\n\`\`\`json\n${dataChunks[0]}\n\`\`\``)
 
     for (let i = 1; i < dataChunks.length; i++)
       await interaction.followUp(`\`\`\`json\n${dataChunks[i]}\n\`\`\``)

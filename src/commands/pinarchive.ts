@@ -33,6 +33,7 @@ const PinArchive: CommandInterface = {
       .setRequired(true)
     ),
   async execute(interaction: ChatInputCommandInteraction<CacheType>): Promise<void> {
+    await interaction.deferReply()
     const targetChannel: TextChannel = interaction.options.getChannel('target')
     const observer = new InteractionObserver(interaction)
 
@@ -76,7 +77,7 @@ const PinArchive: CommandInterface = {
       type: ChannelType.GuildText,
       parent: archive.id,
     })
-    await interaction.reply(`Archiving ${pinnedMessages.size} pin(s) from <#${targetChannel.id}>...`)
+    await interaction.editReply(`Archiving ${pinnedMessages.size} pin(s) from <#${targetChannel.id}>...`)
 
     let pins: Array<Message> = pinnedMessages.map(message => message).reverse()
     for (let [i, msg] of pins.entries()) {

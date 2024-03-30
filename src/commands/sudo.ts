@@ -26,6 +26,7 @@ const Sudo: CommandInterface = {
     .setDescription('The message to sudo.')
   ),
   async execute(interaction: ChatInputCommandInteraction<CacheType>): Promise<void> {
+    await interaction.deferReply()
     const targetChannelOption = interaction.options.getChannel('channel', false)
     const targetChannelId = interaction.options.getString('channel-id', false)
     const targetMessage: string = interaction.options.getString('message')
@@ -47,7 +48,7 @@ const Sudo: CommandInterface = {
 
     await targetChannel.send(targetMessage)
 
-    await interaction.reply('Sudo successful')
+    await interaction.editReply('Sudo successful')
   },
   test(): boolean {
     return true

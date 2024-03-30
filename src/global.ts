@@ -10,10 +10,20 @@ interface LoggingConfigInterface {
   roles: boolean
 }
 
+interface CommandCooldownInterface {
+  score: number
+  claim: number
+  steal: number
+  gamble: number
+  shield: number
+  leaderboard: number
+}
+
 interface GlobalInterface {
   ownerId: string
   arrasDiscordId: string
   loggingConfig: LoggingConfigInterface
+  cooldown: CommandCooldownInterface
 }
 
 const global: GlobalInterface = {
@@ -30,6 +40,14 @@ const global: GlobalInterface = {
     presence: true,
     roles: true,
   },
+  cooldown: {
+    score: 30,       // 30sec
+    claim: 60 * 10,  // 10min
+    steal: 60 * 5,   // 5min
+    gamble: 60 * 5,  // 5min
+    shield: 60 * 40, // 40min
+    leaderboard: 30  // 30sec
+  }
 }
 
 export default global

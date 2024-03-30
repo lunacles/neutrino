@@ -42,7 +42,7 @@ const Bot = class {
       if (!data || data?.placeholder) continue
 
       let author: User = await this.client.users.fetch(data?.id, { force: true })
-      let user = await new UserData(author).getData()
+      let user = await (await new UserData(author).getData()).getScoreGame()
       Database.users.set(data?.id, user)
     }
   }

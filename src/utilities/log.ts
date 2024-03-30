@@ -3,7 +3,7 @@ const Log = {
   time(): string {
     return `[${new Date().toISOString()}] [${((Date.now() - Log.startTime) * 0.001).toFixed(3)}]`
   },
-  error(reason: string, err?: Error): void {
+  error(reason: string, err?: Error | object): void {
     console.error(Log.time(), 'ERROR:', reason, err)
   },
   warn(reason: string): void {

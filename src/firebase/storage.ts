@@ -66,11 +66,6 @@ export const FireStorage = class FireStorageInterface {
       })
     })
   }
-  /*private appendFile(id: string, buffer: Buffer): void {
-    let buffers: Array<Buffer> = this.appendedFiles.get(id)
-    buffers.push(buffer)
-    this.appendedFiles.set(id, buffers)
-  }*/
   private saveFile(file: File, buffer: Buffer): Promise<File> {
     return new Promise((resolve, reject) => {
       file.save(buffer, (err: Error) => {

@@ -11,6 +11,8 @@ import {
   DocumentReference,
   DocumentSnapshot,
   DocumentData,
+  WriteBatch,
+  WriteResult,
 } from 'firebase-admin/firestore'
 import serviceAccount from './serviceaccount.js'
 import {
@@ -33,11 +35,33 @@ export interface DatabaseInterface {
   cd: (dir: string) => this
   mkdir: (name: string, data?: object) => Promise<DocumentReference>
   cat: (name?: string) => Promise<DocumentSnapshot | DocumentReference>
+  getdoc: (name: string) => DocumentReference
   write: (data: object) => Promise<this>
   rm: (name?: string) => Promise<this>
 }
 
 export const Database = class DatabaseInterface {
+  static batchWrite(operations: any): Promise<Array<WriteResult>> {
+    let batch: WriteBatch = db.batch()
+
+    for (let { type, ref, data } of operations) {
+      switch (type) {
+        case 'set':
+          batch.set(ref, data)
+          break
+        case 'update':
+          batch.update(ref, data)
+          break
+        case 'delete':
+          batch.delete(ref)
+          break
+        default:
+          throw new Error(`Unsupported batch operation type: ${type}`)
+      }
+    }
+
+    return batch.commit()
+  }
   static users: Map<string, DocumentData> = new Map()
   public collection: CollectionReference
   public doc: DocumentReference
@@ -95,6 +119,18 @@ export const Database = class DatabaseInterface {
       if (!data.exists) throw new ReferenceError('Requested document doesn\'t exist')
       this.doc = doc
       return data
+    } catch (err) {
+      Log.error(`Requested document "${name}" at path "${this.path}" does not exist`, err)
+      return null
+    }
+  }
+  public getdoc(name: string): DocumentReference {
+    try {
+      if (!this.collection) throw new Error('Collection has not been set.')
+
+      let doc = this.collection.doc(name ?? /[^/]+$/.exec(this.path)[0])
+      this.doc = doc
+      return this.doc
     } catch (err) {
       Log.error(`Requested document "${name}" at path "${this.path}" does not exist`, err)
       return null

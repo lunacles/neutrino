@@ -31,32 +31,32 @@ const InteractionObserver = class InteractionObserver {
 
     this.filter = new Collection()
   }
-  filterChannels(): this {
+  public filterChannels(): this {
     this.filter = this.interaction.guild.channels.cache
     return this
   }
-  byChannelType(type: ChannelType): this {
+  public byChannelType(type: ChannelType): this {
     this.filter = this.filter.filter((channel: GuildBasedChannel) => channel.type === type)
     return this
   }
-  byExactName(name: string): this {
+  public byExactName(name: string): this {
     this.filter = this.filter.filter((channel: GuildBasedChannel) => channel.name.toLowerCase() === name.toLowerCase())
     return this
   }
-  byNameQuery(query: string): this {
+  public byNameQuery(query: string): this {
     this.filter = this.filter.filter((channel: GuildBasedChannel) => channel.name.toLowerCase().includes(query.toLowerCase()))
     return this
   }
-  byParentId(parentId: string): this {
+  public byParentId(parentId: string): this {
     this.filter = this.filter.filter((channel: GuildBasedChannel) => channel.parentId === parentId)
     return this
   }
-  finishFilter(): Collection<string, GuildBasedChannel> {
+  public finishFilter(): Collection<string, GuildBasedChannel> {
     let filter: Collection<string, GuildBasedChannel> = this.filter.clone()
     this.filter.clear()
     return filter
   }
-  async abort(code: number): Promise<void> {
+  public async abort(code: number): Promise<void> {
     await this.interaction.editReply(`${InteractionObserver.abortReasons.get(code)} (Error code ${code})`)
   }
 }

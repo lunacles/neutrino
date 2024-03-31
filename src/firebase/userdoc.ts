@@ -101,7 +101,7 @@ const UserData = class {
   private operations: Array<OperationInterface>
   private storage: FireStorageInterface
   private database: DatabaseInterface
-  private author: User
+  public author: User
   private guildAuthor: GuildMember
 
   public global: GlobalInterface
@@ -591,7 +591,7 @@ const UserData = class {
       //await this.getData()
       //await this.getScoreGame()
 
-      Database.users.set(this.author.id, this.data)
+      Database.users.set(this.author.id, this)
 
       return this
     } catch (err) {

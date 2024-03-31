@@ -24,6 +24,7 @@ interface GlobalInterface {
   arrasDiscordId: string
   loggingConfig: LoggingConfigInterface
   cooldown: CommandCooldownInterface
+  shieldDuration: number
 }
 
 const global: GlobalInterface = {
@@ -41,13 +42,14 @@ const global: GlobalInterface = {
     roles: true,
   },
   cooldown: {
-    score: 30,       // 30sec
-    claim: 60 * 10,  // 10min
-    steal: 60 * 5,   // 5min
-    gamble: 60 * 5,  // 5min
-    shield: 60 * 40, // 40min
+    score: 5,        // 5sec
+    claim: 30,       // 30sec
+    steal: 60 * 2,   // 2min
+    gamble: 60,      // 1min
+    shield: 60 * 60, // 1hr
     leaderboard: 30  // 30sec
-  }
+  },
+  shieldDuration: 60 * 30 // 30min,
 }
 
 export default global

@@ -3,6 +3,7 @@ import {
   CacheType,
   SlashCommandBuilder,
   SlashCommandUserOption,
+  EmbedBuilder,
 } from 'discord.js'
 import CommandInterface from './interface.js'
 import InteractionObserver from './interactionobserver.js'
@@ -12,14 +13,15 @@ import {
 } from '../firebase/database.js'
 import * as util from '../utilities/util.js'
 import UserData from '../firebase/userdoc.js'
+import Icon from '../utilities/icon.js'
 
 const Score: CommandInterface = {
   name: 'score',
-  description: `Shows the given user\'s current score. ${util.formatSeconds(global.cooldown.score)} cooldown.`,
+  description: `Shows the given user\'s current points. ${util.formatSeconds(global.cooldown.score)} cooldown.`,
   data: new SlashCommandBuilder()
     .addUserOption((option: SlashCommandUserOption ): SlashCommandUserOption => option
       .setName('user')
-      .setDescription('The user to check the score of.')
+      .setDescription('The user to check the points of.')
     ),
   async execute(interaction: ChatInputCommandInteraction<CacheType>): Promise<void> {
     await interaction.deferReply()
@@ -37,7 +39,23 @@ const Score: CommandInterface = {
       interaction.editReply(`This command is on cooldown for **${util.formatSeconds(global.cooldown.score - cooldown, true)}!**`)
       return
     } else {
-      interaction.editReply(`<@${user.data.id}>'s current balance is **${data.score.toLocaleString()}!**`)
+      const embed = new EmbedBuilder()
+        .setColor(user.author.hexAccentColor)
+        .setAuthor({
+          name: `${user.author.username}`,
+          iconURL: user.author.avatarURL(),
+        })
+        .setThumbnail(`attachment://${Icon.PiggyBank}`)
+        .setDescription(`# <@${user.data.id}>'s current balance is **${data.score.toLocaleString()}!**`)
+
+      interaction.editReply({
+        embeds: [embed],
+        files: [{
+          attachment: `./src/utilities/assets/${Icon.PiggyBank}`,
+          name: Icon.PiggyBank,
+        }]
+      })
+
       await author.misc.scoreGame.setCooldown(interaction.guild, 'score', Date.now())
     }
   },

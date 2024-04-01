@@ -3,17 +3,30 @@ import {
   GuildBasedChannel,
   ChannelType,
   Collection,
+
+  CacheType,
+  StringSelectMenuInteraction,
+  UserSelectMenuInteraction,
+  RoleSelectMenuInteraction,
+  MentionableSelectMenuInteraction,
+  ChannelSelectMenuInteraction,
+  ButtonInteraction,
 } from 'discord.js'
+
+type Action = StringSelectMenuInteraction<CacheType> | UserSelectMenuInteraction<CacheType> | RoleSelectMenuInteraction<CacheType> | MentionableSelectMenuInteraction<CacheType> | ChannelSelectMenuInteraction<CacheType> | ButtonInteraction<CacheType>
 
 interface InteractionObserver {
   interaction: CommandInteraction
   filter: Array<any>
 
-  filterChannels: () => this
-  byChannelType: (type: ChannelType) => this
-  byExactName: (name: string) => this
-  byNameQuery: (query: string) => this
-  byParentId: (parentId: string) => this
+  filterChannels(): this
+  byChannelType(type: ChannelType): this
+  byExactName(name: string): this
+  byNameQuery(query: string): this
+  byParentId(parentId: string): this
+  finishFilter(): Collection<string, GuildBasedChannel>
+  componentsFilter(components: Array<string>): (component: Action) => boolean
+  abort(code: number): Promise<void>
 }
 
 const InteractionObserver = class InteractionObserver {
@@ -55,6 +68,9 @@ const InteractionObserver = class InteractionObserver {
     let filter: Collection<string, GuildBasedChannel> = this.filter.clone()
     this.filter.clear()
     return filter
+  }
+  public componentsFilter(components: Array<string>): (component: Action) => boolean {
+    return (component: Action): boolean => components.includes(component.customId) && component.user.id === this.interaction.user.id
   }
   public async abort(code: number): Promise<void> {
     await this.interaction.editReply(`${InteractionObserver.abortReasons.get(code)} (Error code ${code})`)

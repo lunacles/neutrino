@@ -43,6 +43,40 @@ enum Icon {
   Undeaf = 'https://cdn3.emoji.gg/emojis/1843-undeaf.png',
   Unmute = 'https://cdn3.emoji.gg/emojis/6859-unmute.png',
   Reply = 'https://cdn3.emoji.gg/emojis/1932-reply.png',
+
+  EmojiCash = '<:cash:1223716699216281706>',
+  EmojiCoins = '<:coins:1223716653712539680>',
+  EmojiGoldBar = '<:goldbar:1223716675166146673>',
+  EmojiOpenTreasureChest = '<:opentreasurechest:1223716688126546091>',
+  EmojiReceiveMoney = '<:receivemoney:1223716632460005498>',
+  EmojiRollingDices = '<:rollingdices:1223716578319794176>',
+  EmojiSnatch = '<:snatch:1223716605528379464>',
+
+  Cash = 'cash.png',
+  Coins = 'coins.png',
+  GoldBar = 'gold-bar.png',
+  OpenTreasureChest = 'open-treasure-chest.png',
+  ReceiveMoney = 'receive-money.png',
+  RollingDices = 'rolling-dices.png',
+
+  DiceOne = 'dice-one.png',
+  DiceTwo = 'dice-two.png',
+  DiceThree = 'dice-three.png',
+  DiceFour = 'dice-four.png',
+  DiceFive = 'dice-five.png',
+  DiceSix = 'dice-six.png',
+
+  Snatch = 'snatch.png',
+  PiggyBank = 'piggy-bank.png',
+  Amputation = 'amputation.png',
+  Robber = 'robber.png',
+
+  TemporaryShield = 'temporary-shield.png',
+  ShieldDisabled = 'shield-disabled.png',
+
+  HazardSign = 'hazard-sign.png',
+
+  Podium = 'podium.png',
 }
 
 export default Icon

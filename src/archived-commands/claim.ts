@@ -4,8 +4,8 @@ import {
   SlashCommandBuilder,
   EmbedBuilder,
 } from 'discord.js'
-import CommandInterface from './interface.js'
-import InteractionObserver from './interactionobserver.js'
+import CommandInterface from '../commands/interface.js'
+import InteractionObserver from '../commands/interactionobserver.js'
 import global from '../global.js'
 import {
   Database

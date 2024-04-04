@@ -5,8 +5,8 @@ import {
   SlashCommandIntegerOption,
   EmbedBuilder,
 } from 'discord.js'
-import CommandInterface from './interface.js'
-import InteractionObserver from './interactionobserver.js'
+import CommandInterface from '../commands/interface.js'
+import InteractionObserver from '../commands/interactionobserver.js'
 import global from '../global.js'
 import {
   Database
@@ -59,7 +59,7 @@ const Gamble: CommandInterface = {
       } else {
         let result: number
         let win: boolean
-        let chance = Math.random()
+        let chance = crypto.getRandomValues(new Uint32Array(1))[0] / 0x100000000
         let icon: string
         if (chance < Chance.Lose25) {
           // 30% chance to lose 25% of the amount

@@ -41,13 +41,9 @@ const RemovePins: CommandInterface = {
     const user: User = interaction.options.getUser('user')
     const observer = new InteractionObserver(interaction)
 
-
     const pinnedMessages: Collection<string, Message<true>> = await targetChannel.messages.fetchPinned()
 
-    if (!PermissionsBitField.Flags.ManageMessages) {
-      await observer.abort(0)
-      return
-    }
+    if (!observer.checkPermissions([PermissionsBitField.Flags.ManageMessages], targetChannel)) return await observer.abort(0)
 
     let userAmount = pinnedMessages.filter((value: Message<true>) => value.author.id === user?.id)
     await interaction.editReply(`Unpinning ${user != null ? userAmount.size : pinnedMessages.size} message(s) ${user != null ? `by <@${user.id}> ` : '' }from <#${targetChannel.id}>...`)

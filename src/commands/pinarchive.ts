@@ -37,10 +37,7 @@ const PinArchive: CommandInterface = {
     const targetChannel: TextChannel = interaction.options.getChannel('target')
     const observer = new InteractionObserver(interaction)
 
-    if (!PermissionsBitField.Flags.ManageMessages) {
-      await observer.abort(0)
-      return
-    }
+    if (!observer.checkPermissions([PermissionsBitField.Flags.ManageMessages], targetChannel)) return await observer.abort(0)
 
     let archive: GuildBasedChannel = observer
       .filterChannels()

@@ -20,6 +20,10 @@ import {
 } from 'firebase-admin/storage'
 import Log from '../utilities/log.js'
 import * as util from '../utilities/util.js'
+import UserData from './userdoc.js'
+import {
+  Guild
+} from 'discord.js'
 
 export const app: App = initializeApp({
   credential: cert(serviceAccount as ServiceAccount),
@@ -63,6 +67,10 @@ export const Database = class DatabaseInterface {
     return batch.commit()
   }
   static users: Map<string, DocumentData> = new Map()
+  static async getUser(id: string, guild: Guild) {
+    if (Database.users.has(id)) return Database.users.get(id)
+    return await UserData.new(id, guild)
+  }
   public collection: CollectionReference
   public doc: DocumentReference
   private path: string

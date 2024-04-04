@@ -31,8 +31,8 @@ const global: GlobalInterface = {
   ownerId: '342038795757027329',
   arrasDiscordId: '366661839620407297',
   loggingConfig: {
-    avatars: true,
-    banners: true,
+    avatars: false,
+    banners: false,
     usernames: true,
     displayNames: true,
     nicknames: true,

@@ -160,12 +160,11 @@ const UserData = class {
           status: self.guildAuthor.presence?.status ?? 'Offline',
         } satisfies UserPresence
 
-        /*
         await Promise.all([
           this.log.avatar(false),
           this.log.banner(false),
         ])
-        */
+
         let data: UserInfo = {
           id: self.author.id,
           creationDate: Timestamp.fromDate(self.author.createdAt),
@@ -358,10 +357,12 @@ const UserData = class {
         if (!global.loggingConfig.servers) return
 
         // guild avatar/banner storage
-        //await this.log.avatar(guild, false)
-        /* discord.js v14 for some reason doesn't allow you to get user server banners lol
-        await this.log.banner(guild, false)
-        */
+        await Promise.all([
+          this.log.avatar(guild, false),
+          /* discord.js v14 for some reason doesn't allow you to get user server banners lol
+          await this.log.banner(guild, false),
+          */
+        ])
 
         let log: GuildData = {
           messageLog: new Map(),
@@ -571,6 +572,7 @@ const UserData = class {
     }
   }
   private async fetchGuildAuthor(guild: Guild): Promise<void> {
+    // TODO: fix the bug that make's fetching guildAuthor break if user is no longer within guild
     if (guild.id === this.guildAuthor?.guild.id) return
     this.guildAuthor = await guild.members.fetch(this.author.id)
   }

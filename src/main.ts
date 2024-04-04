@@ -8,22 +8,12 @@ import {
   Events,
   Interaction,
   Partials,
-  User,
 } from 'discord.js'
 import Log from './utilities/log.js'
 import {
   Commands,
 } from './commands.js'
 import MessageCreate from './observer/message/messageCreate.js'
-import {
-  Database,
-  db,
-} from './firebase/database.js'
-import {
-  DocumentReference,
-  DocumentData,
-} from 'firebase-admin/firestore'
-import UserData from './firebase/userdoc.js'
 
 dotenv.config()
 
@@ -35,17 +25,6 @@ const Bot = class {
     this.client = client
     this.commands = new Collection()
   }
-  private async loadDatabase(): Promise<void> {
-    let documents: Array<DocumentReference<DocumentData, DocumentData>> = await db.collection('users').listDocuments()
-    for (let document of documents) {
-      let data: DocumentData = (await document.get()).data()
-      if (!data || data?.placeholder) continue
-
-      let author: User = await this.client.users.fetch(data?.id, { force: true })
-      let user = await (await new UserData(author).getData()).getScoreGame()
-      Database.users.set(data?.id, user)
-    }
-  }
   public async init(): Promise<void> {
     // login
     await this.client.login(process.env.BOT_TOKEN)
@@ -53,10 +32,6 @@ const Bot = class {
     this.client.on(Events.ClientReady, async (): Promise<void> => {
       if (!this.client || !this.client.user) throw new Error('User not found')
       Log.info(`Client initialized as ${this.client.user.tag}`)
-
-      // import the database
-      Log.info('Collecting database...')
-      await this.loadDatabase()
 
       // compile & test the commands
       Log.info('Compiling commands...')

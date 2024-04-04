@@ -3,6 +3,8 @@ import {
   GuildBasedChannel,
   ChannelType,
   Collection,
+  PermissionsBitField,
+  GuildChannel,
 
   CacheType,
   StringSelectMenuInteraction,
@@ -26,6 +28,7 @@ interface InteractionObserver {
   byParentId(parentId: string): this
   finishFilter(): Collection<string, GuildBasedChannel>
   componentsFilter(components: Array<string>): (component: Action) => boolean
+  checkPermissions(permissions: Array<bigint>, channel: GuildChannel): boolean
   abort(code: number): Promise<void>
 }
 
@@ -71,6 +74,14 @@ const InteractionObserver = class InteractionObserver {
   }
   public componentsFilter(components: Array<string>): (component: Action) => boolean {
     return (component: Action): boolean => components.includes(component.customId) && component.user.id === this.interaction.user.id
+  }
+  public checkPermissions(permissions: Array<bigint>, channel: GuildChannel): boolean {
+    const memberPermissions: Readonly<PermissionsBitField> = channel.permissionsFor(this.interaction.member.user.id)
+    if (!memberPermissions) return false
+    for (let permission of permissions)
+      if (!memberPermissions.has(permission)) return false
+
+    return true
   }
   public async abort(code: number): Promise<void> {
     await this.interaction.editReply(`${InteractionObserver.abortReasons.get(code)} (Error code ${code})`)

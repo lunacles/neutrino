@@ -12,7 +12,6 @@ import {
   Database
 } from '../firebase/database.js'
 import * as util from '../utilities/util.js'
-import UserData from '../firebase/userdoc.js'
 import Icon from '../utilities/icon.js'
 
 const Steal: CommandInterface = {
@@ -32,8 +31,8 @@ const Steal: CommandInterface = {
     if (interaction.guild.id !== global.arrasDiscordId) return await observer.abort(3)
     if (targetUserOption.id === interaction.user.id) return await observer.abort(4)
 
-    let user = Database.users.get(interaction.user.id) ?? await UserData.new(interaction.user.id, interaction.guild)
-    let target = Database.users.get(targetUserOption.id) ?? await UserData.new(targetUserOption.id, interaction.guild)
+    let user = await Database.getUser(interaction.user.id, interaction.guild)
+    let target = await Database.getUser(targetUserOption.id, interaction.guild)
     let userData = user.data.scoregame.data
     let targetData = target.data.scoregame.data
 

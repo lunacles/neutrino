@@ -11,7 +11,6 @@ import {
   Database
 } from '../firebase/database.js'
 import * as util from '../utilities/util.js'
-import UserData from '../firebase/userdoc.js'
 import Icon from '../utilities/icon.js'
 
 const Leaderboard: CommandInterface = {
@@ -23,7 +22,7 @@ const Leaderboard: CommandInterface = {
     const observer = new InteractionObserver(interaction)
     if (interaction.guild.id !== global.arrasDiscordId) return await observer.abort(3)
 
-    let user = Database.users.get(interaction.user.id) ?? await UserData.new(interaction.user.id, interaction.guild)
+    let user = await Database.getUser(interaction.user.id, interaction.guild)
     let data = user.data.scoregame.data
     //let top = Array.from(Database.users.values()).sort((a, b) => b.data.scoregame.data.score - (a.data.scoregame.data?.score ?? 0)).slice(0, 10).map((user, index) => `**${index + 1}:** <@${user.data.id}> - **${user.data.scoregame.data.score.toLocaleString()}**`).join('\n')
     let top = Array.from(Database.users.values())

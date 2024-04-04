@@ -40,7 +40,7 @@ const FetchUserData: CommandInterface = {
       targetUser = targetUserId
     }
 
-    let userData: string = JSON.stringify(Database.users.get(targetUser).data, null, 2)
+    let userData: string = JSON.stringify((await Database.getUser(targetUser, interaction.guild)).data, null, 2)
     let dataChunks: Array<string> = []
 
     for (let i = 0; i < userData.length; i += 1900)

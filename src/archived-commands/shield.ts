@@ -24,7 +24,6 @@ import {
   Database
 } from '../firebase/database.js'
 import * as util from '../utilities/util.js'
-import UserData from '../firebase/userdoc.js'
 import Icon from '../utilities/icon.js'
 
 type Action = StringSelectMenuInteraction<CacheType> | UserSelectMenuInteraction<CacheType> | RoleSelectMenuInteraction<CacheType> | MentionableSelectMenuInteraction<CacheType> | ChannelSelectMenuInteraction<CacheType> | ButtonInteraction<CacheType>
@@ -39,7 +38,7 @@ const Shield: CommandInterface = {
     const observer = new InteractionObserver(interaction)
     if (interaction.guild.id !== global.arrasDiscordId) return await observer.abort(3)
 
-    let user = Database.users.get(interaction.user.id) ?? await UserData.new(interaction.user.id, interaction.guild)
+    let user = await Database.getUser(interaction.user.id, interaction.guild)
     let data = user.data.scoregame.data
     let cooldown: number = Math.floor((Date.now() - data.cooldown.shield) / 1e3)
     if (data.shieldEnd > Date.now()) {

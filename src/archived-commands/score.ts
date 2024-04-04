@@ -12,7 +12,6 @@ import {
   Database
 } from '../firebase/database.js'
 import * as util from '../utilities/util.js'
-import UserData from '../firebase/userdoc.js'
 import Icon from '../utilities/icon.js'
 
 const Score: CommandInterface = {
@@ -27,12 +26,12 @@ const Score: CommandInterface = {
     await interaction.deferReply()
     const targetUserOption = interaction.options.getUser('user', false)
     const observer = new InteractionObserver(interaction)
-    let author = Database.users.get(interaction.user.id) ?? await UserData.new(interaction.user.id, interaction.guild)
+    let author = await Database.getUser(interaction.user.id, interaction.guild)
 
     if (interaction.guild.id !== global.arrasDiscordId) return await observer.abort(3)
     let targetUser: string = targetUserOption ? targetUserOption.id : interaction.user.id
 
-    let user = Database.users.get(targetUser) ?? await UserData.new(targetUser, interaction.guild)
+    let user =  await Database.getUser(targetUser, interaction.guild)
     let data = user.data.scoregame.data
     let cooldown: number = Math.floor((Date.now() - data.cooldown.score) / 1e3)
     if (cooldown < global.cooldown.score) {

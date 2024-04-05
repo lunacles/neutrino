@@ -29,7 +29,8 @@ const Info: CommandInterface = {
       **Node Version:** \`${process.version}\`
       **Discord.js Version:** \`${discordjs.version}\`
       **Memory Usage:** \`${Math.floor(process.memoryUsage().heapUsed / 1024 / 1024)}MB\`
-      **Ping:** \`${interaction.client.ws.ping}ms\``)
+      **Ping:** \`${interaction.client.ws.ping}ms\`
+      **Repository:** [Github Link](<https://github.com/lunacles/eula-bot>)`)
 
   interaction.editReply({
     embeds: [embed],

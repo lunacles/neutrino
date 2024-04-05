@@ -12,7 +12,7 @@ interface LogInterface {
 const Log: LogInterface = {
   startTime: Date.now(),
   get uptime(): string {
-    return util.formatSeconds(process.uptime())
+    return util.formatSeconds(Math.floor(process.uptime()), true)
   },
   get time(): string {
     return `[${new Date().toISOString()}] [${((Date.now() - Log.startTime) * 0.001).toFixed(3)}]`

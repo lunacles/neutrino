@@ -16,7 +16,7 @@ const Build: BuildInterface = {
   diff: '',
   async load(): Promise<void> {
     try {
-      let response: Response = await fetch('https://api.github.com/repos/lunacles/eulaquery/commits/main')
+      let response: Response = await fetch('https://api.github.com/repos/lunacles/eula-bot/commits/main')
       if (!response.ok)
         throw new Error(`HTTP error: ${response.status}`)
 

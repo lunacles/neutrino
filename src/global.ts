@@ -1,3 +1,5 @@
+import Build from "./utilities/repo"
+
 interface LoggingConfigInterface {
   avatars: boolean
   banners: boolean
@@ -20,6 +22,7 @@ interface CommandCooldownInterface {
 }
 
 interface GlobalInterface {
+  build: any
   ownerId: string
   arrasDiscordId: string
   loggingConfig: LoggingConfigInterface
@@ -28,6 +31,7 @@ interface GlobalInterface {
 }
 
 const global: GlobalInterface = {
+  build: Build,
   ownerId: '342038795757027329',
   arrasDiscordId: '366661839620407297',
   loggingConfig: {

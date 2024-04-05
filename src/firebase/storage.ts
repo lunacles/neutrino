@@ -22,13 +22,10 @@ export const FireStorage = class FireStorageInterface {
   private storage: Bucket
   private path: string
   private homeDir: string
-  //private appendedFiles: Map<string, Array<Buffer>>
   constructor() {
     this.storage = bucket
     this.path = ''
     this.homeDir = 'users'
-
-    //this.appendedFiles = new Map()
   }
   private normalizePath(path: string): string {
     let parts: Array<string> = path.split('/').reduce((acc: Array<string>, cur: string) => {

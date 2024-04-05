@@ -9,8 +9,8 @@ export interface CommandsInterface {
   directory: string
   folder: Array<string>
 
-  locate: () => Promise<void>
-  compile: () => Promise<Array<CommandInterface>>
+  locate(): Promise<void>
+  compile(): Promise<Array<CommandInterface>>
 }
 
 export const Commands: CommandsInterface = {

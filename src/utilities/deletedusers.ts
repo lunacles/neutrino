@@ -1,6 +1,6 @@
 interface DeletedUsersInterface {
   ids: Map<string, string>
-  fixId: (id: string) => string
+  fixId(id: string): string
 }
 
 const DeletedUsers: DeletedUsersInterface = {

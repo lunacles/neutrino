@@ -36,12 +36,12 @@ export interface DatabaseInterface {
   collection: CollectionReference
   doc: DocumentReference
 
-  cd: (dir: string) => this
-  mkdir: (name: string, data?: object) => Promise<DocumentReference>
-  cat: (name?: string) => Promise<DocumentSnapshot | DocumentReference>
-  getdoc: (name: string) => DocumentReference
-  write: (data: object) => Promise<this>
-  rm: (name?: string) => Promise<this>
+  cd(dir: string): this
+  mkdir(name: string, data?: object): Promise<DocumentReference>
+  cat(name?: string): Promise<DocumentSnapshot | DocumentReference>
+  getdoc(name: string): DocumentReference
+  write(data: object): Promise<this>
+  rm(name?: string): Promise<this>
 }
 
 export const Database = class DatabaseInterface {

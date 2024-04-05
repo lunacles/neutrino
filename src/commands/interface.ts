@@ -8,8 +8,8 @@ interface CommandInterface {
   description: string
   data: any,
 
-  execute: (interaction: ChatInputCommandInteraction<CacheType>) => Promise<void>
-  test: () => boolean
+  execute(interaction: ChatInputCommandInteraction<CacheType>): Promise<void>
+  test(): boolean
 }
 
 export default CommandInterface

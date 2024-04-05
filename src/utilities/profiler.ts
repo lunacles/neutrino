@@ -6,10 +6,10 @@ interface ProfilerInterface {
   time: number
   totalSum: number
 
-  set: () => void
-  mark: () => void
-  getAverage: () => number
-  sum: () => number
+  set(): void
+  mark(): void
+  getAverage(): number
+  sum(): number
 }
 
 interface Profilers {

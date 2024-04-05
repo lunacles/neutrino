@@ -13,9 +13,9 @@ import {
 } from './database.js'
 
 export interface FireStorageInterface {
-  cd: (dir: string) => this
-  rm: (name?: string) => Promise<this>
-  upload: (url: string, fileName?: string) => Promise<string>
+  cd(dir: string): this
+  rm(name?: string): Promise<this>
+  upload(url: string, fileName?: string): Promise<string>
 }
 
 export const FireStorage = class FireStorageInterface {

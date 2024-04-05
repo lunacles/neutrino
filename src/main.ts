@@ -14,6 +14,7 @@ import {
   Commands,
 } from './commands.js'
 import MessageCreate from './observer/message/messageCreate.js'
+import Build from './utilities/repo.js'
 
 dotenv.config()
 
@@ -39,6 +40,9 @@ const Bot = class {
 
       Log.info(`${this.client.user.tag} is now accepting interactions`)
       this.awaitInteractions()
+
+      // get the build info
+      await Build.load()
 
       this.events()
     })

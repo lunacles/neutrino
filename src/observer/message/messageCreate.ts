@@ -8,7 +8,6 @@ import Observer from '../interface.js'
 import {
   Database,
 } from '../../firebase/database.js'
-import UserData from '../../firebase/userdoc.js'
 
 const MessageCreate: Observer = {
   eventID: Events.MessageCreate,
@@ -17,7 +16,7 @@ const MessageCreate: Observer = {
     // if the user is a bot, ignore them
     if (message.author.bot) return
     let guild: Guild = await message.guild.fetch()
-    let userData = Database.users.get(message.author.id) ?? await UserData.new(message.author.id, guild)
+    let userData = await Database.getUser(message.author.id, guild)
 
     await userData.guild?.log.message(message)
   }

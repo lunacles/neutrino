@@ -24,7 +24,7 @@ import InteractionObserver from './interactionobserver.js'
 import DeletedUsers from '../utilities/deletedusers.js'
 
 const PinArchive: CommandInterface = {
-  name: 'archive-pins',
+  name: 'archivepins',
   description: 'Archives pinned messages of a specified channel.',
   data: new SlashCommandBuilder()
     .addChannelOption((option: SlashCommandChannelOption): SlashCommandChannelOption => option

@@ -5,6 +5,7 @@ import {
   Collection,
   PermissionsBitField,
   GuildChannel,
+  GuildTextBasedChannel,
 
   CacheType,
   StringSelectMenuInteraction,
@@ -75,7 +76,7 @@ const InteractionObserver = class InteractionObserver {
   public componentsFilter(components: Array<string>): (component: Action) => boolean {
     return (component: Action): boolean => components.includes(component.customId) && component.user.id === this.interaction.user.id
   }
-  public checkPermissions(permissions: Array<bigint>, channel: GuildChannel): boolean {
+  public checkPermissions(permissions: Array<bigint>, channel: GuildChannel | GuildTextBasedChannel): boolean {
     const memberPermissions: Readonly<PermissionsBitField> = channel.permissionsFor(this.interaction.member.user.id)
     if (!memberPermissions) return false
     for (let permission of permissions)

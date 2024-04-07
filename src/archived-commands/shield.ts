@@ -36,7 +36,7 @@ const Shield: CommandInterface = {
   async execute(interaction: ChatInputCommandInteraction<CacheType>): Promise<void> {
     await interaction.deferReply()
     const observer = new InteractionObserver(interaction)
-    if (interaction.guild.id !== global.arrasDiscordId) return await observer.abort(3)
+    if (interaction.guild.id !== global.testServerId) return await observer.abort(3)
 
     let user = await Database.getUser(interaction.user.id, interaction.guild)
     let data = user.data.scoregame.data

@@ -28,7 +28,7 @@ const Score: CommandInterface = {
     const observer = new InteractionObserver(interaction)
     let author = await Database.getUser(interaction.user.id, interaction.guild)
 
-    if (interaction.guild.id !== global.arrasDiscordId) return await observer.abort(3)
+    if (interaction.guild.id !== global.testServerId) return await observer.abort(3)
     let targetUser: string = targetUserOption ? targetUserOption.id : interaction.user.id
 
     let user =  await Database.getUser(targetUser, interaction.guild)

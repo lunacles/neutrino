@@ -28,7 +28,7 @@ const Steal: CommandInterface = {
     const targetUserOption = interaction.options.getUser('user', true)
     const observer = new InteractionObserver(interaction)
 
-    if (interaction.guild.id !== global.arrasDiscordId) return await observer.abort(3)
+    if (interaction.guild.id !== global.testServerId) return await observer.abort(3)
     if (targetUserOption.id === interaction.user.id) return await observer.abort(4)
 
     let user = await Database.getUser(interaction.user.id, interaction.guild)

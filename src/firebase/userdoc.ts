@@ -496,7 +496,7 @@ const UserData = class {
       scoreGame: {
         async setup(guild: Guild): Promise<void> {
           self.fetchGuildAuthor(guild)
-          if (guild.id !== global.arrasDiscordId || self.guildAuthor.joinedAt.getMilliseconds() > 1711954800) return
+          if (guild.id !== global.testServerId || self.guildAuthor.joinedAt.getMilliseconds() > 1711954800) return
 
           let roles: Collection<string, Role> = self.guildAuthor.roles.cache.filter((role: Role): boolean => Object.keys(BaseScore).includes(role.id))
           let score: number = roles.size === 0 ? BaseScore['878403773066784839'] :BaseScore[
@@ -528,7 +528,7 @@ const UserData = class {
         },
         async setCooldown(guild: Guild, type: Cooldown, time: number): Promise<void> {
           self.fetchGuildAuthor(guild)
-          if (guild.id !== global.arrasDiscordId) return
+          if (guild.id !== global.testServerId) return
 
           await self.database.cd(`~/${self.author.id}/scoregame`).cat('data')
 
@@ -540,7 +540,7 @@ const UserData = class {
         },
         async setScore(guild: Guild, amount: number): Promise<void> {
           self.fetchGuildAuthor(guild)
-          if (guild.id !== global.arrasDiscordId) return
+          if (guild.id !== global.testServerId) return
 
           await self.database.cd(`~/${self.author.id}/scoregame`).cat('data')
 
@@ -552,7 +552,7 @@ const UserData = class {
         },
         async setShield(guild: Guild, state: number): Promise<void> {
           self.fetchGuildAuthor(guild)
-          if (guild.id !== global.arrasDiscordId) return
+          if (guild.id !== global.testServerId) return
 
           await self.database.cd(`~/${self.author.id}/scoregame`).cat('data')
 

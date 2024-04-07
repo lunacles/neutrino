@@ -3,11 +3,12 @@ import {
   CacheType,
   SlashCommandBuilder,
   EmbedBuilder,
+  ColorResolvable,
 } from 'discord.js'
 import discordjs from 'discord.js/package.json'
 import CommandInterface from './interface.js'
 import global from '../global.js'
-import Palette from '../utilities/palette.js'
+import Colors from '../canvas/palette.js'
 import Log from '../utilities/log.js'
 
 const Info: CommandInterface = {
@@ -22,7 +23,7 @@ const Info: CommandInterface = {
         name: 'Neurino',
         iconURL: interaction.client.user.displayAvatarURL(),
       })
-      .setColor(Palette.DarkBlue)
+      .setColor(Colors.darkBlue.hex as ColorResolvable)
       .setDescription(`**Bot Creator:** \`_damocles (<@342038795757027329>)\`
       **Uptime:** \`${Log.uptime}\`
       **Version:** \`${global.build.id} (${global.build.date})\`
@@ -32,9 +33,9 @@ const Info: CommandInterface = {
       **Ping:** \`${interaction.client.ws.ping}ms\`
       **Repository:** [Github Link](<https://github.com/lunacles/eula-bot>)`)
 
-  interaction.editReply({
-    embeds: [embed],
-  })
+    interaction.editReply({
+      embeds: [embed],
+    })
   },
   test(): boolean {
     return true

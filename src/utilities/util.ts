@@ -38,6 +38,8 @@ export const averageArray = (array: Array<number>): number => array.length ? arr
 
 export const sumArray = (array: Array<number>): number => array.reduce((a: number, b: number) => a + b, 0)
 
+export const clamp = (value: number, min: number, max: number): number => Math.min(Math.max(value, min), max)
+
 export const dateSuffix = (day: number): string => {
   let last: number = day % 10
   let lastTwo: number = day % 100

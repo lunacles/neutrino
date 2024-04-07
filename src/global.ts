@@ -24,7 +24,7 @@ interface CommandCooldownInterface {
 interface GlobalInterface {
   build: any
   ownerId: string
-  arrasDiscordId: string
+  testServerId: string
   loggingConfig: LoggingConfigInterface
   cooldown: CommandCooldownInterface
   shieldDuration: number
@@ -33,7 +33,7 @@ interface GlobalInterface {
 const global: GlobalInterface = {
   build: Build,
   ownerId: '342038795757027329',
-  arrasDiscordId: '366661839620407297',
+  testServerId: '954026848361254993',
   loggingConfig: {
     avatars: false,
     banners: false,

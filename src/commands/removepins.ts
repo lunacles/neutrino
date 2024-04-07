@@ -15,7 +15,7 @@ import CommandInterface from './interface.js'
 import InteractionObserver from './interactionobserver.js'
 
 const RemovePins: CommandInterface = {
-  name: 'remove-pins',
+  name: 'removepins',
   description: 'Removes all or a set amount of pins from a channel.',
   data: new SlashCommandBuilder()
     .addChannelOption((option: SlashCommandChannelOption ): SlashCommandChannelOption => option

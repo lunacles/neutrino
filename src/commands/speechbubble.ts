@@ -31,6 +31,7 @@ import {
   Circle,
   Clip,
   Media,
+  Rect,
   Text,
 } from '../canvas/elements.js'
 import GIFEncoder from 'gifencoder'
@@ -40,7 +41,7 @@ type Component = InteractionCollector<CollectedInteraction<CacheType>>
 type Pair = [number, number]
 
 let encodeGif = (c: NodeCanvasInterface): Promise<Buffer> => {
-  return new Promise((resolve, reject) => {
+  return new Promise((resolve, reject): void => {
     const encoder = new GIFEncoder(c.width, c.height)
     const stream = encoder.createReadStream()
     let buffers: Array<Buffer> = []
@@ -51,7 +52,7 @@ let encodeGif = (c: NodeCanvasInterface): Promise<Buffer> => {
     encoder.start()
     encoder.setRepeat(0)
     encoder.setQuality(10)
-    encoder.setTransparent(0x00FFFFFF)
+    encoder.setTransparent(0x000000)
     encoder.addFrame(c.ctx)
     encoder.finish()
   })
@@ -69,7 +70,10 @@ let drawBase = async (image: Attachment, depth: number): Promise<NodeCanvasInter
     x: radius * 0.25, y: -radius + depth * 0.75,
     radius
   })
-  c.ctx.clearRect(0, -radius * 0.5, radius, radius)
+  Rect.draw({
+    x: 0, y: -radius * 0.5,
+    width: radius, height: radius
+  }).fill(Colors.pureBlack)
   Clip.end()
 
   return c
@@ -86,6 +90,7 @@ const SpeechBubble: CommandInterface = {
   ).addBooleanOption((option: SlashCommandBooleanOption): SlashCommandBooleanOption => option
     .setName('flip')
     .setDescription('The side the speechbubble arrow will point from. True = right, false = left.')
+    .setRequired(true)
   ),
   async execute(interaction: ChatInputCommandInteraction<CacheType>): Promise<void> {
     await interaction.deferReply()
@@ -182,7 +187,10 @@ const SpeechBubble: CommandInterface = {
         }
 
         Clip.poly(path)
-        c.ctx.clearRect(0, 0, image.width, image.height)
+        Rect.draw({
+          x: 0, y: 0,
+          width: image.width, height: image.height
+        }).fill(Colors.pureBlack)
         Clip.end()
 
         let buffer: Buffer = c.canvas.toBuffer('image/png')

@@ -31,7 +31,7 @@ import {
 } from './datainterface.js'
 
 import Log from '../utilities/log.js'
-import global from '../global.js'
+import global from '../utilities/global.js'
 import * as util from '../utilities/util.js'
 import {
   FireStorage,

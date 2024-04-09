@@ -6,7 +6,7 @@ import {
 } from 'discord.js'
 import CommandInterface from '../commands/interface.js'
 import InteractionObserver from '../commands/interactionobserver.js'
-import global from '../global.js'
+import global from '../utilities/global.js'
 import {
   Database
 } from '../firebase/database.js'

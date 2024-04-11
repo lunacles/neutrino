@@ -3,6 +3,8 @@ import {
   NodeCanvas, NodeCanvasInterface
 } from './canvas'
 import Color from './color.js'
+import { MazeInterface } from '../mazes/maze'
+import Colors from './palette'
 
 type CacheType = 'bar' | 'text' | 'rect' | null
 type Radii = Array<number> | number
@@ -589,5 +591,88 @@ export const Background = class extends Element {
     this.ctx.beginPath()
     this.ctx.rect(0, 0, this.canvas.width, this.canvas.height)
     this.fill(this.color)
+  }
+}
+
+interface Wall {
+  x: number
+  y: number
+  width: number
+  height: number
+}
+
+export const MazeWall = class extends Element {
+  public static draw({ x = 0, y = 0, width = 0, height = 0 }: Wall) {
+    return new MazeWall(x, y, width, height)
+  }
+  private x: number
+  private y: number
+  private width: number
+  private height: number
+  constructor(x: number, y: number, width: number, height: number) {
+    super()
+
+    this.x = x
+    this.y = y
+    this.width = width
+    this.height = height
+
+    this.draw()
+  }
+  private draw(): void {
+    this.setCache({
+      type: 'rect',
+      run: ({ fill = null, stroke = null, lineWidth = null, }) => {
+        Rect.draw({
+          x: this.x, y: this.y,
+          width: this.width, height: this.height
+        }).fill(stroke)
+
+        let innerX = this.x + lineWidth * 0.5
+        let innerY = this.y + lineWidth * 0.5
+        let innerWidth = this.width - lineWidth
+        let innerHeight = this.height - lineWidth
+
+        Rect.draw({
+          x: innerX, y: innerY,
+          width: innerWidth, height: innerHeight
+        }).fill(fill)
+      }
+    })
+  }
+}
+
+interface MapDimensions {
+  x: number,
+  y: number,
+  width: number,
+  height: number,
+}
+
+export const MazeMap = class {
+  private maze: MazeInterface
+  constructor(maze: MazeInterface) {
+    this.maze = maze
+  }
+  public draw({ x, y, width, height }: MapDimensions): void {
+    let border = 5
+    Rect.draw({
+      x, y,
+      width, height
+    }).alpha(0.85).fill(Colors.white)
+    Rect.draw({
+      x, y,
+      width, height
+    }).stroke(Colors.black, border)
+
+    let wallWidth = (width - border * 0.5) / this.maze.width
+    let wallHeight = (height - border * 0.5) / this.maze.height
+
+    for (let wall of this.maze.walls) {
+      MazeWall.draw({
+        x: x + wall.x * wallWidth, y: y + wall.y * wallHeight,
+        width: wall.width * wallWidth, height: wall.height * wallHeight
+      }).both(Colors.wall, Color.blend(Colors.wall, Colors.black, 0.2), 3)
+    }
   }
 }

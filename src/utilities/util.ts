@@ -64,3 +64,5 @@ export const formatDate = (string: string): string => {
     Log.error('Failed to retrieve date', err)
   }
 }
+
+export const capitalize = (string: string): string => string.split(' ').map((r: string): string => `${r[0].toUpperCase()}${r.slice(1)}`).join(' ')

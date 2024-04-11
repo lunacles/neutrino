@@ -10,6 +10,11 @@ const Colors = {
   glacialBlue: new Color('#afe1fb'),
   cyan: new Color('#6191ae'),
   pastelBlue: new Color('#8ec6e6'),
+
+  gray: new Color('#b2b2b2'),
+  red: new Color('#de7076'),
+
+  wall: new Color('#999999'),
 }
 
 export default Colors

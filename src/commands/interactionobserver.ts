@@ -35,11 +35,13 @@ interface InteractionObserver {
 
 const InteractionObserver = class InteractionObserver {
   static abortReasons = new Map([
-    [0, 'You have insufficient permissions to run this command!'],
+    [0, 'You have insufficient permissions to run this command'],
     [1, 'Command unavailable'],
     [2, 'Invalid channel type'],
     [3, 'Command is not available in this server'],
     [4, 'The selected user cannot be yourself'],
+    [5, 'This command can only be used in <#1227836204087640084>'],
+    [6, 'Selected channel does not support permission overwrites']
   ])
   public interaction: CommandInteraction
   public filter: Collection<string, GuildBasedChannel>

@@ -87,6 +87,8 @@ const SeedMaze: CommandInterface = {
     const terminateOnContact: boolean = interaction.options.getBoolean('terminate-on-contact')
     const observer = new InteractionObserver(interaction)
 
+    if (interaction.channel.id !== '1227836204087640084' && !observer.checkPermissions([PermissionsBitField.Flags.ManageMessages], interaction.channel)) return await observer.abort(5)
+
     //if (!observer.checkPermissions([PermissionsBitField.Flags.ManageMessages], interaction.channel)) return await observer.abort(0)
 
     let prngSeed: number = seed === '' ? Math.floor(Math.random() * 2147483646) : /^\d+$/.test(seed) ? parseInt(seed) : Hash.cyrb53(seed)
@@ -102,7 +104,7 @@ const SeedMaze: CommandInterface = {
           ...global.movementOptions.vertical as Array<number>,
         ])
         .setWalkerSettings(borderWrapping, terminateOnContact)
-        .setWalkerLimits(Infinity, Infinity, 20)
+        .setWalkerLimits(50, 50, 5)
     ).findPockets().combineWalls()
     map.draw({
       x: 0, y: 0,

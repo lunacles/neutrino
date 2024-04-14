@@ -63,7 +63,7 @@ let drawBase = async (image: Attachment, depth: number): Promise<NodeCanvasInter
   await Media.draw({
     x: 0, y: 0,
     width: image.width, height: image.height,
-    url: image.url
+    dir: image.url
   })
   let radius: number = image.width * 2
   Clip.circle({
@@ -97,8 +97,8 @@ const SpeechBubble: CommandInterface = {
     const image: Attachment = interaction.options.getAttachment('image')
     const side: boolean = interaction.options.getBoolean('flip') ?? false
     const observer = new InteractionObserver(interaction)
-    //if (interaction.guild.id !== global.testServerId) return await observer.abort(3)
-    if (!observer.checkPermissions([PermissionsBitField.Flags.ManageMessages], interaction.channel)) return await observer.abort(0)
+
+    if (interaction.channel.id !== '1227836204087640084' && !observer.checkPermissions([PermissionsBitField.Flags.ManageMessages], interaction.channel)) return await observer.abort(5)
 
     let buttonWidth: number = image.width / 5
     let buttonHeight: number = image.height / 5

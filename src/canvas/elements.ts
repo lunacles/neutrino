@@ -541,19 +541,19 @@ interface Media {
   y: number
   width: number
   height: number
-  url: string
+  dir: string
 }
 
 export const Media = class extends Element {
-  public static async draw({ x = 0, y = 0, width = 0, height = 0, url = '' }: Media) {
-    return await new Media(x, y, width, height, url).draw()
+  public static async draw({ x = 0, y = 0, width = 0, height = 0, dir = '' }: Media) {
+    return await new Media(x, y, width, height, dir).draw()
   }
   private x: number
   private y: number
   private width: number
   private height: number
-  private url: string
-  constructor(x: number, y: number, width: number, height: number, url: string) {
+  private dir: string
+  constructor(x: number, y: number, width: number, height: number, dir: string) {
     super()
 
     this.x = x
@@ -561,11 +561,11 @@ export const Media = class extends Element {
     this.width = width
     this.height = height
 
-    this.url = url
+    this.dir = dir
   }
   private async draw(): Promise<any> {
     this.ctx.beginPath()
-    let media = await loadImage(this.url)
+    let media = await loadImage(this.dir)
     this.ctx.drawImage(media, this.x, this.y, this.width, this.height)
 
     return Rect.draw({

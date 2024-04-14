@@ -8,6 +8,8 @@ export interface NodeCanvasInterface {
 
   width: number
   height: number
+  centerX: number
+  centerY: number
   scale: number
   ratio: number
 }
@@ -29,6 +31,8 @@ export const NodeCanvas = class NodeCanvasInterface {
 
   public width: number
   public height: number
+  public centerX: number
+  public centerY: number
   public scale: number
   public ratio: number
   constructor(width: number, height: number, scale: number = 1) {
@@ -39,6 +43,9 @@ export const NodeCanvas = class NodeCanvasInterface {
     this.width = width
     this.height = height
     this.scale = scale
+
+    this.centerX = width * 0.5
+    this.centerY = height * 0.5
 
     this.ratio = this.setSize()
 

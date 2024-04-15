@@ -12,10 +12,16 @@ import {
   NoiseInterface,
 } from './algorithms/noise.js'
 import Log from './../utilities/log.js'
+import { Hash } from '../utilities/hash.js'
 
 export type Seed = string | number
 type Pair = [number, number]
 type Algorithm = RandomWalkerInterface | NoiseInterface
+
+export enum PlacementType {
+  Empty = 0,
+  Wall = 1,
+}
 
 export interface Wall {
   x: number
@@ -27,7 +33,7 @@ export interface Wall {
 export interface MazeInterface {
   width: number
   height: number
-  inverse: boolean
+  type: number
   array: Array<any>
   seed: number
   walls: Array<Wall>
@@ -45,21 +51,24 @@ export interface MazeInterface {
 export const Maze = class MazeInterface {
   public width: number
   public height: number
-  public inverse: boolean
+  public type: number
   public array: Array<any>
   public seed: number
   public walls: Array<Wall>
+  public prng: Function
   public ran: RandomInterface
 
-  constructor(width: number, height: number, prng: Function = PRNG.MathRandom, inverse: boolean) {
-    this.width = width
-    this.height = height
-    this.array = Array(width * height).fill(+inverse)
+  constructor() {
+    this.width = 32
+    this.height = 32
+    this.type = PlacementType.Empty
+    this.array = Array(this.width * this.height).fill(this.type)
     this.walls = []
     for (let [x, y, _] of this.entries().filter(([x, y, _]) => !this.has(x, y)))
       this.set(x, y, 0)
 
-    this.ran = new Random(prng)
+    this.seed = Math.floor(Math.random() * 2147483646)
+      this.ran = new Random(PRNG.simple(this.seed))
   }
   public get(x: number, y: number): any {
     return this.array[y * this.width + x]
@@ -181,6 +190,31 @@ export const Maze = class MazeInterface {
     algorithm.maze = this
     algorithm.ran = this.ran
     algorithm.init()
+    return this
+  }
+  public setWidth(width: number): this {
+    this.width = width
+    this.array = Array(this.width * this.height).fill(this.type)
+    return this
+  }
+  public setHeight(height: number): this {
+    this.height = height
+    this.array = Array(this.width * this.height).fill(this.type)
+    return this
+  }
+  public setSeed(seed: string): this {
+    this.seed = seed === '' ? Math.floor(Math.random() * 2147483646) : /^\d+$/.test(seed) ? parseInt(seed) : Hash.cyrb53(seed)
+    this.ran = this.ran = new Random(this.prng(this.seed))
+    return this
+  }
+  public setPRNG(prng: Function): this {
+    this.prng = prng
+    this.ran = this.ran = new Random(prng(this.seed))
+    return this
+  }
+  public fill(type: number): this {
+    this.type = type
+    this.array = Array(this.width * this.height).fill(type)
     return this
   }
 }

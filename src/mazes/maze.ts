@@ -31,7 +31,6 @@ export interface MazeInterface {
   array: Array<any>
   seed: number
   walls: Array<Wall>
-  alreadyPlaced: Array<any>
   ran: RandomInterface
 
   get(x: number, y: number): any
@@ -50,7 +49,6 @@ export const Maze = class MazeInterface {
   public array: Array<any>
   public seed: number
   public walls: Array<Wall>
-  public alreadyPlaced: Array<any>
   public ran: RandomInterface
 
   constructor(width: number, height: number, prng: Function = PRNG.MathRandom, inverse: boolean) {
@@ -62,7 +60,6 @@ export const Maze = class MazeInterface {
       this.set(x, y, 0)
 
     this.ran = new Random(prng)
-    this.alreadyPlaced = []
   }
   public get(x: number, y: number): any {
     return this.array[y * this.width + x]

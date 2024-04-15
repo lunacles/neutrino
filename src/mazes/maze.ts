@@ -113,7 +113,6 @@ export const Maze = class MazeInterface {
     }
     return this
   }
-
   public combineWalls(): this {
     let walls: Array<Wall> = []
     let array = this.array.slice()

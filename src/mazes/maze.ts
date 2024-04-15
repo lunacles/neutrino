@@ -27,7 +27,6 @@ export interface Wall {
 export interface MazeInterface {
   width: number
   height: number
-  mazeSeed: Seed
   inverse: boolean
   array: Array<any>
   seed: number
@@ -47,7 +46,6 @@ export interface MazeInterface {
 export const Maze = class MazeInterface {
   public width: number
   public height: number
-  public mazeSeed: Seed
   public inverse: boolean
   public array: Array<any>
   public seed: number

@@ -15,19 +15,35 @@ import {
   NodeCanvasInterface,
 } from '../canvas/canvas.js'
 import {
-  Maze
+  Maze,
+  PlacementType
 } from '../mazes/maze.js'
 import {
   PRNG
 } from '../utilities/prng.js'
 import {
-  Hash
-} from '../utilities/hash.js'
-import {
   MazeMap
 } from '../canvas/elements.js'
 import { RandomWalker } from '../mazes/algorithms/randomwalker.js'
 import global from '../utilities/global.js'
+
+enum Min {
+  Dimensions = 16,
+  Length = 0,
+  Turns = 0,
+  Branches = 5,
+  Seeds = 1,
+  Chance = 0,
+}
+
+enum Max {
+  Dimensions = 64,
+  Length = 50,
+  Turns = 50,
+  Branches = 5,
+  Seeds = 100,
+  Chance = 1,
+}
 
 const SeedMaze: CommandInterface = {
   name: 'seedmaze',
@@ -35,37 +51,83 @@ const SeedMaze: CommandInterface = {
   data: new SlashCommandBuilder()
     .addStringOption((option: SlashCommandStringOption): SlashCommandStringOption => option
       .setName('seed')
-      .setDescription('The maze seed.')
+      .setDescription('The maze seed. Can be used to recreate the same maze twice.')
+    )
+    .addBooleanOption((option: SlashCommandBooleanOption): SlashCommandBooleanOption => option
+      .setName('placement-type')
+      .setDescription('What the walker places. True for empty, false for walls.')
     )
     .addNumberOption((option: SlashCommandNumberOption): SlashCommandNumberOption => option
-      .setName('dimensions')
-      .setDescription('The width and height of the maze. Default is 32.')
-      .setMinValue(16)
-      .setMaxValue(64)
+      .setName('width')
+      .setDescription('The width of the maze. Default is 32.')
+      .setMinValue(Min.Dimensions)
+      .setMaxValue(Max.Dimensions)
+    )
+    .addNumberOption((option: SlashCommandNumberOption): SlashCommandNumberOption => option
+      .setName('height')
+      .setDescription('The height of the maze. Default is 32.')
+      .setMinValue(Min.Dimensions)
+      .setMaxValue(Max.Dimensions)
     )
     .addNumberOption((option: SlashCommandNumberOption): SlashCommandNumberOption => option
       .setName('seed-amount')
       .setDescription('The amount of walker seeds. Default is 75.')
-      .setMinValue(1)
-      .setMaxValue(100)
+      .setMinValue(Min.Seeds)
+      .setMaxValue(Max.Seeds)
     )
     .addNumberOption((option: SlashCommandNumberOption): SlashCommandNumberOption => option
       .setName('straight-chance')
       .setDescription('The chance for a walker to move forward in the direction it\'s facing. Default its 0.6.')
-      .setMinValue(0)
-      .setMaxValue(1)
+      .setMinValue(Min.Chance)
+      .setMaxValue(Max.Chance)
     )
     .addNumberOption((option: SlashCommandNumberOption): SlashCommandNumberOption => option
       .setName('turn-chance')
       .setDescription('The chance for a walker to turn to a new direction. Runs if straight chance fails. Default is 0.4.')
-      .setMinValue(0)
-      .setMaxValue(1)
+      .setMinValue(Min.Chance)
+      .setMaxValue(Max.Chance)
     )
     .addNumberOption((option: SlashCommandNumberOption): SlashCommandNumberOption => option
       .setName('branch-chance')
       .setDescription('The chance for a walker to branch a new walker. Runs if straight & turn chance fails. Default is 0.')
-      .setMinValue(0)
-      .setMaxValue(1)
+      .setMinValue(Min.Chance)
+      .setMaxValue(Max.Chance)
+    )
+    .addNumberOption((option: SlashCommandNumberOption): SlashCommandNumberOption => option
+      .setName('min-length')
+      .setDescription('The minimum length a walker can be. Default is 0.')
+      .setMinValue(Min.Length)
+      .setMaxValue(Max.Length)
+    )
+    .addNumberOption((option: SlashCommandNumberOption): SlashCommandNumberOption => option
+      .setName('min-turns')
+      .setDescription('The minimum turns a walker can make. Default is 0.')
+      .setMinValue(Min.Turns)
+      .setMaxValue(Max.Turns)
+    )
+    .addNumberOption((option: SlashCommandNumberOption): SlashCommandNumberOption => option
+      .setName('min-branches')
+      .setDescription('The minimum branches a walker can create. Default is 0.')
+      .setMinValue(Min.Branches)
+      .setMaxValue(Max.Branches)
+    )
+    .addNumberOption((option: SlashCommandNumberOption): SlashCommandNumberOption => option
+      .setName('max-length')
+      .setDescription('The maximum length a walker can be. Default is 50.')
+      .setMinValue(Min.Length)
+      .setMaxValue(Max.Length)
+    )
+    .addNumberOption((option: SlashCommandNumberOption): SlashCommandNumberOption => option
+      .setName('max-turns')
+      .setDescription('The maximum turns a walker can make. Default is 50.')
+      .setMinValue(Min.Turns)
+      .setMaxValue(Max.Turns)
+    )
+    .addNumberOption((option: SlashCommandNumberOption): SlashCommandNumberOption => option
+      .setName('max-branches')
+      .setDescription('The maximum branches a walker can create. Default is 0.')
+      .setMinValue(Min.Branches)
+      .setMaxValue(Max.Branches)
     )
     .addBooleanOption((option: SlashCommandBooleanOption): SlashCommandBooleanOption => option
       .setName('border-wrapping')
@@ -78,37 +140,62 @@ const SeedMaze: CommandInterface = {
   async execute(interaction: ChatInputCommandInteraction<CacheType>): Promise<void> {
     await interaction.deferReply()
     const seed: string = interaction.options.getString('seed') ?? ''
-    const dimensions: number = interaction.options.getNumber('dimensions') ?? 32
+    const width: number = interaction.options.getNumber('width') ?? 32
+    const height: number = interaction.options.getNumber('height') ?? 32
+
     const seedAmount: number = interaction.options.getNumber('seed-amount') ?? 75
+    const placementType: boolean = interaction.options.getBoolean('placement-type') ?? false
     const straightChance: number = interaction.options.getNumber('straight-chance') ?? 0.6
     const turnChance: number = interaction.options.getNumber('turn-chance') ?? 0.4
     const branchChance: number = interaction.options.getNumber('branch-chance') ?? 0
     const borderWrapping: boolean = interaction.options.getBoolean('border-wrapping')
     const terminateOnContact: boolean = interaction.options.getBoolean('terminate-on-contact')
+    const minLength: number = interaction.options.getNumber('min-length') ?? 0
+    const maxLength: number = interaction.options.getNumber('max-length') ?? 50
+    const minTurns: number = interaction.options.getNumber('min-turns') ?? 0
+    const maxTurns: number = interaction.options.getNumber('max-turns') ?? 50
+    const minBranches: number = interaction.options.getNumber('min-branches') ?? 0
+    const maxBranches: number = interaction.options.getNumber('max-branches') ?? 0
+
     const observer = new InteractionObserver(interaction)
 
     if (interaction.channel.id !== '1227836204087640084' && !observer.checkPermissions([PermissionsBitField.Flags.ManageMessages], interaction.channel)) return await observer.abort(5)
 
     //if (!observer.checkPermissions([PermissionsBitField.Flags.ManageMessages], interaction.channel)) return await observer.abort(0)
 
-    let prngSeed: number = seed === '' ? Math.floor(Math.random() * 2147483646) : /^\d+$/.test(seed) ? parseInt(seed) : Hash.cyrb53(seed)
+    let c: NodeCanvasInterface = new NodeCanvas(width * 32, height * 32)
+    const maze = new Maze()
+      .setWidth(width)
+      .setHeight(height)
+      .fill(PlacementType.Empty)
+      .setPRNG(PRNG.simple)
+      .setSeed(seed)
 
-    let c: NodeCanvasInterface = new NodeCanvas(dimensions * 32, dimensions * 32)
-    const maze = new Maze(dimensions, dimensions, PRNG.simple(prngSeed), false)
     const map = new MazeMap(maze)
     maze.runAlgorithm(
-      new RandomWalker(seedAmount, true)
-        .setWalkerChances(straightChance, turnChance, branchChance)
+      new RandomWalker()
+        .setSeedAmount(seedAmount)
+        .setPlacementType(+!placementType)
+        .setStraightChance(straightChance)
+        .setTurnChance(turnChance)
+        .setBranchChance(branchChance)
+        .allowBorderWrapping(borderWrapping)
+        .terminateOnContact(terminateOnContact)
+        .setMinLength(minLength)
+        .setMaxLength(maxLength)
+        .setMinTurns(minTurns)
+        .setMaxTurns(maxTurns)
+        .setMinBranches(minBranches)
+        .setMaxBranches(maxBranches)
         .setWalkerInstructions([
           ...global.movementOptions.horizontal as Array<number>,
           ...global.movementOptions.vertical as Array<number>,
         ])
-        .setWalkerSettings(borderWrapping, terminateOnContact)
-        .setWalkerLimits(50, 50, 5)
     ).findPockets().combineWalls()
+
     map.draw({
       x: 0, y: 0,
-      width: dimensions * 32, height: dimensions * 32
+      width: width * 32, height: height * 32
     })
 
     let buffer: Buffer = c.canvas.toBuffer('image/png')
@@ -117,7 +204,7 @@ const SeedMaze: CommandInterface = {
     })
 
     await interaction.editReply({
-      content: `Here is your maze. (Seed: ${seed ? seed : prngSeed})`,
+      content: `Here is your maze. (Seed: ${maze.seed})`,
       files: [attachment],
     })
   },

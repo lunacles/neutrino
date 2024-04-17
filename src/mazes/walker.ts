@@ -11,7 +11,7 @@ type Coordinate = {
   x: number,
   y: number,
 }
-type Movement = Array<number> | number
+export type Movement = Array<number> | number
 
 interface WalkerSetup {
   x: number
@@ -20,27 +20,32 @@ interface WalkerSetup {
   ran: RandomInterface
 }
 
-interface WalkerChances {
+export interface WalkerChances {
   straightChance: number
   turnChance: number
   branchChance: number
 }
 
-interface WalkerInstructions {
+export interface WalkerInstructions {
   startDirections: Movement
   branchDirections: Movement
+  placementType: number
 }
 
-interface WalkerLimits {
-  maxLength: number
-  maxTurns: number
-  maxBranches: number
-}
-
-interface WalkerSettings {
+export interface WalkerSettings {
   borderWrapping: boolean
   terminateOnContact: boolean
 }
+
+export interface WalkerLimits {
+  minLength: number
+  maxLength: number
+  minTurns: number
+  maxTurns: number
+  minBranches: number
+  maxBranches: number
+}
+
 
 interface WalkerConfig {
   setup: WalkerSetup
@@ -81,12 +86,16 @@ export const Walker = class WalkerInterface {
 
   private startDirections: Movement
   private branchDirections: Movement
+  private placementType: number
 
   private borderWrapping: boolean
   private terminateOnContact: boolean
   private maxLength: number
   private maxTurns: number
   private maxBranches: number
+  private minLength: number
+  private minTurns: number
+  private minBranches: number
 
   private length: number
   private turns: number
@@ -108,12 +117,16 @@ export const Walker = class WalkerInterface {
 
     this.startDirections = instructions.startDirections
     this.branchDirections = instructions.branchDirections
+    this.placementType = 1
 
     this.borderWrapping = settings.borderWrapping
     this.terminateOnContact = settings.terminateOnContact
     this.maxLength = limits.maxLength
     this.maxTurns = limits.maxTurns
     this.maxBranches = limits.maxBranches
+    this.minLength = limits.minLength
+    this.minTurns = limits.minTurns
+    this.minBranches = limits.minBranches
 
     this.length = 0
     this.turns = 0
@@ -135,7 +148,7 @@ export const Walker = class WalkerInterface {
     return [x, y]
   }
   private validateCell(x?: number, y?: number): boolean {
-    if (this.terminateOnContact && this.maze.get(x ?? this.x, y ?? this.y) === +!this.maze.inverse % 2) return false
+    if (this.terminateOnContact && this.maze.get(x ?? this.x, y ?? this.y) === this.placementType) return false
     if (!this.maze.has(x ?? this.x, y ?? this.y)) return false
     return true
   }
@@ -210,17 +223,21 @@ export const Walker = class WalkerInterface {
           instructions: {
             startDirections: direction,
             branchDirections: this.branchDirections,
+            placementType: this.placementType
           },
           settings: this.settings,
           limits: {
             maxLength: this.maxLength - this.length,
             maxTurns: this.maxTurns - this.turns,
-            maxBranches: this.maxBranches - this.branches
+            maxBranches: this.maxBranches - this.branches,
+            minLength: this.minLength - this.length,
+            minTurns: this.minTurns - this.turns,
+            minBranches: this.minBranches - this.branches
           }
         })
         branch.walk(type)
       // terminate if all chances fail
-      } else {
+      } else if (this.length >= this.minLength && this.turns >= this.minTurns && this.branches >= this.minBranches) {
         break
       }
       if (this.borderWrapping)

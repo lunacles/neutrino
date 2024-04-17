@@ -31,7 +31,7 @@ enum Min {
   Dimensions = 16,
   Length = 0,
   Turns = 0,
-  Branches = 5,
+  Branches = 0,
   Seeds = 1,
   Chance = 0,
 }

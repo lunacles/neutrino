@@ -10,31 +10,31 @@ import {
 import global from './../../utilities/global.js'
 
 type Coordinate = {
-  x: number,
-  y: number,
+  x: number
+  y: number
 }
 type Movement = Array<number> | number
 
 interface WalkerChances {
-  straightChance: number,
-  turnChance: number,
-  branchChance: number,
+  straightChance: number
+  turnChance: number
+  branchChance: number
 }
 
 interface WalkerInstructions {
-  startDirections: Array<number> | number,
-  branchDirections: Array<number> | number,
+  startDirections: Array<number> | number
+  branchDirections: Array<number> | number
 }
 
 interface WalkerSettings {
-  borderWrapping: boolean,
-  terminateOnContact: boolean,
+  borderWrapping: boolean
+  terminateOnContact: boolean
 }
 
 interface WalkerLimits {
-  maxLength: number,
-  maxTurns: number,
-  maxBranches: number,
+  maxLength: number
+  maxTurns: number
+  maxBranches: number
 }
 
 const defaultWalkerChances: WalkerChances = {

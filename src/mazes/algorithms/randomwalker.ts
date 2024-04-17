@@ -6,35 +6,17 @@ import {
 } from './../../utilities/random.js'
 import {
   Walker,
+  WalkerChances,
+  WalkerInstructions,
+  WalkerSettings,
+  WalkerLimits,
+  Movement,
 } from '../walker.js'
 import global from './../../utilities/global.js'
 
 type Coordinate = {
   x: number
   y: number
-}
-type Movement = Array<number> | number
-
-interface WalkerChances {
-  straightChance: number
-  turnChance: number
-  branchChance: number
-}
-
-interface WalkerInstructions {
-  startDirections: Array<number> | number
-  branchDirections: Array<number> | number
-}
-
-interface WalkerSettings {
-  borderWrapping: boolean
-  terminateOnContact: boolean
-}
-
-interface WalkerLimits {
-  maxLength: number
-  maxTurns: number
-  maxBranches: number
 }
 
 const defaultWalkerChances: WalkerChances = {
@@ -46,6 +28,7 @@ const defaultWalkerChances: WalkerChances = {
 const defaultWalkerInstructions: WalkerInstructions = {
   startDirections: [...global.movementOptions.horizontal as Array<number>, ...global.movementOptions.vertical as Array<number>],
   branchDirections: [...global.movementOptions.horizontal as Array<number>, ...global.movementOptions.vertical as Array<number>],
+  placementType: 1,
 }
 
 const defaultWalkerSettings: WalkerSettings = {
@@ -54,17 +37,17 @@ const defaultWalkerSettings: WalkerSettings = {
 }
 
 const defaultWalkerLimits: WalkerLimits = {
+  minLength: 0,
   maxLength: Infinity,
+  minTurns: 0,
   maxTurns: Infinity,
+  minBranches: 0,
   maxBranches: Infinity,
 }
 
 export interface RandomWalkerInterface {
   maze: MazeInterface
   seedAmount: number
-  type: number
-  turnChance: number
-  straightChance: number
   ran: RandomInterface
 
   walkerChances: WalkerChances
@@ -78,9 +61,6 @@ export interface RandomWalkerInterface {
 export const RandomWalker = class RandomWalkerInterface {
   public maze: MazeInterface
   public seedAmount: number
-  public type: number
-  public turnChance: number
-  public straightChance: number
 
   public walkerChances: WalkerChances
   public walkerInstructions: WalkerInstructions
@@ -89,15 +69,17 @@ export const RandomWalker = class RandomWalkerInterface {
 
   public ran: RandomInterface
   private seeds: Array<Coordinate>
-  constructor(seedAmount: number = 1, inverse: boolean) {
+  constructor() {
     this.maze = null
     this.ran = null
-    this.seedAmount = seedAmount
-    this.turnChance = 0
-    this.straightChance = 0
-    this.type = +inverse
+    this.seedAmount = 75
 
     this.seeds = []
+
+    this.walkerChances = defaultWalkerChances
+    this.walkerInstructions = defaultWalkerInstructions
+    this.walkerSettings = defaultWalkerSettings
+    this.walkerLimits = defaultWalkerLimits
   }
   public init(): void {
     this.place()
@@ -115,7 +97,7 @@ export const RandomWalker = class RandomWalkerInterface {
         settings: this.walkerSettings,
         limits: this.walkerLimits
       })
-      walker.walk(this.type)
+      walker.walk(this.walkerInstructions.placementType)
     }
 
     this.maze.findPockets()
@@ -134,40 +116,70 @@ export const RandomWalker = class RandomWalkerInterface {
 
       if (this.validateCell(loc)) {
         this.seeds.push(loc)
-        this.maze.set(loc.x, loc.y, this.type)
+        this.maze.set(loc.x, loc.y, this.walkerInstructions.placementType)
         amount++
         if (amount >= this.seedAmount) break
       }
     }
   }
-  public setWalkerChances(straightChance?: number, turnChance?: number, branchChance?: number): this {
-    this.walkerChances = {
-      straightChance: straightChance ?? defaultWalkerChances.straightChance,
-      turnChance: turnChance ?? defaultWalkerChances.turnChance,
-      branchChance: branchChance ?? defaultWalkerChances.branchChance,
-    }
+  public setSeedAmount(amount: number): this {
+    this.seedAmount = amount
     return this
   }
-  public setWalkerInstructions( startDirection?: Movement, branchDirection?: Movement): this {
+  public setPlacementType(type: number): this {
+    this.walkerInstructions.placementType = type
+    return this
+  }
+  public setStraightChance(straightChance: number): this {
+    this.walkerChances.straightChance = straightChance
+    return this
+  }
+  public setTurnChance(turnChance: number): this {
+    this.walkerChances.turnChance = turnChance
+    return this
+  }
+  public setBranchChance(branchChance: number): this {
+    this.walkerChances.branchChance = branchChance
+    return this
+  }
+  public setWalkerInstructions(startDirection?: Movement, branchDirection?: Movement): this {
     this.walkerInstructions = {
-      startDirections: startDirection ?? defaultWalkerInstructions.startDirections,
-      branchDirections: branchDirection ?? defaultWalkerInstructions.branchDirections,
+      startDirections: startDirection,
+      branchDirections: branchDirection,
+      placementType: this.walkerInstructions.placementType,
     }
     return this
   }
-  public setWalkerSettings(borderWrapping?: boolean, terminateOnContact?: boolean): this {
-    this.walkerSettings = {
-      borderWrapping: borderWrapping ?? defaultWalkerSettings.borderWrapping,
-      terminateOnContact: terminateOnContact ?? defaultWalkerSettings.terminateOnContact,
-    }
+  public allowBorderWrapping(borderWrapping: boolean): this {
+    this.walkerSettings.borderWrapping = borderWrapping
     return this
   }
-  public setWalkerLimits(maxLength?: number, maxTurns?: number, maxBranches?: number): this {
-    this.walkerLimits = {
-      maxLength: maxLength ?? defaultWalkerLimits.maxLength,
-      maxTurns: maxTurns ?? defaultWalkerLimits.maxTurns,
-      maxBranches: maxBranches ?? defaultWalkerLimits.maxBranches,
-    }
+  public terminateOnContact(terminateOnContact: boolean): this {
+    this.walkerSettings.terminateOnContact = terminateOnContact
+    return this
+  }
+  public setMinLength(minLength: number): this {
+    this.walkerLimits.minLength = minLength
+    return this
+  }
+  public setMaxLength(minLength: number): this {
+    this.walkerLimits.maxLength = minLength
+    return this
+  }
+  public setMinTurns(minTurns: number): this {
+    this.walkerLimits.minTurns = minTurns
+    return this
+  }
+  public setMaxTurns(maxTurns: number): this {
+    this.walkerLimits.maxTurns = maxTurns
+    return this
+  }
+  public setMinBranches(minBranches: number): this {
+    this.walkerLimits.minBranches = minBranches
+    return this
+  }
+  public setMaxBranches(maxBranches: number): this {
+    this.walkerLimits.maxBranches = maxBranches
     return this
   }
 }

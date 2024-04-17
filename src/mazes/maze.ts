@@ -68,7 +68,8 @@ export const Maze = class MazeInterface {
       this.set(x, y, 0)
 
     this.seed = Math.floor(Math.random() * 2147483646)
-      this.ran = new Random(PRNG.simple(this.seed))
+    this.prng = PRNG.simple
+    this.ran = new Random(PRNG.simple(this.seed))
   }
   public get(x: number, y: number): any {
     return this.array[y * this.width + x]

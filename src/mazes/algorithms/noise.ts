@@ -15,6 +15,11 @@ type Coordinate = {
 }
 type NoiseAlgorithms = 'normal' | 'clamped' | 'quantized' | 'dynamic' | 'domainWarped' | 'multiScale' | 'marble'
 
+interface Turbulence {
+  power: number
+  size: number
+}
+
 export interface NoiseInterface {
   maze: MazeInterface
   ran: RandomInterface
@@ -39,6 +44,10 @@ enum DefaultSettings {
   Min = -0.085,
   Max = 0.085,
   Iterations = 1,
+  Power = 5,
+  Size = 16,
+  X = 5,
+  Y = 5,
 }
 
 export const Noise = class NoiseInterface {
@@ -51,17 +60,27 @@ export const Noise = class NoiseInterface {
   private threshold: number
   private min: number
   private max: number
+  private turbulence: Turbulence
+  private repetition: Coordinate
   private iterations: number
-  constructor(type: NoiseAlgorithms = 'normal') {
+  constructor() {
     this.maze = null
     this.ran = null
-    this.type = type
+    this.type = 'normal'
 
     this.zoom = DefaultSettings.Zoom
     this.threshold = DefaultSettings.Threshold
     this.min = DefaultSettings.Min
     this.max = DefaultSettings.Max
     this.iterations = DefaultSettings.Iterations
+    this.turbulence = {
+      power: DefaultSettings.Power,
+      size: DefaultSettings.Size
+    }
+    this.repetition = {
+      x: DefaultSettings.X,
+      y: DefaultSettings.Y,
+    }
   }
   public init(): void {
     this.perlin = new ImprovedNoise(this.ran)
@@ -89,6 +108,10 @@ export const Noise = class NoiseInterface {
     this.iterations = amount
     return this
   }
+  public setType(type: NoiseAlgorithms): this {
+    this.type = type
+    return this
+  }
   private iter(iterator: Function): void {
     for (let y: number = 0; y < this.maze.height; y++) {
       for (let x: number = 0; x < this.maze.width; x++) {
@@ -97,7 +120,7 @@ export const Noise = class NoiseInterface {
         let value: any
         value = iterator(x, y)
 
-        this.maze.set(x, y, +value)
+        this.maze.set(x, y, +!value)
       }
     }
   }
@@ -141,7 +164,7 @@ export const Noise = class NoiseInterface {
     })
     return this
   }
-  private turbulence(x: number, y: number, size: number): number {
+  private applyTurbulence(x: number, y: number, size: number): number {
     let value: number = 0
     let initialSize: number = size
 
@@ -152,17 +175,25 @@ export const Noise = class NoiseInterface {
 
     return 128 * value / initialSize
   }
+  public setRepetitionX(x: number): this {
+    this.repetition.x = x
+    return this
+  }
+  public setRepetitionY(y: number): this {
+    this.repetition.y = y
+    return this
+  }
+  public setTurblencePower(power: number): this {
+    this.turbulence.power = power
+    return this
+  }
+  public setTurblenceSize(size: number): this {
+    this.turbulence.size = size
+    return this
+  }
   public marble(): this {
     this.iter((x: number, y: number): boolean => {
-      let repetition = {
-        x: 5,
-        y: 5,
-      }
-      let turbulence = {
-        power: 5,
-        size: 16,
-      }
-      let value: number = x * repetition.x / this.maze.width + y * repetition.y / this.maze.height + turbulence.power * this.turbulence(x, y, turbulence.size) / 256
+      let value: number = x * this.repetition.x / this.maze.width + y * this.repetition.y / this.maze.height + this.turbulence.power * this.applyTurbulence(x, y, this.turbulence.size) / 256
       let sin: number = 256 * Math.abs(Math.sin(value * Math.PI))
 
       return sin < 100

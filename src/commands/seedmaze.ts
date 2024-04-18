@@ -2,7 +2,6 @@ import {
   ChatInputCommandInteraction,
   CacheType,
   SlashCommandBuilder,
-  AttachmentBuilder,
   SlashCommandBooleanOption,
   PermissionsBitField,
   SlashCommandStringOption,
@@ -10,22 +9,9 @@ import {
 } from 'discord.js'
 import CommandInterface from './interface.js'
 import InteractionObserver from './interactionobserver.js'
-import {
-  NodeCanvas,
-  NodeCanvasInterface,
-} from '../canvas/canvas.js'
-import {
-  Maze,
-  PlacementType
-} from '../mazes/maze.js'
-import {
-  PRNG
-} from '../utilities/prng.js'
-import {
-  MazeMap
-} from '../canvas/elements.js'
 import { RandomWalker } from '../mazes/algorithms/randomwalker.js'
 import global from '../utilities/global.js'
+import generateMaze from './maze.js'
 
 enum Min {
   Dimensions = 16,
@@ -162,49 +148,29 @@ const SeedMaze: CommandInterface = {
     if (interaction.channel.id !== '1227836204087640084' && !observer.checkPermissions([PermissionsBitField.Flags.ManageMessages], interaction.channel)) return await observer.abort(5)
 
     //if (!observer.checkPermissions([PermissionsBitField.Flags.ManageMessages], interaction.channel)) return await observer.abort(0)
+    const algorithm = new RandomWalker()
+      .setSeedAmount(seedAmount)
+      .setPlacementType(+!placementType)
+      .setStraightChance(straightChance)
+      .setTurnChance(turnChance)
+      .setBranchChance(branchChance)
+      .allowBorderWrapping(borderWrapping)
+      .terminateOnContact(terminateOnContact)
+      .setMinLength(minLength)
+      .setMaxLength(maxLength)
+      .setMinTurns(minTurns)
+      .setMaxTurns(maxTurns)
+      .setMinBranches(minBranches)
+      .setMaxBranches(maxBranches)
+      .setWalkerInstructions([
+        ...global.movementOptions.horizontal as Array<number>,
+        ...global.movementOptions.vertical as Array<number>,
+      ])
 
-    let c: NodeCanvasInterface = new NodeCanvas(width * 32, height * 32)
-    const maze = new Maze()
-      .setWidth(width)
-      .setHeight(height)
-      .fill(PlacementType.Empty)
-      .setPRNG(PRNG.simple)
-      .setSeed(seed)
-
-    const map = new MazeMap(maze)
-    maze.runAlgorithm(
-      new RandomWalker()
-        .setSeedAmount(seedAmount)
-        .setPlacementType(+!placementType)
-        .setStraightChance(straightChance)
-        .setTurnChance(turnChance)
-        .setBranchChance(branchChance)
-        .allowBorderWrapping(borderWrapping)
-        .terminateOnContact(terminateOnContact)
-        .setMinLength(minLength)
-        .setMaxLength(maxLength)
-        .setMinTurns(minTurns)
-        .setMaxTurns(maxTurns)
-        .setMinBranches(minBranches)
-        .setMaxBranches(maxBranches)
-        .setWalkerInstructions([
-          ...global.movementOptions.horizontal as Array<number>,
-          ...global.movementOptions.vertical as Array<number>,
-        ])
-    ).findPockets().combineWalls()
-
-    map.draw({
-      x: 0, y: 0,
-      width: width * 32, height: height * 32
-    })
-
-    let buffer: Buffer = c.canvas.toBuffer('image/png')
-    let attachment = new AttachmentBuilder(buffer, {
-      name: 'maze.png'
-    })
+    const [attachment, mazeSeed] = generateMaze(algorithm, seed, width, height)
 
     await interaction.editReply({
-      content: `Here is your maze. (Seed: ${maze.seed})`,
+      content: `Here is your maze. (Seed: ${mazeSeed})`,
       files: [attachment],
     })
   },

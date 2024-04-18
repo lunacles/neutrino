@@ -32,7 +32,7 @@ enum Max {
 }
 
 const SeedMaze: CommandInterface = {
-  name: 'seedmaze',
+  name: 'seed-maze',
   description: 'Generates a seed maze.',
   data: new SlashCommandBuilder()
     .addStringOption((option: SlashCommandStringOption): SlashCommandStringOption => option

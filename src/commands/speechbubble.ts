@@ -80,7 +80,7 @@ let drawBase = async (image: Attachment, depth: number): Promise<NodeCanvasInter
 }
 
 const SpeechBubble: CommandInterface = {
-  name: 'speechbubble',
+  name: 'speech-bubble',
   description: 'Creates a speechbubble.',
   data: new SlashCommandBuilder()
     .addAttachmentOption((option: SlashCommandAttachmentOption): SlashCommandAttachmentOption => option

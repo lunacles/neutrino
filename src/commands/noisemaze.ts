@@ -22,8 +22,8 @@ enum Max {
 }
 
 const NoiseMaze: CommandInterface = {
-  name: 'noisemaze',
-  description: 'Generates a Noise maze.',
+  name: 'noise-maze',
+  description: 'Generates a noise maze.',
   data: new SlashCommandBuilder()
     .addStringOption((option: SlashCommandStringOption): SlashCommandStringOption => option
       .setName('seed')

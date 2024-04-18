@@ -18,8 +18,8 @@ export interface ImprovedNoiseInterface {
   noise(x: number, y: number, z: number): number
   quantize(value: number, threshold: number): number
   dynamic(x: number, y: number, z: number, time: Date): number
-  domainWarp(x: number, y: number, z: number): DomainWarp
-  multiScale(x: number, y: number, z: number): number
+  domainWarp(warp: number, x: number, y: number, z: number): DomainWarp
+  multiScale(amplitude: number, frequency: number, amplitudeMultiplier: number, frequencyMultiplier: number, x: number, y: number, z: number): number
 }
 
 export const ImprovedNoise = class ImprovedNoiseInterface {
@@ -80,20 +80,18 @@ export const ImprovedNoise = class ImprovedNoiseInterface {
     let result: number = this.noise((x + offsetX) * frequency, (y + offsetY) * frequency, (z + offsetZ) * frequency)
     return result
   }
-  public domainWarp(x: number, y: number, z: number): DomainWarp {
+  public domainWarp(warp: number, x: number, y: number, z: number): DomainWarp {
     let dx: number = this.noise(x, y, z)
-    let dy: number = this.noise(x + 50, y + 50, z + 50)
-    let dz: number = this.noise(x - 50, y - 50, z - 50)
+    let dy: number = this.noise(x + warp, y + warp, z + warp)
+    let dz: number = this.noise(x - warp, y - warp, z - warp)
     return { x: x + dx, y: y + dy, z: z + dz }
   }
-  public multiScale(x: number, y: number, z: number): number {
+  public multiScale(amplitude: number, frequency: number, amplitudeMultiplier: number, frequencyMultiplier: number, x: number, y: number, z: number): number {
     let value: number = 0
-    let amplitude: number = 1
-    let frequency: number = 1
     for (let i: number = 0; i < 3; i++) {
       value += this.noise(x * frequency, y * frequency, z * frequency) * amplitude
-      amplitude *= 0.5
-      frequency *= 2
+      amplitude *= amplitudeMultiplier
+      frequency *= frequencyMultiplier
     }
     return value
   }

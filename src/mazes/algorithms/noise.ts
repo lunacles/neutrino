@@ -62,7 +62,6 @@ export const Noise = class NoiseInterface {
   private max: number
   private turbulence: Turbulence
   private repetition: Coordinate
-  private iterations: number
   constructor() {
     this.maze = null
     this.ran = null
@@ -72,7 +71,6 @@ export const Noise = class NoiseInterface {
     this.threshold = DefaultSettings.Threshold
     this.min = DefaultSettings.Min
     this.max = DefaultSettings.Max
-    this.iterations = DefaultSettings.Iterations
     this.turbulence = {
       power: DefaultSettings.Power,
       size: DefaultSettings.Size
@@ -102,10 +100,6 @@ export const Noise = class NoiseInterface {
   public setClamp(min: number, max: number): this {
     this.min = min
     this.max = max
-    return this
-  }
-  public setIterations(amount: number): this {
-    this.iterations = amount
     return this
   }
   public setType(type: NoiseAlgorithms): this {

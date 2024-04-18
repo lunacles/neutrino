@@ -25,7 +25,7 @@ export const Commands: CommandsInterface = {
 
     await this.locate()
     for (let file of this.folder) {
-      if (file === 'interface.ts' || file === 'interactionobserver.ts') continue
+      if (file === 'interface.ts' || file === 'interactionobserver.ts' || file === 'maze.ts') continue
       try {
         let module = await import(path.join(this.directory, file))
 

@@ -16,7 +16,7 @@ import { Hash } from '../utilities/hash.js'
 
 export type Seed = string | number
 type Pair = [number, number]
-type Algorithm = RandomWalkerInterface | NoiseInterface
+export type Algorithm = RandomWalkerInterface | NoiseInterface
 
 export enum PlacementType {
   Empty = 0,
@@ -69,7 +69,7 @@ export const Maze = class MazeInterface {
 
     this.seed = Math.floor(Math.random() * 2147483646)
     this.prng = PRNG.simple
-    this.ran = new Random(PRNG.simple(this.seed))
+    this.ran = new Random(this.prng(this.seed))
   }
   public get(x: number, y: number): any {
     return this.array[y * this.width + x]

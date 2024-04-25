@@ -70,7 +70,7 @@ const DownTime: CommandInterface = {
   async execute(interaction: ChatInputCommandInteraction<CacheType>): Promise<void> {
     await interaction.deferReply()
     const duration: number = interaction.options.getInteger('duration')
-    const reason: string = interaction.options.getString('reason') ?? 'Unspecified'
+    //const reason: string = interaction.options.getString('reason') ?? 'Unspecified'
     const targetChannel = interaction.options.getChannel('channel')
     const observer = new InteractionObserver(interaction)
 

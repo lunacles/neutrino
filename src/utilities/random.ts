@@ -3,7 +3,7 @@ export interface RandomInterface {
   result: number
   asInteger: () => number
   asFloat: () => number
-  fromRange: (min: number, max: number) => object
+  fromRange: (min: number, max: number) => this
   float: (n?: number) => number
   integer: (i?: number) => number
   chance: (probability: number) => boolean
@@ -21,12 +21,12 @@ export const Random = class RandomInterface {
     this.result = 0
   }
   public asInteger(): number {
-    return this.result
-  }
-  public asFloat(): number {
     return this.result | 0
   }
-  public fromRange(min: number, max: number): object {
+  public asFloat(): number {
+    return this.result
+  }
+  public fromRange(min: number, max: number): this {
     this.result = this.prng() * (max - min) + min
     return this
   }

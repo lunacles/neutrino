@@ -13,13 +13,13 @@ import {
   DocumentData,
   WriteBatch,
   WriteResult,
+  Timestamp,
 } from 'firebase-admin/firestore'
 import serviceAccount from './serviceaccount.js'
 import {
   getStorage,
 } from 'firebase-admin/storage'
 import Log from '../utilities/log.js'
-import * as util from '../utilities/util.js'
 import UserData from './userdoc.js'
 import {
   Guild
@@ -66,6 +66,18 @@ export const Database = class DatabaseInterface {
 
     return batch.commit()
   }
+  static structureData(data: any): any {
+    // direct return for non-object/non-array data types
+    if (typeof data !== 'object' || data === null) return data
+    // special handling for Timestamps
+    if (data instanceof Timestamp) return data
+    // handling for Arrays
+    if (Array.isArray(data)) return data.map(item => Database.structureData(item))
+    // handling for Maps and Objects
+    let entries: Array<[string, unknown]> = data instanceof Map ? Array.from(data.entries()) : Object.entries(data)
+    let result: object = Object.fromEntries(entries.map(([key, value]) => [key, Database.structureData(value)]))
+    return result
+  }
   static users: Map<string, DocumentData> = new Map()
   static async getUser(id: string, guild: Guild) {
     if (Database.users.has(id)) return Database.users.get(id)
@@ -111,7 +123,7 @@ export const Database = class DatabaseInterface {
       if (!this.collection) throw new Error('Collection has not been set.')
 
       let doc: DocumentReference = this.collection.doc(name)
-      await doc.set(util.structureData(data))
+      await doc.set(Database.structureData(data))
       this.doc = doc
       return doc
     } catch (err) {
@@ -148,7 +160,7 @@ export const Database = class DatabaseInterface {
     try {
       if (!this.doc) throw new Error('Doc has not been concatenated.')
 
-      await this.doc.update(util.structureData(data))
+      await this.doc.update(Database.structureData(data))
     } catch (err) {
       Log.error(`Filed to write data to document "${this.doc}" at path "${this.path}"`, err)
     }

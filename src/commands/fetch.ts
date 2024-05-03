@@ -9,9 +9,7 @@ import {
 import CommandInterface from './interface.js'
 import InteractionObserver from './interactionobserver.js'
 import global from '../utilities/global.js'
-import {
-  Database
-} from '../firebase/database.js'
+import { GuildCollection, GuildCollectionInterface } from '../user-manager/guildcollection.js'
 
 const FetchUserData: CommandInterface = {
   name: 'fetch',
@@ -39,8 +37,8 @@ const FetchUserData: CommandInterface = {
     } else if (targetUserId) {
       targetUser = targetUserId
     }
-
-    let userData: string = JSON.stringify((await Database.getUser(targetUser, interaction.guild)).data, null, 2)
+    let guild: GuildCollectionInterface = await GuildCollection.fetch(interaction.guildId)
+    let userData: string = JSON.stringify((await guild.fetchMember(targetUser)).data, null, 2)
     let dataChunks: Array<string> = []
 
     for (let i = 0; i < userData.length; i += 1900)

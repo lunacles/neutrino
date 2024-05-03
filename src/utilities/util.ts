@@ -1,3 +1,5 @@
+import { Guild, GuildMember, User } from 'discord.js'
+import bot from '../main.js'
 import Log from './log.js'
 
 export const formatSeconds = (seconds: number, s: boolean = false): string => {
@@ -50,3 +52,7 @@ export const formatDate = (string: string): string => {
 }
 
 export const capitalize = (string: string): string => string.split(' ').map((r: string): string => `${r[0].toUpperCase()}${r.slice(1)}`).join(' ')
+
+export const fetchGuild = async (id: string): Promise<Guild> => await bot.client.guilds.fetch(id)
+export const fetchUser = async (id: string): Promise<User> => await bot.client.users.fetch(id, { force: true })
+export const fetchGuildMember = async (id: string, guild: Guild): Promise<GuildMember> => await guild.members.fetch(id)

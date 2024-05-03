@@ -10,7 +10,6 @@ import {
   CollectionReference,
   DocumentReference,
   DocumentSnapshot,
-  DocumentData,
   WriteBatch,
   WriteResult,
   Timestamp,
@@ -20,10 +19,9 @@ import {
   getStorage,
 } from 'firebase-admin/storage'
 import Log from '../utilities/log.js'
-import UserData from './userdoc.js'
 import {
-  Guild
-} from 'discord.js'
+  GuildCollectionInterface
+} from '../user-manager/guildcollection.js'
 
 export const app: App = initializeApp({
   credential: cert(serviceAccount as ServiceAccount),
@@ -42,6 +40,12 @@ export interface DatabaseInterface {
   getdoc(name: string): DocumentReference
   write(data: object): Promise<this>
   rm(name?: string): Promise<this>
+}
+
+export enum OperationType {
+  Set = 'set',
+  Update = 'update',
+  Delete = 'delete',
 }
 
 export const Database = class DatabaseInterface {
@@ -78,11 +82,7 @@ export const Database = class DatabaseInterface {
     let result: object = Object.fromEntries(entries.map(([key, value]) => [key, Database.structureData(value)]))
     return result
   }
-  static users: Map<string, DocumentData> = new Map()
-  static async getUser(id: string, guild: Guild) {
-    if (Database.users.has(id)) return Database.users.get(id)
-    return await UserData.new(id, guild)
-  }
+  static guilds: Map<string, GuildCollectionInterface> = new Map()
   public collection: CollectionReference
   public doc: DocumentReference
   private path: string
@@ -91,7 +91,7 @@ export const Database = class DatabaseInterface {
     this.collection = null
     this.doc = null
     this.path = ''
-    this.homeDir = 'users'
+    this.homeDir = 'guilds'
 
     this.cd('~')
   }

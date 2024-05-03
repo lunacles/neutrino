@@ -73,7 +73,7 @@ interface GlobalInterface {
 const global: GlobalInterface = {
   build: Build,
   ownerId: '342038795757027329',
-  testServerId: '954026848361254993',
+  testServerId: '1120372465252700331',
   loggingConfig: {
     avatars: false,
     banners: false,

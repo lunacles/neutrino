@@ -6,9 +6,9 @@ import {
   SlashCommandChannelOption,
   TextChannel,
 } from 'discord.js'
-import CommandInterface from './interface.js'
-import InteractionObserver from './interactionobserver.js'
-import global from '../utilities/global.js'
+import CommandInterface from '../interface.js'
+import InteractionObserver from '../interactionobserver.js'
+import global from '../../utilities/global.js'
 const Sudo: CommandInterface = {
   name: 'sudo',
   description: 'Sudo\'s the bot.',

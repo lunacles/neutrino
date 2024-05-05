@@ -13,19 +13,19 @@ import {
   ForumChannel,
   AttachmentBuilder,
 } from 'discord.js'
-import CommandInterface from './interface.js'
-import InteractionObserver from './interactionobserver.js'
+import CommandInterface from '../interface.js'
+import InteractionObserver from '../interactionobserver.js'
 import {
   NodeCanvas,
   NodeCanvasInterface,
-} from '../canvas/canvas.js'
+} from '../../canvas/canvas.js'
 import {
   Background, Circle, Line, Media, Text
-} from '../canvas/elements.js'
-import Colors from '../canvas/palette.js'
-import global from '../utilities/global.js'
-import Color from '../canvas/color.js'
-import * as util from '../utilities/util.js'
+} from '../../canvas/elements.js'
+import Colors from '../../canvas/palette.js'
+import global from '../../utilities/global.js'
+import Color from '../../canvas/color.js'
+import * as util from '../../utilities/util.js'
 
 type Trio = [number, number, number]
 type Colour = typeof Color | Array<number> | string | object

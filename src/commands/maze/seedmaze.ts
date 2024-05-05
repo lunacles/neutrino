@@ -7,10 +7,10 @@ import {
   SlashCommandStringOption,
   SlashCommandNumberOption,
 } from 'discord.js'
-import CommandInterface from './interface.js'
-import InteractionObserver from './interactionobserver.js'
-import { RandomWalker } from '../mazes/algorithms/randomwalker.js'
-import global from '../utilities/global.js'
+import CommandInterface from '../interface.js'
+import InteractionObserver from '../interactionobserver.js'
+import { RandomWalker } from '../../mazes/algorithms/randomwalker.js'
+import global from '../../utilities/global.js'
 import generateMaze from './maze.js'
 
 enum Min {

@@ -6,26 +6,26 @@ import {
   SlashCommandStringOption,
   SlashCommandNumberOption,
 } from 'discord.js'
-import CommandInterface from './interface.js'
-import InteractionObserver from './interactionobserver.js'
-import { Noise } from '../mazes/algorithms/noise.js'
+import CommandInterface from '../interface.js'
+import InteractionObserver from '../interactionobserver.js'
+import { Noise } from '../../mazes/algorithms/noise.js'
 import generateMaze from './maze.js'
 
 enum Min {
   Dimensions = 16,
   Zoom = 0.001,
-  Warp = -1000,
+  Clamp = -5,
 }
 
 enum Max {
   Dimensions = 64,
   Zoom = 10,
-  Warp = 1000,
+  Clamp = 5,
 }
 
-const DomainWarpedNoiseMaze: CommandInterface = {
-  name: 'domain-warped-noise-maze',
-  description: 'Generates a domain warped noise maze.',
+const ClampedNoiseMaze: CommandInterface = {
+  name: 'clamped-noise-maze',
+  description: 'Generates a clamped noise maze.',
   data: new SlashCommandBuilder()
     .addStringOption((option: SlashCommandStringOption): SlashCommandStringOption => option
       .setName('seed')
@@ -46,18 +46,24 @@ const DomainWarpedNoiseMaze: CommandInterface = {
       .setMinValue(Min.Zoom)
       .setMaxValue(Max.Zoom)
     ).addNumberOption((option: SlashCommandNumberOption): SlashCommandNumberOption => option
-      .setName('warp')
-      .setDescription('The x, y, and z coordinates are warped by a given noise generated value. Default is 50.')
-      .setMinValue(Min.Warp)
-      .setMaxValue(Max.Warp)
+      .setName('min')
+      .setDescription('Only noise values higher than this minimum will be considered valid. Default is -0.085.')
+      .setMinValue(Min.Clamp)
+      .setMaxValue(Max.Clamp)
+    ).addNumberOption((option: SlashCommandNumberOption): SlashCommandNumberOption => option
+      .setName('max')
+      .setDescription('Only noise values lower than this maximum will be considered valid. Default is 0.085')
+      .setMinValue(Min.Clamp)
+      .setMaxValue(Max.Clamp)
     ),
   async execute(interaction: ChatInputCommandInteraction<CacheType>): Promise<void> {
     await interaction.deferReply()
     const seed: string = interaction.options.getString('seed') ?? ''
     const width: number = interaction.options.getNumber('width') ?? 32
     const height: number = interaction.options.getNumber('height') ?? 32
-    const zoom: number = interaction.options.getNumber('zoom') ?? 2
-    const warp: number = interaction.options.getNumber('warp') ?? 50
+    const zoom: number = interaction.options.getNumber('zoom') ?? 4
+    const min: number = interaction.options.getNumber('min') ?? -0.085
+    const max: number = interaction.options.getNumber('max') ?? 0.085
 
     const observer = new InteractionObserver(interaction)
 
@@ -65,9 +71,9 @@ const DomainWarpedNoiseMaze: CommandInterface = {
 
     //if (!observer.checkPermissions([PermissionsBitField.Flags.ManageMessages], interaction.channel)) return await observer.abort(0)
     const algorithm = new Noise()
-      .setType('domainWarped')
+      .setType('clamped')
       .setZoom(zoom)
-      .setWarp(warp)
+      .setClamp(min, max)
 
     const [attachment, mazeSeed] = generateMaze(algorithm, seed, width, height)
 
@@ -81,4 +87,4 @@ const DomainWarpedNoiseMaze: CommandInterface = {
   },
 }
 
-export default DomainWarpedNoiseMaze
+export default ClampedNoiseMaze

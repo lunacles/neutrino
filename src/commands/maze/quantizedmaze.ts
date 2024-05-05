@@ -6,32 +6,26 @@ import {
   SlashCommandStringOption,
   SlashCommandNumberOption,
 } from 'discord.js'
-import CommandInterface from './interface.js'
-import InteractionObserver from './interactionobserver.js'
-import { Noise } from '../mazes/algorithms/noise.js'
+import CommandInterface from '../interface.js'
+import InteractionObserver from '../interactionobserver.js'
+import { Noise } from '../../mazes/algorithms/noise.js'
 import generateMaze from './maze.js'
 
 enum Min {
   Dimensions = 16,
   Zoom = 0.001,
-  Amplitude = -10,
-  Frequency = -10,
-  AmplitudeMultiplier = 5,
-  FrequencyMultiplier = 10,
+  Threshold = -5,
 }
 
 enum Max {
   Dimensions = 64,
   Zoom = 10,
-  Amplitude = 10,
-  Frequency = 10,
-  AmplitudeMultiplier = 5,
-  FrequencyMultiplier = 10,
+  Threshold = 5,
 }
 
-const MultiScaleNoiseMaze: CommandInterface = {
-  name: 'multi-scale-noise-maze',
-  description: 'Generates a multiscaled noise maze.',
+const QuantizedNoiseMaze: CommandInterface = {
+  name: 'quantized-noise-maze',
+  description: 'Generates a quantized noise maze.',
   data: new SlashCommandBuilder()
     .addStringOption((option: SlashCommandStringOption): SlashCommandStringOption => option
       .setName('seed')
@@ -52,25 +46,10 @@ const MultiScaleNoiseMaze: CommandInterface = {
       .setMinValue(Min.Zoom)
       .setMaxValue(Max.Zoom)
     ).addNumberOption((option: SlashCommandNumberOption): SlashCommandNumberOption => option
-      .setName('amplitude')
-      .setDescription('The base intensity of noise applied. Default is 1.')
-      .setMinValue(Min.Amplitude)
-      .setMaxValue(Max.Amplitude)
-    ).addNumberOption((option: SlashCommandNumberOption): SlashCommandNumberOption => option
-      .setName('frequency')
-      .setDescription('The base frequency of noise generated features applied. Default is 1.')
-      .setMinValue(Min.Frequency)
-      .setMaxValue(Max.Frequency)
-    ).addNumberOption((option: SlashCommandNumberOption): SlashCommandNumberOption => option
-      .setName('amplitude-multiplier')
-      .setDescription('The amplitude multiplier applied across 3 scales. Default is 0.5.')
-      .setMinValue(Min.AmplitudeMultiplier)
-      .setMaxValue(Max.AmplitudeMultiplier)
-    ).addNumberOption((option: SlashCommandNumberOption): SlashCommandNumberOption => option
-      .setName('frequency-multiplier')
-      .setDescription('The frequency multiplier applied across 3 scales. Default is 2.')
-      .setMinValue(Min.FrequencyMultiplier)
-      .setMaxValue(Max.FrequencyMultiplier)
+      .setName('threshold')
+      .setDescription('The cutoff value for noise values. Default is 0.1.')
+      .setMinValue(Min.Threshold)
+      .setMaxValue(Max.Threshold)
     ),
   async execute(interaction: ChatInputCommandInteraction<CacheType>): Promise<void> {
     await interaction.deferReply()
@@ -78,10 +57,7 @@ const MultiScaleNoiseMaze: CommandInterface = {
     const width: number = interaction.options.getNumber('width') ?? 32
     const height: number = interaction.options.getNumber('height') ?? 32
     const zoom: number = interaction.options.getNumber('zoom') ?? 2
-    const amplitude: number = interaction.options.getNumber('amplitude') ?? 1
-    const frequency: number = interaction.options.getNumber('frequency') ?? 1
-    const amplitudeMultiplier: number = interaction.options.getNumber('amplitude-multiplier') ?? 0.5
-    const frequencyMultiplier: number = interaction.options.getNumber('frequency-multiplier') ?? 2
+    const threshold: number = interaction.options.getNumber('threshold') ?? 0.1
 
     const observer = new InteractionObserver(interaction)
 
@@ -89,12 +65,9 @@ const MultiScaleNoiseMaze: CommandInterface = {
 
     //if (!observer.checkPermissions([PermissionsBitField.Flags.ManageMessages], interaction.channel)) return await observer.abort(0)
     const algorithm = new Noise()
-      .setType('multiScale')
+      .setType('quantized')
       .setZoom(zoom)
-      .setAmplitude(amplitude)
-      .setFrequency(frequency)
-      .setAmplitudeMultiplier(amplitudeMultiplier)
-      .setFrequencyMultiplier(frequencyMultiplier)
+      .setThreshold(threshold)
 
     const [attachment, mazeSeed] = generateMaze(algorithm, seed, width, height)
 
@@ -108,4 +81,4 @@ const MultiScaleNoiseMaze: CommandInterface = {
   },
 }
 
-export default MultiScaleNoiseMaze
+export default QuantizedNoiseMaze

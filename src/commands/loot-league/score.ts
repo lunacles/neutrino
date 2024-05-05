@@ -5,14 +5,14 @@ import {
   SlashCommandUserOption,
   EmbedBuilder,
 } from 'discord.js'
-import CommandInterface from '../commands/interface.js'
-import InteractionObserver from '../commands/interactionobserver.js'
-import global from '../utilities/global.js'
-import * as util from '../utilities/util.js'
-import Icon from '../utilities/icon.js'
-import { UserDataInterface } from '../user-manager/userdoc.js'
-import { GuildCollection, GuildCollectionInterface } from '../user-manager/guildcollection.js'
-import { LootLeagueInterface } from '../user-manager/lootleague.js'
+import CommandInterface from '../interface.js'
+import InteractionObserver from '../interactionobserver.js'
+import global from '../../utilities/global.js'
+import * as util from '../../utilities/util.js'
+import Icon from '../../utilities/icon.js'
+import { UserDataInterface } from '../../user-manager/userdoc.js'
+import { GuildCollection, GuildCollectionInterface } from '../../user-manager/guildcollection.js'
+import { LootLeagueInterface } from '../../user-manager/lootleague.js'
 
 const Score: CommandInterface = {
   name: 'score',

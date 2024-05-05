@@ -17,11 +17,11 @@ import {
   SlashCommandChannelOption,
   PermissionsBitField,
 } from 'discord.js'
-import CommandInterface from './interface.js'
-import Log from '../utilities/log.js'
-import Icon from '../utilities/icon.js'
-import InteractionObserver from './interactionobserver.js'
-import DeletedUsers from '../utilities/deletedusers.js'
+import CommandInterface from '../interface.js'
+import Log from '../../utilities/log.js'
+import Icon from '../../utilities/icon.js'
+import InteractionObserver from '../interactionobserver.js'
+import DeletedUsers from '../../utilities/deletedusers.js'
 
 const PinArchive: CommandInterface = {
   name: 'archive-pins',

@@ -6,10 +6,10 @@ import {
   ColorResolvable,
 } from 'discord.js'
 import discordjs from 'discord.js/package.json'
-import CommandInterface from './interface.js'
-import global from '../utilities/global.js'
-import Colors from '../canvas/palette.js'
-import Log from '../utilities/log.js'
+import CommandInterface from '../interface.js'
+import global from '../../utilities/global.js'
+import Colors from '../../canvas/palette.js'
+import Log from '../../utilities/log.js'
 
 const Info: CommandInterface = {
   name: 'info',

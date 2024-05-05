@@ -8,11 +8,11 @@ import {
 import CommandInterface from '../commands/interface.js'
 import InteractionObserver from '../commands/interactionobserver.js'
 import global from '../utilities/global.js'
-import {
-  Database
-} from '../firebase/database.js'
 import * as util from '../utilities/util.js'
 import Icon from '../utilities/icon.js'
+import { GuildCollection, GuildCollectionInterface } from '../user-manager/guildcollection.js'
+import { UserDataInterface } from '../user-manager/userdoc.js'
+import { LootLeagueInterface } from '../user-manager/lootleague.js'
 
 let chance: number = 0
 let setChance = (set: number): number => chance += set
@@ -42,18 +42,19 @@ const Gamble: CommandInterface = {
     const observer = new InteractionObserver(interaction)
     if (interaction.guild.id !== global.testServerId) return await observer.abort(3)
 
-    let user =  await Database.getUser(interaction.user.id, interaction.guild)
-    let data = user.data.scoregame.data
-    let cooldown: number = Math.floor((Date.now() - data.cooldown.gamble) / 1e3)
+    let guild: GuildCollectionInterface = await GuildCollection.fetch(interaction.guildId)
+    let userData: UserDataInterface = await guild.fetchMember(interaction.user.id)
+    let lootLeague: LootLeagueInterface = userData.lootLeague
 
-    if (data.shieldEnd > Date.now()) {
+    let cooldown: number = Math.floor((Date.now() - lootLeague.cooldown.gamble) / 1e3)
+    if (lootLeague.shieldEnd > Date.now()) {
       interaction.editReply('You cannot gamble while you have a shield active!')
       return
     } else if (cooldown < global.cooldown.gamble) {
       interaction.editReply(`This command is on cooldown for **${util.formatSeconds(global.cooldown.gamble - cooldown, true)}!**`)
       return
     } else {
-      if (amount > data.score) {
+      if (amount > lootLeague.score) {
         interaction.editReply('You cannot gamble more points than what you currently have!')
       } else {
         let result: number
@@ -97,13 +98,13 @@ const Gamble: CommandInterface = {
           `lost **${Math.floor(Math.abs(netResult)).toLocaleString()}**!`
         let roll: string = icon.match(/dice-(\w+)\.png/)[1]
 
-        await user.misc.scoreGame.setScore(interaction.guild, Math.floor(data.score - amount + result))
+        await lootLeague.setScore(Math.floor(lootLeague.score - amount + result))
 
         const embed = new EmbedBuilder()
-          .setColor(user.author.hexAccentColor)
+          .setColor(userData.user.hexAccentColor)
           .setAuthor({
-            name: `${user.author.username}`,
-            iconURL: user.author.avatarURL(),
+            name: `${userData.user.username}`,
+            iconURL: userData.user.avatarURL(),
           })
           .setThumbnail(`attachment://${icon}`)
           .setDescription(`# You rolled a ${roll} and ${resultMessage}!`)
@@ -117,7 +118,7 @@ const Gamble: CommandInterface = {
             inline: true,
           }, {
             name: 'New Total Points',
-            value: Math.floor(data.score).toLocaleString(),
+            value: Math.floor(lootLeague.score).toLocaleString(),
           })
 
         interaction.editReply({
@@ -129,7 +130,7 @@ const Gamble: CommandInterface = {
         })
       }
 
-      await user.misc.scoreGame.setCooldown(interaction.guild, 'gamble', Date.now())
+      await lootLeague.setCooldown('gamble', Date.now())
     }
   },
   test(): boolean {

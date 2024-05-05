@@ -7,11 +7,11 @@ import {
 import CommandInterface from '../commands/interface.js'
 import InteractionObserver from '../commands/interactionobserver.js'
 import global from '../utilities/global.js'
-import {
-  Database
-} from '../firebase/database.js'
 import * as util from '../utilities/util.js'
 import Icon from '../utilities/icon.js'
+import { GuildCollection, GuildCollectionInterface } from '../user-manager/guildcollection.js'
+import { UserDataInterface } from '../user-manager/userdoc.js'
+import { LootLeagueInterface } from '../user-manager/lootleague.js'
 
 const Claim: CommandInterface = {
   name: 'claim',
@@ -22,9 +22,11 @@ const Claim: CommandInterface = {
     const observer = new InteractionObserver(interaction)
     if (interaction.guild.id !== global.testServerId) return await observer.abort(3)
 
-    let user = await Database.getUser(interaction.user.id, interaction.guild)
-    let data = user.data.scoregame.data
-    let cooldown: number = Math.floor((Date.now() - data.cooldown.claim) / 1e3)
+    let guild: GuildCollectionInterface = await GuildCollection.fetch(interaction.guildId)
+    let userData: UserDataInterface = await guild.fetchMember(interaction.user.id)
+    let lootLeague: LootLeagueInterface = userData.lootLeague
+
+    let cooldown: number = Math.floor((Date.now() - lootLeague.cooldown.claim) / 1e3)
     if (cooldown < global.cooldown.claim) {
       interaction.editReply(`This command is on cooldown for **${util.formatSeconds(global.cooldown.claim - cooldown, true)}!**`)
       return
@@ -43,14 +45,14 @@ const Claim: CommandInterface = {
       } else {
         icon = Icon.OpenTreasureChest
       }
-      await user.misc.scoreGame.setScore(interaction.guild, data.score + claimedScore)
-      await user.misc.scoreGame.setCooldown(interaction.guild, 'claim', Date.now())
+      await lootLeague.setScore(lootLeague.score + claimedScore)
+      await lootLeague.setCooldown('claim', Date.now())
 
       const embed = new EmbedBuilder()
-        .setColor(user.author.hexAccentColor)
+        .setColor(userData.user.hexAccentColor)
         .setAuthor({
-          name: `${user.author.username}`,
-          iconURL: user.author.avatarURL(),
+          name: `${userData.user.username}`,
+          iconURL: userData.user.avatarURL(),
         })
         .setThumbnail(`attachment://${icon}`)
         .setDescription(`# You have claimed **${claimedScore.toLocaleString()} points!**`)

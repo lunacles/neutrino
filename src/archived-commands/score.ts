@@ -8,11 +8,11 @@ import {
 import CommandInterface from '../commands/interface.js'
 import InteractionObserver from '../commands/interactionobserver.js'
 import global from '../utilities/global.js'
-import {
-  Database
-} from '../firebase/database.js'
 import * as util from '../utilities/util.js'
 import Icon from '../utilities/icon.js'
+import { UserDataInterface } from '../user-manager/userdoc.js'
+import { GuildCollection, GuildCollectionInterface } from '../user-manager/guildcollection.js'
+import { LootLeagueInterface } from '../user-manager/lootleague.js'
 
 const Score: CommandInterface = {
   name: 'score',
@@ -26,26 +26,29 @@ const Score: CommandInterface = {
     await interaction.deferReply()
     const targetUserOption = interaction.options.getUser('user', false)
     const observer = new InteractionObserver(interaction)
-    let author = await Database.getUser(interaction.user.id, interaction.guild)
+
+    let guild: GuildCollectionInterface = await GuildCollection.fetch(interaction.guildId)
+    let authorData: UserDataInterface = await guild.fetchMember(interaction.user.id)
 
     if (interaction.guild.id !== global.testServerId) return await observer.abort(3)
     let targetUser: string = targetUserOption ? targetUserOption.id : interaction.user.id
 
-    let user =  await Database.getUser(targetUser, interaction.guild)
-    let data = user.data.scoregame.data
-    let cooldown: number = Math.floor((Date.now() - data.cooldown.score) / 1e3)
+    let targetData: UserDataInterface = await guild.fetchMember(targetUser)
+
+    let lootLeague: LootLeagueInterface = authorData.lootLeague
+    let cooldown: number = Math.floor((Date.now() - lootLeague.cooldown.score) / 1e3)
     if (cooldown < global.cooldown.score) {
       interaction.editReply(`This command is on cooldown for **${util.formatSeconds(global.cooldown.score - cooldown, true)}!**`)
       return
     } else {
       const embed = new EmbedBuilder()
-        .setColor(user.author.hexAccentColor)
+        .setColor(authorData.user.hexAccentColor)
         .setAuthor({
-          name: `${user.author.username}`,
-          iconURL: user.author.avatarURL(),
+          name: `${authorData.user.username}`,
+          iconURL: authorData.user.avatarURL(),
         })
         .setThumbnail(`attachment://${Icon.PiggyBank}`)
-        .setDescription(`# <@${user.data.id}>'s current balance is **${data.score.toLocaleString()}!**`)
+        .setDescription(`# <@${targetData.data.id}>'s current balance is **${lootLeague.score.toLocaleString()}!**`)
 
       interaction.editReply({
         embeds: [embed],
@@ -55,7 +58,7 @@ const Score: CommandInterface = {
         }]
       })
 
-      await author.misc.scoreGame.setCooldown(interaction.guild, 'score', Date.now())
+      await lootLeague.setCooldown('score', Date.now())
     }
   },
   test(): boolean {

@@ -2,12 +2,9 @@ import {
   Client,
   Message,
   Events,
-  Guild,
 } from 'discord.js'
 import Observer from '../interface.js'
-import {
-  Database,
-} from '../../firebase/database.js'
+import { GuildCollection, GuildCollectionInterface } from '../../user-manager/guildcollection.js'
 
 const MessageCreate: Observer = {
   eventID: Events.MessageCreate,
@@ -15,10 +12,12 @@ const MessageCreate: Observer = {
   async react(bot: Client, message: Message): Promise<void> {
     // if the user is a bot, ignore them
     if (message.author.bot) return
-    let guild: Guild = await message.guild.fetch()
-    let userData = await Database.getUser(message.author.id, guild)
 
-    await userData.guild?.log.message(message)
+    //if (message.guild.id === global.testServerId) {
+      let guild: GuildCollectionInterface = await GuildCollection.fetch(message.guild.id)
+      let userData = await guild.fetchMember(message.author.id)
+      await userData.xpData.passiveXP()
+    //}
   }
 }
 

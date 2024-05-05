@@ -63,14 +63,15 @@ export interface UserDataInterface {
 }
 
 export const UserData = class UserDataInterface {
-  public static async fetch(member: GuildMember, guildCollection?: GuildCollectionInterface): Promise<UserDataInterface> {//UserDataInterface> {
+  public static async fetch(member: GuildMember, guildCollection?: GuildCollectionInterface): Promise<UserDataInterface> {
     let collection: GuildCollectionInterface = guildCollection ?? await GuildCollection.fetch(member.guild.id)
-    return collection.members.get(member.id) ?? collection.members.set(member.id, await UserData.compile(collection, member.id)).get(member.id)
+    return collection.members.get(member.id) ?? await UserData.compile(collection, member.id)
   }
   public static async compile(collection: GuildCollectionInterface, id: string, data?: GuildMemberInfo): Promise<UserDataInterface> {
     let user: User = await util.fetchUser(id)
     let member: GuildMember = await util.fetchGuildMember(id, collection.guild)
     let userData = await new UserData(user, member, collection).restoreData(data)
+    collection.members.set(member.id, userData)
     return userData
   }
   public operations: Array<OperationInterface>

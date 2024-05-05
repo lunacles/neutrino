@@ -8,11 +8,11 @@ import {
 import CommandInterface from '../commands/interface.js'
 import InteractionObserver from '../commands/interactionobserver.js'
 import global from '../utilities/global.js'
-import {
-  Database
-} from '../firebase/database.js'
 import * as util from '../utilities/util.js'
 import Icon from '../utilities/icon.js'
+import { GuildCollection, GuildCollectionInterface } from '../user-manager/guildcollection.js'
+import { UserDataInterface } from '../user-manager/userdoc.js'
+import { LootLeagueInterface } from '../user-manager/lootleague.js'
 
 const Steal: CommandInterface = {
   name: 'steal',
@@ -31,51 +31,52 @@ const Steal: CommandInterface = {
     if (interaction.guild.id !== global.testServerId) return await observer.abort(3)
     if (targetUserOption.id === interaction.user.id) return await observer.abort(4)
 
-    let user = await Database.getUser(interaction.user.id, interaction.guild)
-    let target = await Database.getUser(targetUserOption.id, interaction.guild)
-    let userData = user.data.scoregame.data
-    let targetData = target.data.scoregame.data
+    let guild: GuildCollectionInterface = await GuildCollection.fetch(interaction.guildId)
+    let userData: UserDataInterface = await guild.fetchMember(interaction.user.id)
+    let targetData: UserDataInterface = await guild.fetchMember(targetUserOption.id)
 
-    if (userData.shieldEnd > Date.now()) {
+    let userLootLeague: LootLeagueInterface = userData.lootLeague
+    let targetLootLeague: LootLeagueInterface = targetData.lootLeague
+    if (userLootLeague.shieldEnd > Date.now()) {
       interaction.editReply('You cannot steal from someone while you have a shield active!')
       return
-    } else if (targetData.score < 250) {
+    } else if (targetLootLeague.score < 250) {
       interaction.editReply('You cannot steal from someone with less than 250 points!')
       return
-    } else if (userData.score < 250) {
+    } else if (userLootLeague.score < 250) {
       interaction.editReply('You cannot steal from someone if you have less than 250 points!')
       return
-    } else if (targetData.shieldEnd > Date.now()) {
-      interaction.editReply(`You cannot steal from someone who has a shield active!\nTheir shield will expire <t:${Math.floor(targetData.shieldEnd / 1e3)}:R>`)
+    } else if (targetLootLeague.shieldEnd > Date.now()) {
+      interaction.editReply(`You cannot steal from someone who has a shield active!\nTheir shield will expire <t:${Math.floor(targetLootLeague.shieldEnd / 1e3)}:R>`)
       return
     }
 
-    let cooldown: number = Math.floor((Date.now() - userData.cooldown.steal) / 1e3)
+    let cooldown: number = Math.floor((Date.now() - userLootLeague.cooldown.steal) / 1e3)
     if (cooldown < global.cooldown.steal) {
       interaction.editReply(`This command is on cooldown for **${util.formatSeconds(global.cooldown.steal - cooldown, true)}!**`)
       return
     } else {
       let succeed: boolean = Math.random() < 0.5
-      let stolenScore: number = Math.floor(Math.max(targetData.score * 0.3 * Math.random(), targetData.score * 0.3 * 0.25))
+      let stolenScore: number = Math.floor(Math.max(targetLootLeague.score * 0.3 * Math.random(), targetLootLeague.score * 0.3 * 0.25))
 
       if (succeed) {
-        await user.misc.scoreGame.setScore(interaction.guild, userData.score + stolenScore)
-        await target.misc.scoreGame.setScore(interaction.guild, targetData.score - stolenScore)
+        await targetLootLeague.setScore(userLootLeague.score + stolenScore)
+        await targetLootLeague.setScore(targetLootLeague.score - stolenScore)
         const embed = new EmbedBuilder()
-          .setColor(user.author.hexAccentColor)
+          .setColor(userData.user.hexAccentColor)
           .setAuthor({
-            name: `${user.author.username}`,
-            iconURL: user.author.avatarURL(),
+            name: `${userData.user.username}`,
+            iconURL: userData.user.avatarURL(),
           })
           .setThumbnail(`attachment://${Icon.Robber}`)
-          .setDescription(`# You successfully stole __${stolenScore.toLocaleString()}__ from <@${target.author.id}>!`)
+          .setDescription(`# You successfully stole __${stolenScore.toLocaleString()}__ from <@${targetData.user.id}>!`)
           .addFields({
             name: 'Your New Points',
-            value: userData.score.toLocaleString(),
+            value: userLootLeague.score.toLocaleString(),
             inline: true,
           }, {
-            name: `${target.author.username}'s New Points`,
-            value: targetData.score.toLocaleString(),
+            name: `${targetData.user.username}'s New Points`,
+            value: targetLootLeague.score.toLocaleString(),
             inline: true,
           })
 
@@ -87,22 +88,22 @@ const Steal: CommandInterface = {
           }]
         })
       } else {
-        await user.misc.scoreGame.setScore(interaction.guild, Math.max(userData.score - stolenScore, 0))
+        await userLootLeague.setScore(Math.max(userLootLeague.score - stolenScore, 0))
         const embed = new EmbedBuilder()
-          .setColor(user.author.hexAccentColor)
+          .setColor(userData.user.hexAccentColor)
           .setAuthor({
-            name: `${user.author.username}`,
-            iconURL: user.author.avatarURL(),
+            name: `${userData.user.username}`,
+            iconURL: userData.user.avatarURL(),
           })
           .setThumbnail(`attachment://${Icon.Amputation}`)
-          .setDescription(`# You failed to steal from <@${target.author.id}> and lost __${stolenScore.toLocaleString()}__!`)
+          .setDescription(`# You failed to steal from <@${targetData.user.id}> and lost __${stolenScore.toLocaleString()}__!`)
           .addFields({
             name: 'Your New Points',
-            value: userData.score.toLocaleString(),
+            value: userLootLeague.score.toLocaleString(),
             inline: true,
           }, {
-            name: `${target.author.username}'s New Points`,
-            value: targetData.score.toLocaleString(),
+            name: `${targetData.user.username}'s New Points`,
+            value: targetLootLeague.score.toLocaleString(),
             inline: true,
           })
 
@@ -115,7 +116,7 @@ const Steal: CommandInterface = {
         })
       }
 
-      await user.misc.scoreGame.setCooldown(interaction.guild, 'steal', Date.now())
+      await userLootLeague.setCooldown('steal', Date.now())
     }
   },
   test(): boolean {

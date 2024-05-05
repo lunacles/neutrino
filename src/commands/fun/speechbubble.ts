@@ -20,20 +20,20 @@ import {
   Attachment,
   PermissionsBitField,
 } from 'discord.js'
-import CommandInterface from './interface.js'
-import InteractionObserver from './interactionobserver.js'
+import CommandInterface from '../interface.js'
+import InteractionObserver from '../interactionobserver.js'
 import {
   NodeCanvas,
   NodeCanvasInterface,
-} from '../canvas/canvas.js'
-import Colors from '../canvas/palette.js'
+} from '../../canvas/canvas.js'
+import Colors from '../../canvas/palette.js'
 import {
   Circle,
   Clip,
   Media,
   Rect,
   Text,
-} from '../canvas/elements.js'
+} from '../../canvas/elements.js'
 import GIFEncoder from 'gifencoder'
 
 type Action = StringSelectMenuInteraction<CacheType> | UserSelectMenuInteraction<CacheType> | RoleSelectMenuInteraction<CacheType> | MentionableSelectMenuInteraction<CacheType> | ChannelSelectMenuInteraction<CacheType> | ButtonInteraction<CacheType>

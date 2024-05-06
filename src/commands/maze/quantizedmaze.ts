@@ -9,7 +9,7 @@ import {
 import CommandInterface from '../interface.js'
 import InteractionObserver from '../interactionobserver.js'
 import { Noise } from '../../mazes/algorithms/noise.js'
-import generateMaze from './maze.js'
+import generateMaze from '../maze.js'
 
 enum Min {
   Dimensions = 16,

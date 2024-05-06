@@ -5,29 +5,31 @@ import CommandInterface from './commands/interface.js'
 import { fileURLToPath } from 'url'
 import bot from './main.js'
 
-export interface CommandsInterface {
-  directory: string
-  folder: Array<string>
+type File = [string, string]
 
-  locate(): Promise<void>
+export interface CommandsInterface {
+  locate(folder: string): Promise<Array<File>>
   compile(): Promise<Array<CommandInterface>>
 }
 
 export const Commands: CommandsInterface = {
-  directory: '',
-  folder: [],
-  async locate(): Promise<void> {
-    this.directory = path.join(path.dirname(fileURLToPath(import.meta.url)), 'commands')
-    this.folder = await fs.readdir(this.directory)
+  async locate(folder: string): Promise<Array<File>> {
+    let directory = path.join(path.dirname(fileURLToPath(import.meta.url)), `commands/${folder}`)
+    return (await fs.readdir(directory)).map(f => [directory, f])
   },
   async compile(): Promise<Array<CommandInterface>> {
     const commands: Array<CommandInterface> = []
 
-    await this.locate()
-    for (let file of this.folder) {
+    let files = [
+      ...(await this.locate('developer')),
+      ...(await this.locate('fun')),
+      ...(await this.locate('maze')),
+      ...(await this.locate('utility')),
+    ]
+    for (let file of files) {
       if (file === 'interface.ts' || file === 'interactionobserver.ts' || file === 'maze.ts') continue
       try {
-        let module = await import(path.join(this.directory, file))
+        let module = await import(path.join(...file))
 
         const command = module.default
         if (!command.test()) throw new Error('Test failed')

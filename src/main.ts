@@ -38,11 +38,13 @@ const Bot = class {
       Log.info('Compiling commands...')
       await this.compileCommands()
 
+      // get the build info
+      Log.info('Getting build information...')
+      await Build.load()
+
+      // await interactions
       Log.info(`${this.client.user.tag} is now accepting interactions`)
       this.awaitInteractions()
-
-      // get the build info
-      await Build.load()
 
       this.events()
     })
@@ -74,7 +76,7 @@ const Bot = class {
   public events(): void {
     this.client.on(Events.MessageCreate as never, async (message) => {
       try {
-        await MessageCreate.react(this.client, message)
+        await MessageCreate.react(this, message)
       } catch (err) {
         Log.error(`Client event ${Events.MessageCreate} failed`, err)
       }

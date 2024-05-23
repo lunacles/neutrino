@@ -15,6 +15,12 @@ const Colors = {
   red: new Color('#de7076'),
 
   wall: new Color('#999999'),
+
+  snow: new Color('#FFFAFA'),
+  darkGray: null,
+  carrot: new Color('#EB8921'),
+  brown: new Color('#654321'),
 }
+Colors.darkGray = Color.blend(Colors.gray ?? '#ffffff', Colors.black, 0.6)
 
 export default Colors

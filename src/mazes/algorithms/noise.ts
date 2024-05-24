@@ -1,42 +1,12 @@
+import ImprovedNoise from '../perlinnoise.js'
 import {
+  Coordinate,
+  NoiseAlgorithms,
+  Turbulence,
   MazeInterface,
-} from '../maze.js'
-import {
   RandomInterface,
-} from './../../utilities/random.js'
-import {
-  ImprovedNoise,
   ImprovedNoiseInterface,
-} from '../perlinnoise.js'
-
-type Coordinate = {
-  x: number,
-  y: number,
-}
-type NoiseAlgorithms = 'normal' | 'clamped' | 'quantized' | 'dynamic' | 'domainWarped' | 'multiScale' | 'marble'
-
-interface Turbulence {
-  power: number
-  size: number
-}
-
-export interface NoiseInterface {
-  maze: MazeInterface
-  ran: RandomInterface
-  perlin: ImprovedNoiseInterface
-  init(): void
-  setThreshold(threshold: number): this
-  setClamp(min: number, max: number): this
-  setZoom(threshold: number): this
-
-  normal(): this
-  clamped(): this
-  quantized(): this
-  dynamic(): this
-  domainWarped(): this
-  multiScale(): this
-  marble(): this
-}
+} from '../../types.js'
 
 enum DefaultSettings {
   Zoom = 1,

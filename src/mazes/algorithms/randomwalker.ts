@@ -1,23 +1,17 @@
 import {
-  MazeInterface,
-} from '../maze.js'
-import {
-  RandomInterface,
-} from './../../utilities/random.js'
-import {
   Walker,
+} from '../walker.js'
+import global from './../../utilities/global.js'
+import {
+  Coordinate,
   WalkerChances,
   WalkerInstructions,
   WalkerSettings,
   WalkerLimits,
   Movement,
-} from '../walker.js'
-import global from './../../utilities/global.js'
-
-type Coordinate = {
-  x: number
-  y: number
-}
+  RandomInterface,
+  MazeInterface,
+} from '../../types.js'
 
 const defaultWalkerChances: WalkerChances = {
   straightChance: 0.6,

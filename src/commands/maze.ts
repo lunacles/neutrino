@@ -1,15 +1,19 @@
-import { AttachmentBuilder } from 'discord.js'
 import {
-  NodeCanvas,
-  NodeCanvasInterface
-} from '../canvas/canvas.js'
-import { MazeMap } from '../canvas/elements.js'
+  AttachmentBuilder
+} from 'discord.js'
+import NodeCanvas from '../canvas/canvas.js'
 import {
-  Algorithm,
+  MazeMap
+} from '../canvas/elements.js'
+import {
   Maze,
-  PlacementType
 } from '../mazes/maze.js'
-import { PRNG } from '../utilities/prng.js'
+import PRNG from '../utilities/prng.js'
+import {
+  NodeCanvasInterface,
+  PlacementType,
+  Algorithm,
+} from '../types.d.js'
 
 const generateMaze = (algorithm: Algorithm, seed: string, width: number, height: number): any => {
   let c: NodeCanvasInterface = new NodeCanvas(width * 32, height * 32)

@@ -1,34 +1,18 @@
-import {
-  UserDataInterface
-} from './userdoc.js'
-import {
-  RandomInterface,
-  Random,
-} from '../utilities/random.js'
+
+import Random from '../utilities/random.js'
 import Log from '../utilities/log.js'
 import {
   Database,
-  OperationType,
 } from '../firebase/database.js'
 import {
-  XPData
-} from './datainterface.js'
+  UserDataInterface,
+  XPData,
+  RandomInterface,
+  Pair,
+  OperationType,
+} from '../types.d.js'
 
-type Pair = [number, number]
-
-export interface XPManagerInterface {
-  xp: number
-  level: number
-  cooldown: number
-
-  setup(): XPData
-  setXP(amount: number): Promise<void>
-  setLevel(level: number): Promise<void>
-  setCooldown(length: number): Promise<void>
-  passiveXP(): Promise<void>
-}
-
-export const XPManager = class XPManagerInterface {
+const XPManager = class XPManagerInterface {
   public static async restore(user: UserDataInterface, data: XPData): Promise<XPManagerInterface> {
     let manager = new XPManager(user)
     manager.xp = data.xp
@@ -133,3 +117,5 @@ export const XPManager = class XPManagerInterface {
     }
   }
 }
+
+export default XPManager

@@ -12,13 +12,7 @@ import {
   bucket,
 } from './database.js'
 
-export interface FireStorageInterface {
-  cd(dir: string): this
-  rm(name?: string): Promise<this>
-  upload(url: string, fileName?: string): Promise<string>
-}
-
-export const FireStorage = class FireStorageInterface {
+const FireStorage = class FireStorageInterface {
   private storage: Bucket
   private path: string
   private homeDir: string
@@ -97,3 +91,5 @@ export const FireStorage = class FireStorageInterface {
     return this
   }
 }
+
+export default FireStorage

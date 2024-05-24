@@ -20,8 +20,8 @@ import {
 } from 'firebase-admin/storage'
 import Log from '../utilities/log.js'
 import {
-  GuildCollectionInterface
-} from '../user-manager/guildcollection.js'
+  GuildCollectionInterface,
+} from '../types.d.js'
 
 export const app: App = initializeApp({
   credential: cert(serviceAccount as ServiceAccount),
@@ -29,24 +29,6 @@ export const app: App = initializeApp({
 })
 export const bucket = getStorage().bucket()
 export const db: Firestore = getFirestore(app)
-
-export interface DatabaseInterface {
-  collection: CollectionReference
-  doc: DocumentReference
-
-  cd(dir: string): this
-  mkdir(name: string, data?: object): Promise<DocumentReference>
-  cat(name?: string): Promise<DocumentSnapshot | DocumentReference>
-  getdoc(name: string): DocumentReference
-  write(data: object): Promise<this>
-  rm(name?: string): Promise<this>
-}
-
-export enum OperationType {
-  Set = 'set',
-  Update = 'update',
-  Delete = 'delete',
-}
 
 export const Database = class DatabaseInterface {
   static batchWrite(operations: any): Promise<Array<WriteResult>> {

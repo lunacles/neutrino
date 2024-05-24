@@ -2,37 +2,23 @@ import {
   Guild,
 } from 'discord.js'
 import {
-  Database,
-  DatabaseInterface,
+  Database
 } from '../firebase/database.js'
-import {
-  UserData,
-  UserDataInterface,
-} from './userdoc.js'
-import {
-  GuildInfo,
-  GuildMemberInfo,
-} from './datainterface.js'
+import UserData from './userdoc.js'
 import * as util from '../utilities/util.js'
 import {
   DocumentReference,
   DocumentSnapshot
 } from 'firebase-admin/firestore'
 import Log from '../utilities/log.js'
+import {
+  DatabaseInterface,
+  GuildInfo,
+  GuildMemberInfo,
+  UserDataInterface,
+} from '../types.d.js'
 
-export interface GuildCollectionInterface {
-  guild: Guild
-  guildDatabase: DatabaseInterface
-  members: Map<string, UserDataInterface>
-  data: GuildInfo
-  ref: DocumentReference
-
-  fetchData(): Promise<this>
-  fetchMember(id: string): Promise<UserDataInterface>
-  setup(): Promise<DocumentReference>
-}
-
-export const GuildCollection = class GuildCollectionInterface {
+const GuildCollection = class GuildCollectionInterface {
   public static async fetch(id: string): Promise<GuildCollectionInterface> {
     let guild: Guild = await util.fetchGuild(id)
     let collection: GuildCollectionInterface = Database.guilds.get(id)
@@ -96,3 +82,5 @@ export const GuildCollection = class GuildCollectionInterface {
     } satisfies GuildInfo)
   }
 }
+
+export default GuildCollection

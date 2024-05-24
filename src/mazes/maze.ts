@@ -1,52 +1,14 @@
-import {
-  Random,
-  RandomInterface,
-} from '../utilities/random.js'
-import {
-  PRNG,
-} from '../utilities/prng.js'
-import {
-  RandomWalkerInterface,
-} from './algorithms/randomwalker.js'
-import {
-  NoiseInterface,
-} from './algorithms/noise.js'
+import Random from '../utilities/random.js'
+import PRNG from '../utilities/prng.js'
 import Log from './../utilities/log.js'
-import { Hash } from '../utilities/hash.js'
-
-export type Seed = string | number
-type Pair = [number, number]
-export type Algorithm = RandomWalkerInterface | NoiseInterface
-
-export enum PlacementType {
-  Empty = 0,
-  Wall = 1,
-}
-
-export interface Wall {
-  x: number
-  y: number
-  width: number
-  height: number
-}
-
-export interface MazeInterface {
-  width: number
-  height: number
-  type: number
-  array: Array<any>
-  seed: number
-  walls: Array<Wall>
-  ran: RandomInterface
-
-  get(x: number, y: number): any
-  set(x: number, y: number, value: any): any
-  entries(): Array<any>
-  has(x: number, y: number): boolean
-  findPockets(): void
-  combineWalls(): void
-  mergeWalls(): void
-}
+import Hash from '../utilities/hash.js'
+import {
+  PlacementType,
+  RandomInterface,
+  Wall,
+  Algorithm,
+  Pair
+} from '../types.d.js'
 
 export const Maze = class MazeInterface {
   public width: number
@@ -123,7 +85,7 @@ export const Maze = class MazeInterface {
     let array = this.array.slice()
     do {
       let best: Pair
-      let maxSize = 0
+      let maxSize: number = 0
       for (let [x, y, r] of this.entries()) {
         if (r !== 1) continue
         let size = 1

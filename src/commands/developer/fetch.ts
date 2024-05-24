@@ -6,10 +6,13 @@ import {
   SlashCommandUserOption,
   User,
 } from 'discord.js'
-import CommandInterface from '../interface.js'
+import {
+  CommandInterface,
+  GuildCollectionInterface,
+} from '../../types.d.js'
 import InteractionObserver from '../interactionobserver.js'
 import global from '../../utilities/global.js'
-import { GuildCollection, GuildCollectionInterface } from '../../user-manager/guildcollection.js'
+import GuildCollection from '../../user-manager/guildcollection.js'
 
 const FetchUserData: CommandInterface = {
   name: 'fetch',

@@ -6,35 +6,14 @@ import {
   PermissionsBitField,
   GuildChannel,
   GuildTextBasedChannel,
-
-  CacheType,
-  StringSelectMenuInteraction,
-  UserSelectMenuInteraction,
-  RoleSelectMenuInteraction,
-  MentionableSelectMenuInteraction,
-  ChannelSelectMenuInteraction,
-  ButtonInteraction,
 } from 'discord.js'
+import {
+  ObserverInterface,
+  Action,
+} from '../types.d.js'
 
-type Action = StringSelectMenuInteraction<CacheType> | UserSelectMenuInteraction<CacheType> | RoleSelectMenuInteraction<CacheType> | MentionableSelectMenuInteraction<CacheType> | ChannelSelectMenuInteraction<CacheType> | ButtonInteraction<CacheType>
-
-interface InteractionObserver {
-  interaction: CommandInteraction
-  filter: Array<any>
-
-  filterChannels(): this
-  byChannelType(type: ChannelType): this
-  byExactName(name: string): this
-  byNameQuery(query: string): this
-  byParentId(parentId: string): this
-  finishFilter(): Collection<string, GuildBasedChannel>
-  componentsFilter(components: Array<string>): (component: Action) => boolean
-  checkPermissions(permissions: Array<bigint>, channel: GuildChannel): boolean
-  abort(code: number): Promise<void>
-}
-
-const InteractionObserver = class InteractionObserver {
-  static abortReasons = new Map([
+const Observer = class<T extends CommandInteraction> implements ObserverInterface {
+  public static abortReasons = new Map([
     [0, 'You have insufficient permissions to run this command'],
     [1, 'Command unavailable'],
     [2, 'Invalid channel type'],
@@ -43,9 +22,9 @@ const InteractionObserver = class InteractionObserver {
     [5, 'This command can only be used in <#1227836204087640084>'],
     [6, 'Selected channel does not support permission overwrites']
   ])
-  public interaction: CommandInteraction
+  public readonly interaction: T
   public filter: Collection<string, GuildBasedChannel>
-  constructor(interaction: CommandInteraction) {
+  public constructor(interaction: T) {
     this.interaction = interaction
 
     this.filter = new Collection()
@@ -87,8 +66,8 @@ const InteractionObserver = class InteractionObserver {
     return true
   }
   public async abort(code: number): Promise<void> {
-    await this.interaction.editReply(`${InteractionObserver.abortReasons.get(code)} (Error code ${code})`)
+    await this.interaction.editReply(`${Observer.abortReasons.get(code)} (Error code ${code})`)
   }
 }
 
-export default InteractionObserver
+export default Observer

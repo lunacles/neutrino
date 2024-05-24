@@ -1,28 +1,11 @@
-/*
-  Created using Ken Perlin's Java reference implementation of improved noise https://cs.nyu.edu/~perlin/
-*/
+// Created using Ken Perlin's Java reference implementation of improved noise https://cs.nyu.edu/~perlin/
 import {
-  Random,
-  RandomInterface,
-} from '../utilities/random.js'
+  DomainWarp,
+  Mutation,
+} from '../types.d.js'
+import Random from '../utilities/random.js'
 
-type Mutation = RandomInterface | number
-
-interface DomainWarp {
-  x: number
-  y: number
-  z: number
-}
-
-export interface ImprovedNoiseInterface {
-  noise(x: number, y: number, z: number): number
-  quantize(value: number, threshold: number): number
-  dynamic(x: number, y: number, z: number, time: Date): number
-  domainWarp(warp: number, x: number, y: number, z: number): DomainWarp
-  multiScale(amplitude: number, frequency: number, amplitudeMultiplier: number, frequencyMultiplier: number, x: number, y: number, z: number): number
-}
-
-export const ImprovedNoise = class ImprovedNoiseInterface {
+const ImprovedNoise = class ImprovedNoiseInterface {
   private p: Array<number>
   private permutation: Array<number>
   constructor(mutation: Mutation) {
@@ -96,3 +79,5 @@ export const ImprovedNoise = class ImprovedNoiseInterface {
     return value
   }
 }
+
+export default ImprovedNoise

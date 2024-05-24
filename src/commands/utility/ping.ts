@@ -3,7 +3,9 @@ import {
   CacheType,
   SlashCommandBuilder,
 } from 'discord.js'
-import CommandInterface from '../interface.js'
+import {
+  CommandInterface,
+} from '../../types.js'
 
 const PingCommand: CommandInterface = {
   name: 'ping',

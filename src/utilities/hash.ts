@@ -1,8 +1,6 @@
-export interface HashInterface {
-  cyrb53: (str: string, seed?: number) => number
-}
+import { HashInterface } from '../types.d.js'
 
-export const Hash: HashInterface = {
+const Hash: HashInterface = {
   // 53-bit string hash - https://github.com/bryc/code/blob/master/jshash/experimental/cyrb53.js
   cyrb53(str: string = '', seed: number = 0): number {
     let h1 = 0xdeadbeef ^ seed
@@ -20,3 +18,5 @@ export const Hash: HashInterface = {
     return 2097152 * (h2 >>> 0) + (h1 >>> 11)
   }
 }
+
+export default Hash

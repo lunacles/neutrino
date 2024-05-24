@@ -1,7 +1,9 @@
 import fs from 'fs/promises'
 import path from 'path'
 import Log from './utilities/log.js'
-import CommandInterface from './commands/interface.js'
+import {
+  CommandInterface
+} from './types.js'
 import { fileURLToPath } from 'url'
 import bot from './main.js'
 

@@ -13,14 +13,18 @@ import {
   ForumChannel,
   AttachmentBuilder,
 } from 'discord.js'
-import CommandInterface from '../interface.js'
-import InteractionObserver from '../interactionobserver.js'
 import {
-  NodeCanvas,
+  CommandInterface,
   NodeCanvasInterface,
-} from '../../canvas/canvas.js'
+} from '../../types.js'
+import InteractionObserver from '../interactionobserver.js'
+import NodeCanvas from '../../canvas/canvas.js'
 import {
-  Background, Circle, Line, Media, Text
+  Background,
+  Circle,
+  Line,
+  Media,
+  Text
 } from '../../canvas/elements.js'
 import Colors from '../../canvas/palette.js'
 import global from '../../utilities/global.js'

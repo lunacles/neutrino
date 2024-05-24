@@ -11,7 +11,9 @@ import {
   Message,
   PermissionsBitField,
 } from 'discord.js'
-import CommandInterface from '../interface.js'
+import {
+  CommandInterface,
+} from '../../types.js'
 import InteractionObserver from '../interactionobserver.js'
 
 const RemovePins: CommandInterface = {

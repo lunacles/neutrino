@@ -17,14 +17,17 @@ import {
   ChannelSelectMenuInteraction,
   CollectedInteraction,
 } from 'discord.js'
-import CommandInterface from '../interface.js'
+import {
+  CommandInterface,
+  GuildCollectionInterface,
+  UserDataInterface,
+  LootLeagueInterface,
+} from '../../types.js'
+import GuildCollection from '../../user-manager/guildcollection.js'
 import InteractionObserver from '../interactionobserver.js'
 import global from '../../utilities/global.js'
 import * as util from '../../utilities/util.js'
 import Icon from '../../utilities/icon.js'
-import { GuildCollection, GuildCollectionInterface } from '../../user-manager/guildcollection.js'
-import { UserDataInterface } from '../../user-manager/userdoc.js'
-import { LootLeagueInterface } from '../../user-manager/lootleague.js'
 
 type Action = StringSelectMenuInteraction<CacheType> | UserSelectMenuInteraction<CacheType> | RoleSelectMenuInteraction<CacheType> | MentionableSelectMenuInteraction<CacheType> | ChannelSelectMenuInteraction<CacheType> | ButtonInteraction<CacheType>
 type Component = InteractionCollector<CollectedInteraction<CacheType>>

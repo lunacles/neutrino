@@ -1,29 +1,15 @@
 import {
-  createCanvas, registerFont
+  createCanvas,
+  registerFont
 } from 'canvas'
-
-export interface NodeCanvasInterface {
-  canvas: any
-  ctx: CanvasRenderingContext2D
-
-  width: number
-  height: number
-  centerX: number
-  centerY: number
-  scale: number
-  ratio: number
-}
-
-interface Viewport {
-  x: number,
-  y: number,
-  width: number,
-  height: number,
-}
+import {
+  NodeCanvasInterface,
+  Viewport
+} from '../types.d.js'
 
 registerFont('../eula-bot/src/utilities/fonts/Ubuntu-Bold.ttf', { family: 'Ubuntu', weight: '16', style: 'bold' })
 
-export const NodeCanvas = class NodeCanvasInterface {
+const NodeCanvas = class implements NodeCanvasInterface {
   static activeCanvas = null
 
   public canvas: any
@@ -69,3 +55,5 @@ export const NodeCanvas = class NodeCanvasInterface {
     this.ctx.setTransform(sx, 0, 0, sy, -x * sx, -y * sy)
   }
 }
+
+export default NodeCanvas

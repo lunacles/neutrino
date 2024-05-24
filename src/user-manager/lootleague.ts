@@ -3,16 +3,14 @@ import {
   Role,
 } from 'discord.js'
 import {
-  UserDataInterface
-} from './userdoc.js'
+  Database,
+} from '../firebase/database.js'
 import {
+  UserDataInterface,
   Cooldown,
   ScoreGame,
-} from './datainterface.js'
-import {
-  Database,
   OperationType,
-} from '../firebase/database.js'
+} from '../types.d.js'
 
 type Cooldowns = 'score' | 'leaderboard' | 'claim' | 'steal' | 'gamble' | 'shield'
 
@@ -28,18 +26,7 @@ enum BaseScore {
   '1026052883768152145' = 1e4, // basic
 }
 
-export interface LootLeagueInterface {
-  score: number
-  cooldown: Cooldown
-  shieldEnd: number
-
-  setup(): ScoreGame
-  setCooldown(type: Cooldowns, time: number): Promise<void>
-  setScore(amount: number): Promise<void>
-  setShield(state: number): Promise<void>
-}
-
-export const LootLeague = class LootLeagueInterface {
+const LootLeague = class LootLeagueInterface {
   public static async restore(user: UserDataInterface, data: ScoreGame): Promise<LootLeagueInterface> {
     let league = new LootLeague(user)
     league.score = data.score
@@ -118,22 +105,4 @@ export const LootLeague = class LootLeagueInterface {
   }
 }
 
-/*
-this.guild.members.cache.map(async (member: GuildMember): Promise<[string, GuildMemberInfo]> => {
-        let xp = new XPManager(await util.fetchUser(member.id), member)
-        let scoreGame = new LootLeague(await util.fetchUser(member.id), member)
-        return [member.id, {
-          roles: new Map(member.roles.cache.map((role: Role) => [role.id, {
-            name: role.name,
-            color: role.hexColor,
-            icon: role.icon,
-          } satisfies GuildRole])),
-          nickname: member.nickname,
-          avatar: member.avatar,
-          joined: member.joinedTimestamp,
-          xp,
-          scoreGame,
-        } satisfies GuildMemberInfo
-      ]
-    })
-*/
+export default LootLeague

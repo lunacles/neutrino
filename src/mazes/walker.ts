@@ -1,72 +1,18 @@
+
 import {
-  MazeInterface
-} from './maze.js'
-import {
-  RandomInterface
-} from '../utilities/random.js'
+  Coordinate,
+  MazeInterface,
+  Movement,
+  Pair,
+  RandomInterface,
+  WalkerChances,
+  WalkerConfig,
+  WalkerInstructions,
+  WalkerLimits,
+  WalkerSettings,
+  WalkerSetup
+} from '../types.d.js'
 import global from '../utilities/global.js'
-
-type Pair = [number, number]
-type Coordinate = {
-  x: number,
-  y: number,
-}
-export type Movement = Array<number> | number
-
-interface WalkerSetup {
-  x: number
-  y: number
-  maze: MazeInterface
-  ran: RandomInterface
-}
-
-export interface WalkerChances {
-  straightChance: number
-  turnChance: number
-  branchChance: number
-}
-
-export interface WalkerInstructions {
-  startDirections: Movement
-  branchDirections: Movement
-  placementType: number
-}
-
-export interface WalkerSettings {
-  borderWrapping: boolean
-  terminateOnContact: boolean
-}
-
-export interface WalkerLimits {
-  minLength: number
-  maxLength: number
-  minTurns: number
-  maxTurns: number
-  minBranches: number
-  maxBranches: number
-}
-
-
-interface WalkerConfig {
-  setup: WalkerSetup
-  chances: WalkerChances
-  instructions: WalkerInstructions
-  settings: WalkerSettings
-  limits: WalkerLimits
-}
-
-export interface WalkerInterface {
-  setup: WalkerSetup
-  chances: WalkerChances
-  instructions: WalkerInstructions
-  settings: WalkerSettings
-  limits: WalkerLimits
-  x: number
-  y: number
-  maze: MazeInterface
-  ran: number
-  walk(type: number): void,
-}
 
 export const Walker = class WalkerInterface {
   public setup: WalkerSetup

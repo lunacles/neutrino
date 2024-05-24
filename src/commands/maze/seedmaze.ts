@@ -7,7 +7,9 @@ import {
   SlashCommandStringOption,
   SlashCommandNumberOption,
 } from 'discord.js'
-import CommandInterface from '../interface.js'
+import {
+  CommandInterface,
+} from '../../types.js'
 import InteractionObserver from '../interactionobserver.js'
 import { RandomWalker } from '../../mazes/algorithms/randomwalker.js'
 import global from '../../utilities/global.js'

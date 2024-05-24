@@ -10,59 +10,27 @@ import {
 } from 'firebase-admin/firestore'
 import {
   Database,
-  DatabaseInterface,
-  OperationType
 } from '../firebase/database.js'
+import Log from '../utilities/log.js'
+import * as util from '../utilities/util.js'
+//import FireStorage from '../firebase/storage.js'
+import LootLeague from './lootleague.js'
+import XPManager from './xp.js'
+import GuildCollection from './guildcollection.js'
 import {
+  DatabaseInterface,
+  GuildCollectionInterface,
+  XPManagerInterface,
+  LootLeagueInterface,
+  FireStorageInterface,
   UserInfo,
   GuildRole,
   GuildMemberInfo,
   OperationInterface,
-} from './datainterface.js'
+  OperationType,
+} from '../types.d.js'
 
-import Log from '../utilities/log.js'
-import * as util from '../utilities/util.js'
-import {
-  //FireStorage,
-  FireStorageInterface,
-} from '../firebase/storage.js'
-import {
-  LootLeague,
-  LootLeagueInterface
-} from './lootleague.js'
-import {
-  XPManager,
-  XPManagerInterface
-
-} from './xp.js'
-import {
-  GuildCollection,
-  GuildCollectionInterface
-} from './guildcollection.js'
-
-export interface UserDataInterface {
-  operations: Array<OperationInterface>
-  storage: FireStorageInterface
-  database: DatabaseInterface
-  user: User
-  member: GuildMember
-
-  globalData: UserInfo
-  guildData: GuildMemberInfo
-  guildCollection: GuildCollectionInterface
-  xpData: XPManagerInterface
-  lootLeague: LootLeagueInterface
-  guild: DatabaseInterface
-  doc: DocumentReference<DocumentData, DocumentData>
-  data: DocumentData
-
-  setup(): OperationInterface
-  restoreData(): Promise<this>
-  create(): Promise<this>
-  writeBatch(): Promise<this>
-}
-
-export const UserData = class UserDataInterface {
+const UserData = class UserDataInterface {
   public static async fetch(member: GuildMember, guildCollection?: GuildCollectionInterface): Promise<UserDataInterface> {
     let collection: GuildCollectionInterface = guildCollection ?? await GuildCollection.fetch(member.guild.id)
     return collection.members.get(member.id) ?? await UserData.compile(collection, member.id)
@@ -172,3 +140,5 @@ export const UserData = class UserDataInterface {
     return this
   }
 }
+
+export default UserData

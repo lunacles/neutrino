@@ -1,21 +1,22 @@
 import * as util from '../utilities/util.js'
-
-type color = typeof Color | Array<number> | string | object
+import {
+  ColorValue
+} from '../types.d.js'
 
 const Color = class {
-  public static hexToRgb(hex: color): object {
+  public static hexToRgb(hex: ColorValue): object {
     if (!/^#([0-9A-Fa-f]{3}){1,2}$/.test(hex as string)) throw new Error('Invalid hex code.')
     hex = hex.toString().replace(/^#/, '')
     if (hex.length === 3)
-      hex = hex.split('').map(char => char + char).join('')
+      hex = hex.split('').map((char: string) => char + char).join('')
     let num: number = parseInt(hex, 16)
     return [(num >> 16) & 0xFF, (num >> 8) & 0xFF, num & 0xFF]
   }
-  public static rgbToHex(rgb: color): string {
+  public static rgbToHex(rgb: ColorValue): string {
     if (!Array.isArray(rgb) || rgb.length !== 3) throw new Error('Invalid rgb code.')
     return `#${rgb.reduce((a, b): any => (a + (b | 256).toString(16).slice(1)), 0).slice(1)}`
   }
-  public static blend(color1: color, color2: color, weight2: number): object {
+  public static blend(color1: ColorValue, color2: ColorValue, weight2: number): object {
     let c1 = color1 instanceof Color ? color1 : new Color(color1)
     let c2 = color2 instanceof Color ? color2 : new Color(color2)
 
@@ -41,7 +42,7 @@ const Color = class {
   private hue: number
   private saturation: number
   private value: number
-  constructor(color: color) {
+  constructor(color: ColorValue) {
     this.color = color
 
     this.type = typeof this.color === 'string' ? 'hex' : 'rgb'

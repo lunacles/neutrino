@@ -17,7 +17,9 @@ import {
   SlashCommandChannelOption,
   PermissionsBitField,
 } from 'discord.js'
-import CommandInterface from '../interface.js'
+import {
+  CommandInterface,
+} from '../../types.js'
 import Log from '../../utilities/log.js'
 import Icon from '../../utilities/icon.js'
 import InteractionObserver from '../interactionobserver.js'

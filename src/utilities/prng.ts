@@ -1,12 +1,6 @@
-export interface PRNGInterface {
-  MathRandom(): () => number
-  crypto(): () => number
-  sfc32(a: number, b: number, c: number, d: number): () => number
-  splitMix32(a: number): () => number
-  simple(a: number): () => number
-}
+import { PRNGInterface } from '../types.d.js'
 
-export const PRNG: PRNGInterface = {
+const PRNG: PRNGInterface = {
   // Why not include this lol
   MathRandom(): () => number {
     return Math.random
@@ -58,3 +52,5 @@ export const PRNG: PRNGInterface = {
     }
   }
 }
+
+export default PRNG

@@ -1,19 +1,4 @@
-export interface RandomInterface {
-  prng: Function
-  result: number
-  asInteger: () => number
-  asFloat: () => number
-  fromRange: (min: number, max: number) => this
-  float: (n?: number) => number
-  integer: (i?: number) => number
-  chance: (probability: number) => boolean
-  fromArray: (array: Array<any>) => any
-  fromObject: (object: object ) => number
-  index: (probabilities: Array<any>) => number
-  shuffleArray: (array: Array<any>) => Array<any>
-}
-
-export const Random = class RandomInterface {
+const Random = class RandomInterface {
   public prng: Function
   public result: number
   constructor(prng: Function = () => Math.random()) {
@@ -58,3 +43,5 @@ export const Random = class RandomInterface {
     return array.slice().sort(() => 0.5 - this.float())
   }
 }
+
+export default Random

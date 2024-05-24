@@ -20,12 +20,12 @@ import {
   Attachment,
   PermissionsBitField,
 } from 'discord.js'
-import CommandInterface from '../interface.js'
-import InteractionObserver from '../interactionobserver.js'
 import {
-  NodeCanvas,
+  CommandInterface,
   NodeCanvasInterface,
-} from '../../canvas/canvas.js'
+} from '../../types.js'
+import InteractionObserver from '../interactionobserver.js'
+import NodeCanvas from '../../canvas/canvas.js'
 import Colors from '../../canvas/palette.js'
 import {
   Circle,

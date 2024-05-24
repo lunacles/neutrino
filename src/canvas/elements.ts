@@ -1,44 +1,30 @@
 import { loadImage } from 'canvas'
-import {
-  NodeCanvas, NodeCanvasInterface
-} from './canvas'
+import NodeCanvas from './canvas'
 import Color from './color.js'
-import { MazeInterface } from '../mazes/maze'
+import {  } from '../mazes/maze'
 import Colors from './palette'
-
-type CacheType = 'bar' | 'text' | 'rect' | null
-type Radii = Array<number> | number
-type ClipType = 'circle' | 'rect' | 'path'
-type Pair = [number, number]
-
-interface Cached {
-  type: CacheType,
-  run: Function,
-}
-interface Gradient {
-  color: any
-  pos: number
-}
-interface LinearGradient {
-  x1: number
-  y1: number
-  x2: number
-  y2: number
-  gradient: Array<Gradient>
-}
-interface RadialGradient {
-  x1: number
-  y1: number
-  r1: number
-  x2: number
-  y2: number
-  r2: number
-  gradient: Array<Gradient>
-}
+import {
+  Radii,
+  ClipType,
+  Pair,
+  Cached,
+  LinearGradient,
+  RadialGradient,
+  RectangleInterface,
+  RoundRectangleInterface,
+  LineInterface,
+  CurveInterface,
+  TextInterface,
+  MediaInterface,
+  Wall,
+  MapDimensions,
+  NodeCanvasInterface,
+  MazeInterface,
+} from '../types.d.js'
 
 export const Element = class {
-  public canvas: NodeCanvasInterface
-  public ctx: any
+  public readonly canvas: NodeCanvasInterface
+  public readonly ctx: any
   public cache: Cached
   constructor() {
     this.canvas = NodeCanvas.activeCanvas.canvas
@@ -142,7 +128,7 @@ export const Element = class {
         if (stop.color instanceof Color)
           stop.color = stop.color.hex
 
-        fill.addColorStop(stop.pos, stop.color as string)
+        fill.addColorStop(stop.pos, stop.color satisfies string)
       }
 
       this.ctx.fillStyle = fill
@@ -159,7 +145,7 @@ export const Element = class {
         if (stop.color instanceof Color)
           stop.color = stop.color.hex
 
-        fill.addColorStop(stop.pos, stop.color as string)
+        fill.addColorStop(stop.pos, stop.color satisfies string)
       }
 
       this.ctx.fillStyle = fill
@@ -176,7 +162,7 @@ export const Element = class {
         if (stop.color instanceof Color)
           stop.color = stop.color.hex
 
-        stroke.addColorStop(stop.pos, stop.color as string)
+        stroke.addColorStop(stop.pos, stop.color satisfies string)
       }
 
       this.ctx.lineWidth = lineWidth
@@ -194,7 +180,7 @@ export const Element = class {
         if (stop.color instanceof Color)
           stop.color = stop.color.hex
 
-        stroke.addColorStop(stop.pos, stop.color as string)
+        stroke.addColorStop(stop.pos, stop.color satisfies string)
       }
 
       this.ctx.lineWidth = lineWidth
@@ -210,15 +196,8 @@ export const Element = class {
   }
 }
 
-interface Rectangle {
-  x: number
-  y: number
-  width: number
-  height: number
-}
-
 export const Rect = class extends Element {
-  public static draw({ x = 0, y = 0, width = 0, height = 0 }: Rectangle) {
+  public static draw({ x = 0, y = 0, width = 0, height = 0 }: RectangleInterface) {
     return new Rect(x, y, width, height)
   }
   private x: number
@@ -241,16 +220,8 @@ export const Rect = class extends Element {
   }
 }
 
-interface RoundRectangle {
-  x: number
-  y: number
-  width: number
-  height: number
-  radii: Radii
-}
-
 export const RoundRect = class extends Element {
-  public static draw({ x = 0, y = 0, width = 0, height = 0, radii = 0 }: RoundRectangle) {
+  public static draw({ x = 0, y = 0, width = 0, height = 0, radii = 0 }: RoundRectangleInterface) {
     return new RoundRect(x, y, width, height, radii)
   }
   private x: number
@@ -275,15 +246,10 @@ export const RoundRect = class extends Element {
   }
 }
 
-interface Line {
-  x1: number
-  y1: number
-  x2: number
-  y2: number
-}
+
 
 export const Line = class extends Element {
-  public static draw({ x1 = 0, y1 = 0, x2 = 0, y2 = 0 }: Line) {
+  public static draw({ x1 = 0, y1 = 0, x2 = 0, y2 = 0 }: LineInterface) {
     return new Line(x1, y1, x2, y2)
   }
   private x1: number
@@ -307,16 +273,8 @@ export const Line = class extends Element {
   }
 }
 
-interface Curve {
-  x: number
-  y: number
-  radius: number
-  startAngle?: number
-  endAngle?: number
-}
-
 export const Arc = class extends Element {
-  public static draw({ x = 0, y = 0, radius = 1, startAngle = 0, endAngle = 0 }: Curve) {
+  public static draw({ x = 0, y = 0, radius = 1, startAngle = 0, endAngle = 0 }: CurveInterface) {
     return new Arc(x, y, radius, startAngle, endAngle)
   }
   private x: number
@@ -342,7 +300,7 @@ export const Arc = class extends Element {
 }
 
 export const Circle = class extends Element {
-  static draw({ x = 0, y = 0, radius = 1 }: Curve) {
+  static draw({ x = 0, y = 0, radius = 1 }: CurveInterface) {
     return new Circle(x, y, radius)
   }
   private x: number
@@ -363,18 +321,8 @@ export const Circle = class extends Element {
   }
 }
 
-interface Text {
-  x: number
-  y: number
-  size: number
-  text: string
-  align?: CanvasTextAlign
-  style?: string
-  family?: string
-}
-
 export const Text = class extends Element {
-  public static draw({ x = 0, y = 0, size = 0, text = '', align = 'center' as CanvasTextAlign, style = global.fontConfig.style, family = global.fontConfig.family }: Text) {
+  public static draw({ x = 0, y = 0, size = 0, text = '', align = 'center' as CanvasTextAlign, style = global.fontConfig.style, family = global.fontConfig.family }: TextInterface) {
     return new Text(x, y, size, text, align, style, family)
   }
   private x: number
@@ -421,7 +369,7 @@ export const Text = class extends Element {
 }
 
 export const Bar = class extends Element {
-  public static draw({ x = 0, y = 0, width = 0, height = 0 }: Rectangle) {
+  public static draw({ x = 0, y = 0, width = 0, height = 0 }: RectangleInterface) {
     return new Bar(x, y, width, height)
   }
   private x: number
@@ -458,10 +406,10 @@ export const Bar = class extends Element {
 }
 
 export const Clip = class extends Element {
-  public static rect({ x = 0, y = 0, width = 0, height = 0 }: Rectangle) {
+  public static rect({ x = 0, y = 0, width = 0, height = 0 }: RectangleInterface) {
     return new Clip('rect', { x, y, width, height })
   }
-  public static circle({ x = 0, y = 0, radius = 0 }: Curve) {
+  public static circle({ x = 0, y = 0, radius = 0 }: CurveInterface) {
     return new Clip('circle', { x, y, radius })
   }
   public static poly(path: Array<Pair>) {
@@ -536,16 +484,8 @@ export const Poly = class extends Element {
   }
 }
 
-interface Media {
-  x: number
-  y: number
-  width: number
-  height: number
-  dir: string
-}
-
 export const Media = class extends Element {
-  public static async draw({ x = 0, y = 0, width = 0, height = 0, dir = '' }: Media) {
+  public static async draw({ x = 0, y = 0, width = 0, height = 0, dir = '' }: MediaInterface) {
     return await new Media(x, y, width, height, dir).draw()
   }
   private x: number
@@ -594,13 +534,6 @@ export const Background = class extends Element {
   }
 }
 
-interface Wall {
-  x: number
-  y: number
-  width: number
-  height: number
-}
-
 export const MazeWall = class extends Element {
   public static draw({ x = 0, y = 0, width = 0, height = 0 }: Wall) {
     return new MazeWall(x, y, width, height)
@@ -640,13 +573,6 @@ export const MazeWall = class extends Element {
       }
     })
   }
-}
-
-interface MapDimensions {
-  x: number,
-  y: number,
-  width: number,
-  height: number,
 }
 
 export const MazeMap = class {

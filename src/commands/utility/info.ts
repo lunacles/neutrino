@@ -5,7 +5,7 @@ import {
   EmbedBuilder,
   ColorResolvable,
 } from 'discord.js'
-import discordjs from 'discord.js/package.json'
+import { version } from 'discord.js'
 import {
   CommandInterface,
 } from '../../types.js'
@@ -30,9 +30,9 @@ const Info: CommandInterface = {
       **Uptime:** \`${Log.uptime}\`
       **Version:** \`${global.build.id} (${global.build.date})\`
       **Node Version:** \`${process.version}\`
-      **Discord.js Version:** \`${discordjs.version}\`
+      **Discord.js Version:** \`${version}\`
       **Memory Usage:** \`${Math.floor(process.memoryUsage().heapUsed / 1024 / 1024)}MB\`
-      **Ping:** \`${interaction.client.ws.ping}ms\`
+      **Ping:** \`${interaction.client.ws.ping < 0 ? 'Unknown ' : interaction.client.ws.ping}ms\`
       **Repository:** [Github Link](<https://github.com/lunacles/neutrino>)`)
 
     interaction.editReply({

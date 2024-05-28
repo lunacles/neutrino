@@ -1,7 +1,7 @@
 import Random from '../utilities/random.js'
 import PRNG from '../utilities/prng.js'
 import Log from './../utilities/log.js'
-import Hash from '../utilities/hash.js'
+import Hash from '../utilities/secret.js'
 import {
   PlacementType,
   RandomInterface,

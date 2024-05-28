@@ -12,7 +12,7 @@ import {
   WalkerSettings,
   WalkerSetup
 } from '../types.d.js'
-import global from '../utilities/global.js'
+import global from '../global.js'
 
 export const Walker = class WalkerInterface {
   public setup: WalkerSetup

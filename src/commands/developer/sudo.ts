@@ -10,7 +10,7 @@ import {
   CommandInterface,
 } from '../../types.js'
 import InteractionObserver from '../interactionobserver.js'
-import global from '../../utilities/global.js'
+import global from '../../global.js'
 const Sudo: CommandInterface = {
   name: 'sudo',
   description: 'Sudo\'s the bot.',

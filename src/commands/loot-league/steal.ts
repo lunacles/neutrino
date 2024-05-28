@@ -4,6 +4,7 @@ import {
   SlashCommandBuilder,
   SlashCommandUserOption,
   EmbedBuilder,
+  PermissionsBitField,
 } from 'discord.js'
 import {
   CommandInterface,
@@ -13,7 +14,7 @@ import {
 } from '../../types.js'
 import GuildCollection from '../../user-manager/guildcollection.js'
 import InteractionObserver from '../interactionobserver.js'
-import global from '../../utilities/global.js'
+import global from '../../global.js'
 import * as util from '../../utilities/util.js'
 import Icon from '../../utilities/icon.js'
 
@@ -30,8 +31,9 @@ const Steal: CommandInterface = {
     await interaction.deferReply()
     const targetUserOption = interaction.options.getUser('user', true)
     const observer = new InteractionObserver(interaction)
+    //if (interaction.guild.id !== global.testServerId) return await observer.abort(3)
+    if (interaction.channel.id !== '1227836204087640084' && !observer.checkPermissions([PermissionsBitField.Flags.ManageMessages], interaction.channel)) return await observer.abort(5)
 
-    if (interaction.guild.id !== global.testServerId) return await observer.abort(3)
     if (targetUserOption.id === interaction.user.id) return await observer.abort(4)
 
     let guild: GuildCollectionInterface = await GuildCollection.fetch(interaction.guildId)
@@ -63,7 +65,7 @@ const Steal: CommandInterface = {
       let stolenScore: number = Math.floor(Math.max(targetLootLeague.score * 0.3 * Math.random(), targetLootLeague.score * 0.3 * 0.25))
 
       if (succeed) {
-        await targetLootLeague.setScore(userLootLeague.score + stolenScore)
+        await userLootLeague.setScore(userLootLeague.score + stolenScore)
         await targetLootLeague.setScore(targetLootLeague.score - stolenScore)
         const embed = new EmbedBuilder()
           .setColor(userData.user.hexAccentColor)

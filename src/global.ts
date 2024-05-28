@@ -1,4 +1,4 @@
-import Build from "./repo"
+import Build from "./utilities/repo"
 
 interface LoggingConfigInterface {
   avatars: boolean
@@ -68,12 +68,14 @@ interface GlobalInterface {
   direction: Direction
   diagonalDirection: DiagonalDirection
   movementOptions: MovementOptions
+  batchTick: number
+  errorTraceChannel: string
 }
 
 const global: GlobalInterface = {
   build: Build,
   ownerId: '342038795757027329',
-  testServerId: '366661839620407297',
+  testServerId: '954026848361254993',
   loggingConfig: {
     avatars: false,
     banners: false,
@@ -114,6 +116,8 @@ const global: GlobalInterface = {
       Direction.left, Direction.right
     ],
   },
+  batchTick: 60e3,
+  errorTraceChannel: '1244402813870669885',
 }
 
 export default global

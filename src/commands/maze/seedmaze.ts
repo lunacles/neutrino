@@ -12,7 +12,7 @@ import {
 } from '../../types.js'
 import InteractionObserver from '../interactionobserver.js'
 import { RandomWalker } from '../../mazes/algorithms/randomwalker.js'
-import global from '../../utilities/global.js'
+import global from '../../global.js'
 import generateMaze from '../maze.js'
 
 enum Min {

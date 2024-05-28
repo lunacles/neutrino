@@ -11,7 +11,7 @@ import {
   GuildCollectionInterface,
 } from '../../types.d.js'
 import InteractionObserver from '../interactionobserver.js'
-import global from '../../utilities/global.js'
+import global from '../../global.js'
 import GuildCollection from '../../user-manager/guildcollection.js'
 
 const FetchUserData: CommandInterface = {

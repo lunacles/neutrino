@@ -16,6 +16,7 @@ import {
   MentionableSelectMenuInteraction,
   ChannelSelectMenuInteraction,
   CollectedInteraction,
+  PermissionsBitField,
 } from 'discord.js'
 import {
   CommandInterface,
@@ -25,7 +26,7 @@ import {
 } from '../../types.js'
 import GuildCollection from '../../user-manager/guildcollection.js'
 import InteractionObserver from '../interactionobserver.js'
-import global from '../../utilities/global.js'
+import global from '../../global.js'
 import * as util from '../../utilities/util.js'
 import Icon from '../../utilities/icon.js'
 
@@ -39,7 +40,8 @@ const Shield: CommandInterface = {
   async execute(interaction: ChatInputCommandInteraction<CacheType>): Promise<void> {
     await interaction.deferReply()
     const observer = new InteractionObserver(interaction)
-    if (interaction.guild.id !== global.testServerId) return await observer.abort(3)
+    //if (interaction.guild.id !== global.testServerId) return await observer.abort(3)
+    if (interaction.channel.id !== '1227836204087640084' && !observer.checkPermissions([PermissionsBitField.Flags.ManageMessages], interaction.channel)) return await observer.abort(5)
 
     let guild: GuildCollectionInterface = await GuildCollection.fetch(interaction.guildId)
     let userData: UserDataInterface = await guild.fetchMember(interaction.user.id)

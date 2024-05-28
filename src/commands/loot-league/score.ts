@@ -4,6 +4,7 @@ import {
   SlashCommandBuilder,
   SlashCommandUserOption,
   EmbedBuilder,
+  PermissionsBitField,
 } from 'discord.js'
 import {
   CommandInterface,
@@ -13,7 +14,7 @@ import {
 } from '../../types.js'
 import GuildCollection from '../../user-manager/guildcollection.js'
 import InteractionObserver from '../interactionobserver.js'
-import global from '../../utilities/global.js'
+import global from '../../global.js'
 import * as util from '../../utilities/util.js'
 import Icon from '../../utilities/icon.js'
 
@@ -29,13 +30,13 @@ const Score: CommandInterface = {
     await interaction.deferReply()
     const targetUserOption = interaction.options.getUser('user', false)
     const observer = new InteractionObserver(interaction)
+    //if (interaction.guild.id !== global.testServerId) return await observer.abort(3)
+    if (interaction.channel.id !== '1227836204087640084' && !observer.checkPermissions([PermissionsBitField.Flags.ManageMessages], interaction.channel)) return await observer.abort(5)
 
     let guild: GuildCollectionInterface = await GuildCollection.fetch(interaction.guildId)
     let authorData: UserDataInterface = await guild.fetchMember(interaction.user.id)
 
-    if (interaction.guild.id !== global.testServerId) return await observer.abort(3)
     let targetUser: string = targetUserOption ? targetUserOption.id : interaction.user.id
-
     let targetData: UserDataInterface = await guild.fetchMember(targetUser)
 
     let lootLeague: LootLeagueInterface = authorData.lootLeague
@@ -51,7 +52,7 @@ const Score: CommandInterface = {
           iconURL: authorData.user.avatarURL(),
         })
         .setThumbnail(`attachment://${Icon.PiggyBank}`)
-        .setDescription(`# <@${targetData.data.id}>'s current balance is **${lootLeague.score.toLocaleString()}!**`)
+        .setDescription(`# <@${targetData.user.id}>'s current balance is **${targetData.lootLeague.score.toLocaleString()}!**`)
 
       interaction.editReply({
         embeds: [embed],

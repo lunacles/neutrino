@@ -27,7 +27,7 @@ import {
   Text
 } from '../../canvas/elements.js'
 import Colors from '../../canvas/palette.js'
-import global from '../../utilities/global.js'
+import global from '../../global.js'
 import Color from '../../canvas/color.js'
 import * as util from '../../utilities/util.js'
 

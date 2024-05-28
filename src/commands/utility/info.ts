@@ -9,7 +9,7 @@ import discordjs from 'discord.js/package.json'
 import {
   CommandInterface,
 } from '../../types.js'
-import global from '../../utilities/global.js'
+import global from '../../global.js'
 import Colors from '../../canvas/palette.js'
 import Log from '../../utilities/log.js'
 

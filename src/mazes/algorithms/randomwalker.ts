@@ -1,7 +1,7 @@
 import {
   Walker,
 } from '../walker.js'
-import global from './../../utilities/global.js'
+import global from '../../global.js'
 import {
   Coordinate,
   WalkerChances,

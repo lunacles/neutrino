@@ -5,7 +5,7 @@ import {
 import GuildCollection from '../../user-manager/guildcollection.js'
 import fetch from 'node-fetch'
 import Log from '../../utilities/log.js'
-import global from '../../utilities/global.js'
+import global from '../../global.js'
 import {
   Observer
 } from '../../types.js'

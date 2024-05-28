@@ -29,7 +29,8 @@ const Observer = class<T extends CommandInteraction> implements ObserverInterfac
     [4, 'The selected user cannot be yourself'],
     [5, 'This command can only be used in <#1227836204087640084>'],
     [6, 'Selected channel does not support permission overwrites'],
-    [7, 'Error']
+    [7, 'This command can only be used in <#1244869387991781428>'],
+    [8, 'This command can only be used in <#1244869433911152690>'],
   ])
   public readonly interaction: T
   public filter: Collection<string, GuildBasedChannel>

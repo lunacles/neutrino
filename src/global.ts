@@ -58,6 +58,12 @@ interface MovementOptions {
   horizontal: Array<number> | number,
 }
 
+interface CommandChannels {
+  readonly lootLeague: string
+  readonly mazeGeneration: string
+  readonly misc: string
+}
+
 interface GlobalInterface {
   build: any
   ownerId: string
@@ -70,6 +76,7 @@ interface GlobalInterface {
   movementOptions: MovementOptions
   batchTick: number
   errorTraceChannel: string
+  commandChannels: CommandChannels
 }
 
 const global: GlobalInterface = {
@@ -118,6 +125,11 @@ const global: GlobalInterface = {
   },
   batchTick: 60e3,
   errorTraceChannel: '1244402813870669885',
+  commandChannels: {
+    lootLeague: '1227836204087640084',
+    mazeGeneration: '1244869387991781428',
+    misc: '1244869433911152690'
+  }
 }
 
 export default global

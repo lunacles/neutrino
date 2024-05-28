@@ -147,7 +147,8 @@ const SeedMaze: CommandInterface = {
 
     const observer = new InteractionObserver(interaction)
 
-    if (interaction.channel.id !== '1227836204087640084' && !observer.checkPermissions([PermissionsBitField.Flags.ManageMessages], interaction.channel)) return await observer.abort(5)
+    if (interaction.channel.id !== global.commandChannels.mazeGeneration && !observer.checkPermissions([PermissionsBitField.Flags.ManageMessages], interaction.channel))
+      return await observer.abort(7)
 
     //if (!observer.checkPermissions([PermissionsBitField.Flags.ManageMessages], interaction.channel)) return await observer.abort(0)
     const algorithm = new RandomWalker()

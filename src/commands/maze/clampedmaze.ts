@@ -12,6 +12,7 @@ import {
 import InteractionObserver from '../interactionobserver.js'
 import { Noise } from '../../mazes/algorithms/noise.js'
 import generateMaze from '../maze.js'
+import global from 'global.js'
 
 enum Min {
   Dimensions = 16,
@@ -68,8 +69,8 @@ const ClampedNoiseMaze: CommandInterface = {
     const max: number = interaction.options.getNumber('max') ?? 0.085
 
     const observer = new InteractionObserver(interaction)
-
-    if (interaction.channel.id !== '1227836204087640084' && !observer.checkPermissions([PermissionsBitField.Flags.ManageMessages], interaction.channel)) return await observer.abort(5)
+    if (interaction.channel.id !== global.commandChannels.mazeGeneration && !observer.checkPermissions([PermissionsBitField.Flags.ManageMessages], interaction.channel))
+      return await observer.abort(7)
 
     //if (!observer.checkPermissions([PermissionsBitField.Flags.ManageMessages], interaction.channel)) return await observer.abort(0)
     const algorithm = new Noise()

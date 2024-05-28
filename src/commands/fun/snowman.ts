@@ -20,6 +20,7 @@ import {
 } from '../../canvas/elements.js'
 import Color from '../../canvas/color.js'
 import InteractionObserver from '../interactionobserver.js'
+import global from 'global.js'
 
 type Pair = [number, number]
 
@@ -30,7 +31,9 @@ const Snowman: CommandInterface = {
   async execute(interaction: ChatInputCommandInteraction<CacheType>): Promise<void> {
     await interaction.deferReply()
     const observer = new InteractionObserver(interaction)
-    if (interaction.channel.id !== '1227836204087640084' && !observer.checkPermissions([PermissionsBitField.Flags.ManageMessages], interaction.channel)) return await observer.abort(5)
+
+    if (interaction.channel.id !== global.commandChannels.misc && !observer.checkPermissions([PermissionsBitField.Flags.ManageMessages], interaction.channel))
+      return await observer.abort(8)
 
     let size: number = 256
     let radii: number = size * 0.5

@@ -4,12 +4,14 @@ import {
   SlashCommandBuilder,
   EmbedBuilder,
   ColorResolvable,
+  PermissionsBitField,
 } from 'discord.js'
 import { version } from 'discord.js'
 import {
   CommandInterface,
 } from '../../types.js'
-import global from '../../global.js'
+import InteractionObserver from '../interactionobserver.js'
+import global from 'global.js'
 import Colors from '../../canvas/palette.js'
 import Log from '../../utilities/log.js'
 
@@ -19,6 +21,10 @@ const Info: CommandInterface = {
   data: new SlashCommandBuilder(),
   async execute(interaction: ChatInputCommandInteraction<CacheType>): Promise<void> {
     await interaction.deferReply()
+    const observer = new InteractionObserver(interaction)
+
+    if (interaction.channel.id !== global.commandChannels.misc && !observer.checkPermissions([PermissionsBitField.Flags.ManageMessages], interaction.channel))
+      return await observer.abort(8)
 
     const embed = new EmbedBuilder()
       .setAuthor({

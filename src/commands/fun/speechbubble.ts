@@ -98,7 +98,9 @@ const SpeechBubble: CommandInterface = {
     const side: boolean = interaction.options.getBoolean('flip') ?? false
     const observer = new InteractionObserver(interaction)
 
-    if (interaction.channel.id !== '1227836204087640084' && !observer.checkPermissions([PermissionsBitField.Flags.ManageMessages], interaction.channel)) return await observer.abort(5)
+    if (interaction.channel.id !== global.commandChannels.misc && !observer.checkPermissions([PermissionsBitField.Flags.ManageMessages], interaction.channel))
+      return await observer.abort(8)
+
     try {
       let buttonWidth: number = image.width / 5
       let buttonHeight: number = image.height / 5

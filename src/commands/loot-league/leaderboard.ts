@@ -25,7 +25,7 @@ const Leaderboard: CommandInterface = {
     await interaction.deferReply()
     const observer = new InteractionObserver(interaction)
     //if (interaction.guild.id !== global.testServerId) return await observer.abort(3)
-    if (interaction.channel.id !== '1227836204087640084' && !observer.checkPermissions([PermissionsBitField.Flags.ManageMessages], interaction.channel))
+    if (interaction.channel.id !== global.commandChannels.lootLeague && !observer.checkPermissions([PermissionsBitField.Flags.ManageMessages], interaction.channel))
       return await observer.abort(5)
 
     let guild: GuildCollectionInterface = await GuildCollection.fetch(interaction.guildId)

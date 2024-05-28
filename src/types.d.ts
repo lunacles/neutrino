@@ -46,6 +46,7 @@ export interface ObserverInterface {
   public componentsFilter(components: Array<string>): (component: Action) => boolean
   public checkPermissions(permissions: Array<bigint>, channel: GuildChannel): boolean
   public abort(code: number): Promise<void>
+  public panic(error: Error, command: string): Promise<void>
 }
 export type Action = StringSelectMenuInteraction<CacheType> | UserSelectMenuInteraction<CacheType> | RoleSelectMenuInteraction<CacheType> | MentionableSelectMenuInteraction<CacheType> | ChannelSelectMenuInteraction<CacheType> | ButtonInteraction<CacheType>
 export type CachedElement = 'bar' | 'text' | 'rect' | null
@@ -244,8 +245,13 @@ export interface PRNGInterface {
   splitMix32(a: number): () => number
   simple(a: number): () => number
 }
-export interface HashInterface {
-  cyrb53: (str: string, seed?: number) => number
+export interface SecretInterface {
+  readonly secret: string
+  readonly key: Buffer
+  cyrb53(str: string, seed?: number): number
+  hash(str: string): string
+  encrypt(str: string): string
+  decrypt(str: string): string
 }
 export interface DatabaseInterface {
   collection: CollectionReference
@@ -260,6 +266,7 @@ export interface DatabaseInterface {
 }
 export interface UserDataInterface {
   operations: Array<OperationInterface>
+  timeSinceLastOperation: number
   storage: FireStorageInterface
   database: DatabaseInterface
   user: User
@@ -277,6 +284,7 @@ export interface UserDataInterface {
   setup(): OperationInterface
   restoreData(): Promise<this>
   create(): Promise<this>
+  pushOperation(operation: OperationInterface): Promise<this>
   writeBatch(): Promise<this>
 }
 export interface Cooldown {

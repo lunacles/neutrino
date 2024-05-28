@@ -20,6 +20,8 @@ const Colors = {
   darkGray: null,
   carrot: new Color('#EB8921'),
   brown: new Color('#654321'),
+
+  error: new Color('#cc0000'),
 }
 Colors.darkGray = Color.blend(Colors.gray ?? '#ffffff', Colors.black, 0.6)
 

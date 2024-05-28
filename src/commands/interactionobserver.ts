@@ -6,11 +6,19 @@ import {
   PermissionsBitField,
   GuildChannel,
   GuildTextBasedChannel,
+  EmbedBuilder,
+  ColorResolvable,
+  TextChannel,
+  Message,
 } from 'discord.js'
 import {
   ObserverInterface,
   Action,
 } from '../types.d.js'
+//import Secret from 'utilities/secret.js'
+import Colors from 'canvas/palette.js'
+import global from 'global.js'
+import Icon from 'utilities/icon.js'
 
 const Observer = class<T extends CommandInteraction> implements ObserverInterface {
   public static abortReasons = new Map([
@@ -20,7 +28,8 @@ const Observer = class<T extends CommandInteraction> implements ObserverInterfac
     [3, 'Command is not available in this server'],
     [4, 'The selected user cannot be yourself'],
     [5, 'This command can only be used in <#1227836204087640084>'],
-    [6, 'Selected channel does not support permission overwrites']
+    [6, 'Selected channel does not support permission overwrites'],
+    [7, 'Error']
   ])
   public readonly interaction: T
   public filter: Collection<string, GuildBasedChannel>
@@ -67,6 +76,36 @@ const Observer = class<T extends CommandInteraction> implements ObserverInterfac
   }
   public async abort(code: number): Promise<void> {
     await this.interaction.editReply(`${Observer.abortReasons.get(code)} (Error code ${code})`)
+  }
+  public async panic(error: Error, command: string): Promise<void> {
+    /*
+    const embed = new EmbedBuilder()
+      .setThumbnail(`attachment://${Icon.HazardSign}`)
+      .setColor(Colors.error.hex as ColorResolvable)
+      .setDescription(`\`${Secret.encrypt(error.stack)}\``)
+    */
+    let message: Message<boolean> = await this.interaction.editReply({
+      content: 'Oopsie! Something went wrong. The bot creator has been notified!',
+      //embeds: [embed],
+    })
+
+    let errorTrace = await this.interaction.client.channels.fetch(global.errorTraceChannel) as TextChannel
+    await errorTrace.send({
+      content: `<@${global.ownerId}>`,
+      embeds: [new EmbedBuilder()
+        .setColor(Colors.error.hex as ColorResolvable)
+        .setThumbnail(`attachment://${Icon.HazardSign}`)
+        .setDescription([
+          `# ${error.name}`,
+          `**Server ID**: ${message.guildId}`,
+          `**Channel ID**: ${message.channelId}`,
+          `**Link**: ${message.url}`,
+          `**User**: <@${this.interaction.user.id}> (${this.interaction.user.id})`,
+          `**Command**: ${command}`,
+          `**Stack Trace**: \`\`\`${error.stack}\`\`\``
+        ].join('\n'))
+      ]
+    })
   }
 }
 

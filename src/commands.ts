@@ -25,8 +25,9 @@ export const Commands: CommandsInterface = {
     let files = [
       ...(await this.locate('developer')),
       ...(await this.locate('fun')),
-      ...(await this.locate('maze')),
       ...(await this.locate('utility')),
+      ...(await this.locate('loot-league')),
+      ...(await this.locate('maze')),
     ]
     for (let file of files) {
       if (file === 'interface.ts' || file === 'interactionobserver.ts' || file === 'maze.ts') continue

@@ -3,12 +3,13 @@ import {
   CacheType,
   SlashCommandBuilder,
   AttachmentBuilder,
+  PermissionsBitField,
 } from 'discord.js'
-import CommandInterface from '../interface.js'
 import {
-  NodeCanvas,
+  CommandInterface,
   NodeCanvasInterface,
-} from '../../canvas/canvas.js'
+} from '../../types.js'
+import NodeCanvas from '../../canvas/canvas.js'
 import Colors from '../../canvas/palette.js'
 import {
   Background,
@@ -18,6 +19,7 @@ import {
   Rect,
 } from '../../canvas/elements.js'
 import Color from '../../canvas/color.js'
+import InteractionObserver from '../interactionobserver.js'
 
 type Pair = [number, number]
 
@@ -27,6 +29,9 @@ const Snowman: CommandInterface = {
   data: new SlashCommandBuilder(),
   async execute(interaction: ChatInputCommandInteraction<CacheType>): Promise<void> {
     await interaction.deferReply()
+    const observer = new InteractionObserver(interaction)
+    if (interaction.channel.id !== '1227836204087640084' && !observer.checkPermissions([PermissionsBitField.Flags.ManageMessages], interaction.channel)) return await observer.abort(5)
+
     let size: number = 256
     let radii: number = size * 0.5
     let c: NodeCanvasInterface = new NodeCanvas(size, size)
@@ -35,7 +40,6 @@ const Snowman: CommandInterface = {
 
     // arms
     let path = (path: Pair) => ((to: Pair): void => {
-      console.log(path)
       let [x1, y1] = path
       let [xTo, yTo] = to
       Line.draw({
@@ -96,6 +100,7 @@ const Snowman: CommandInterface = {
       [size * 0.5 - 4, size * 0.375],
       [size * 0.5 + 4, size * 0.375],
       [size * 0.5, size * 0.375 + 8],
+      [size * 0.5 - 4, size * 0.375],
     ]).both(Colors.carrot, Color.blend(Colors.carrot, Colors.black, 0.6), 4)
 
     // Hat

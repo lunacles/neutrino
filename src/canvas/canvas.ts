@@ -7,7 +7,7 @@ import {
   Viewport
 } from '../types.d.js'
 
-registerFont('../eula-bot/src/utilities/fonts/Ubuntu-Bold.ttf', { family: 'Ubuntu', weight: '16', style: 'bold' })
+registerFont('../neutrino/src/utilities/fonts/Ubuntu-Bold.ttf', { family: 'Ubuntu', weight: '16', style: 'bold' })
 
 const NodeCanvas = class implements NodeCanvasInterface {
   static activeCanvas = null

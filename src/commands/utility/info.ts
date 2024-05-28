@@ -33,7 +33,7 @@ const Info: CommandInterface = {
       **Discord.js Version:** \`${discordjs.version}\`
       **Memory Usage:** \`${Math.floor(process.memoryUsage().heapUsed / 1024 / 1024)}MB\`
       **Ping:** \`${interaction.client.ws.ping}ms\`
-      **Repository:** [Github Link](<https://github.com/lunacles/eula-bot>)`)
+      **Repository:** [Github Link](<https://github.com/lunacles/neutrino>)`)
 
     interaction.editReply({
       embeds: [embed],

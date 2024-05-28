@@ -15,16 +15,25 @@ import {
 } from './commands.js'
 import MessageCreate from './observer/message/messageCreate.js'
 import Build from './utilities/repo.js'
+/*import {
+  MobileNetModel,
+  MobileNetModelInterface
+} from './tensorflow/model.js'*/
+import { ready, setBackend } from '@tensorflow/tfjs-node'
 
 dotenv.config()
+setBackend('tensorflow')
+await ready()
 
 const Bot = class {
   public client: Client
   private rest: REST
   public commands: Collection<any, any>
+  //public model: MobileNetModelInterface
   constructor(client: Client) {
     this.client = client
     this.commands = new Collection()
+    //this.model = null
   }
   public async init(): Promise<void> {
     // login
@@ -41,6 +50,10 @@ const Bot = class {
       // get the build info
       Log.info('Getting build information...')
       await Build.load()
+
+      // load the mobilenet model
+      //Log.info('Loading mobilenet model...')
+      //this.model = await MobileNetModel.load()
 
       // await interactions
       Log.info(`${this.client.user.tag} is now accepting interactions`)

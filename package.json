@@ -18,6 +18,9 @@
     "typescript": "^5.4.2"
   },
   "dependencies": {
+    "@tensorflow-models/mobilenet": "^2.1.1",
+    "@tensorflow/tfjs": "^4.19.0",
+    "@tensorflow/tfjs-node": "^4.19.0",
     "@types/node": "^20.11.25",
     "canvas": "^2.11.2",
     "discord.js": "^14.12.1",

@@ -65,39 +65,39 @@ const LootLeague = class LootLeagueInterface {
     }
   }
   public async setCooldown(type: Cooldowns, time: number): Promise<void> {
-    this.data.operations.push({
+    this.data.pushOperation({
       type: OperationType.Update,
       ref: this.data.guildCollection.ref,
       data: Database.structureData({
-        [`lootleague.cooldown.${type}`]: time
+        [`members.${this.data.user.id}.scoreGame.cooldown.${type}`]: time
       })
     })
 
     this.cooldown[type] = time
   }
   public async setScore(amount: number): Promise<void> {
-    this.data.operations.push({
+    this.data.pushOperation({
       type: OperationType.Update,
       ref: this.data.guildCollection.ref,
       data: Database.structureData({
-        ['lootleague.score']: amount
+        [`members.${this.data.user.id}.scoreGame.score`]: amount
       })
     })
 
     this.score = amount
   }
   public async setShield(state: number): Promise<void> {
-    this.data.operations.push({
+    this.data.pushOperation({
       type: OperationType.Update,
       ref: this.data.guildCollection.ref,
       data: Database.structureData({
-        ['lootleague.shieldEnd']: state
+        [`members.${this.data.user.id}.scoreGame.shieldEnd`]: state
       })
     })
     /*
     setTimeout(async (): Promise<void> => {
       await this.data.database.write(Database.structureData({
-        ['lootleague.shieldEnd']: null
+        ['lootleague.scoreGame']: null
       }))
     }, global.shieldDuration * 1e3)
     */

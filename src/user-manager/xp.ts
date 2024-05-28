@@ -59,11 +59,11 @@ const XPManager = class XPManagerInterface {
     }
   }
   public async setXP(amount: number): Promise<void> {
-    this.data.operations.push({
+    this.data.pushOperation({
       type: OperationType.Update,
       ref: this.data.guildCollection.ref,
       data: Database.structureData({
-        ['xpData.xp']: amount
+        [`members.${this.data.user.id}.xpData.xp`]: amount
       })
     })
 
@@ -71,11 +71,11 @@ const XPManager = class XPManagerInterface {
   }
   public async setCooldown(length: number): Promise<void> {
     let time = Date.now() + length
-    this.data.operations.push({
+    this.data.pushOperation({
       type: OperationType.Update,
       ref: this.data.guildCollection.ref,
       data: Database.structureData({
-        ['xpData.cooldown']: time
+        [`members.${this.data.user.id}.xpData.cooldown`]: time
       })
     })
 
@@ -83,12 +83,12 @@ const XPManager = class XPManagerInterface {
   }
   public async setLevel(level: number): Promise<void> {
     let xp = XPManager.levelFromXP(level)
-    this.data.operations.push({
+    this.data.pushOperation({
       type: OperationType.Update,
       ref: this.data.guildCollection.ref,
       data: Database.structureData({
-        ['xpData.level']: level,
-        ['xpData.xp']: xp
+        [`members.${this.data.user.id}.xpData.level`]: level,
+        [`members.${this.data.user.id}.xpData.xp`]: xp
       })
     })
 
@@ -103,11 +103,11 @@ const XPManager = class XPManagerInterface {
         await this.setLevel(this.level + 1)
         Log.info(`User with id "${this.data.user.id}" leveled up to ${this.level}`)
       } else {
-        this.data.operations.push({
+        this.data.pushOperation({
           type: OperationType.Update,
           ref: this.data.guildCollection.ref,
           data: Database.structureData({
-            ['xpData.xp']: this.xp
+            [`members.${this.data.user.id}.xpData.xp`]: this.xp
           })
         })
       }

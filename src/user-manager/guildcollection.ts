@@ -34,7 +34,7 @@ const GuildCollection = class GuildCollectionInterface {
 
     this.guildDatabase = new Database()
     this.data = null
-    this.members = null
+    this.members = new Map()
 
     this.ref = this.guildDatabase.cd('~/').getdoc(this.guild.id)
     Database.guilds.set(guild.id, this)
@@ -49,9 +49,9 @@ const GuildCollection = class GuildCollectionInterface {
       Log.info(`Fetching document data of guild with id "${this.guild.id}"`)
     }
     this.data = doc.data() as GuildInfo
-    this.members = new Map(await Promise.all(Object.entries(this.data.members).map(
-      async ([id, member]): Promise<[string, UserDataInterface]> => [id, await UserData.compile(this, member.id, member satisfies GuildMemberInfo)]))
-    )
+    for (let [id, member] of await Promise.all(Object.entries(this.data.members))) {
+      await UserData.compile(this, id, member satisfies GuildMemberInfo)
+    }
     return this
   }
   public async fetchMember(id: string): Promise<UserDataInterface> {

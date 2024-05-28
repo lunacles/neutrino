@@ -43,6 +43,7 @@ const UserData = class UserDataInterface {
     return userData
   }
   public operations: Array<OperationInterface>
+  public timeSinceLastOperation: number
   public storage: FireStorageInterface
   public database: DatabaseInterface
   public user: User
@@ -58,6 +59,7 @@ const UserData = class UserDataInterface {
   public data: DocumentData
   constructor(user: User, member: GuildMember, collection: GuildCollectionInterface) {
     this.operations = []
+    this.timeSinceLastOperation = Date.now()
 
     this.user = user
     this.member = member
@@ -73,6 +75,8 @@ const UserData = class UserDataInterface {
     this.data = null
   }
   public setup(): OperationInterface {
+    this.xpData = new XPManager(this)
+    this.lootLeague = new LootLeague(this)
     this.guildData = {
       id: this.user.id,
       roles: new Map(this.member.roles.cache.map((role: Role): [string, GuildRole] => [role.id, {
@@ -83,8 +87,8 @@ const UserData = class UserDataInterface {
       nickname: this.member.nickname,
       avatar: this.member.avatarURL(),
       joined: this.member.joinedTimestamp,
-      xpData: new XPManager(this).setup(),
-      scoreGame: new LootLeague(this).setup(),
+      xpData: this.xpData.setup(),
+      scoreGame: this.lootLeague.setup(),
       global: {
         id: this.user.id,
         creationDate: Timestamp.fromDate(this.user.createdAt),
@@ -117,7 +121,7 @@ const UserData = class UserDataInterface {
 
   public async create(): Promise<this> {
     try {
-      this.operations.push(this.setup())
+      this.pushOperation(this.setup())
       await this.writeBatch()
 
       Log.info(`Creating document for user with id "${this.user.id}"`)
@@ -134,9 +138,17 @@ const UserData = class UserDataInterface {
       }])
     }
   }
+  public async pushOperation(operation: OperationInterface): Promise<this> {
+    this.operations.push(operation)
+    if (this.operations.length > 5) {
+      await this.writeBatch(this.operations)
+      this.operations = []
+    }
+    return this
+  }
   public async writeBatch(batch?: Array<OperationInterface>): Promise<this> {
     await Database.batchWrite(batch ?? this.operations)
-    this.operations = []
+
     return this
   }
 }

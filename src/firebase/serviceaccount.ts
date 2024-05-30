@@ -1,6 +1,4 @@
-import serviceAccountJSON from '../../serviceaccount.json'
-
-process.env.SERVICE_ACCOUNT = btoa(JSON.stringify(serviceAccountJSON))
+const serviceAccountJSON = (await import(`../../${process.env.NODE_ENV.toLowerCase()}-serviceaccount.json`)).default
 const serviceAccount = structuredClone(serviceAccountJSON)
 
 export default serviceAccount

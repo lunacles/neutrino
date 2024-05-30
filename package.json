@@ -5,7 +5,8 @@
   "main": "main.js",
   "type": "module",
   "scripts": {
-    "dev": "tsx watch src/main.ts",
+    "prod": "NODE_ENV=PROD tsx watch src/main.ts",
+    "dev": "NODE_ENV=DEV tsx watch src/main.ts",
     "start": "node dist/main.js",
     "build": "tsup src/main.ts --minify"
   },

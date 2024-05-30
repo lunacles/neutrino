@@ -5,7 +5,8 @@ process-env.d.ts
 init.js
 init.js.map
 package-lock.json
-serviceaccount.json
+prod-serviceaccount.json
+dev-serviceaccount.json
 tensorflow
 items.md
 tcg

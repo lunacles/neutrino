@@ -1,24 +1,14 @@
-import Build from "./utilities/repo"
-
-interface LoggingConfigInterface {
-  avatars: boolean
-  banners: boolean
-  usernames: boolean
-  displayNames: boolean
-  nicknames: boolean
-  servers: boolean
-  messages: boolean
-  presence: boolean
-  roles: boolean
-}
+import dotenv from 'dotenv'
+dotenv.config()
+import Build from 'utilities/repo'
 
 interface CommandCooldownInterface {
-  score: number
-  claim: number
-  steal: number
-  gamble: number
-  shield: number
-  leaderboard: number
+  readonly score: number
+  readonly claim: number
+  readonly steal: number
+  readonly gamble: number
+  readonly shield: number
+  readonly leaderboard: number
 }
 
 interface Direction {
@@ -30,10 +20,10 @@ interface Direction {
 }
 
 interface DiagonalDirection {
-  upLeft: number
-  downLeft: number
-  upRight: number
-  downRight: number
+  readonly upLeft: number
+  readonly downLeft: number
+  readonly upRight: number
+  readonly downRight: number
 }
 
 const Direction: Direction = {
@@ -64,36 +54,39 @@ interface CommandChannels {
   readonly misc: string
 }
 
+interface ENV {
+  readonly FIREBASE_API_KEY: string
+  readonly FIREBASE_AUTH_DOMAIN: string
+  readonly FIREBASE_PROJECT_ID: string
+  readonly FIREBASE_STORAGE_BUCKET: string
+  readonly FIREBASE_MESSAGE_SENDER_ID: string
+  readonly FIREBASE_APP_ID: string
+  readonly FIREBASE_MEASUREMENT_ID: string
+  readonly BOT_TOKEN: string
+  readonly BOT_CLIENT_ID: string
+}
+
+const envVar = (key: string): string => process.env[`${process.env.NODE_ENV}_${key}`]
+
 interface GlobalInterface {
-  build: any
-  ownerId: string
-  testServerId: string
-  loggingConfig: LoggingConfigInterface
-  cooldown: CommandCooldownInterface
-  shieldDuration: number
+  readonly build: any
+  readonly ownerId: string
+  readonly testServerId: string
+  readonly cooldown: CommandCooldownInterface
+  readonly shieldDuration: number
   direction: Direction
   diagonalDirection: DiagonalDirection
   movementOptions: MovementOptions
-  batchTick: number
-  errorTraceChannel: string
-  commandChannels: CommandChannels
+  readonly batchTick: number
+  readonly errorTraceChannel: string
+  readonly commandChannels: CommandChannels
+  readonly env: ENV
 }
 
 const global: GlobalInterface = {
   build: Build,
   ownerId: '342038795757027329',
   testServerId: '954026848361254993',
-  loggingConfig: {
-    avatars: false,
-    banners: false,
-    usernames: true,
-    displayNames: true,
-    nicknames: true,
-    servers: true,
-    messages: false,
-    presence: true,
-    roles: true,
-  },
   cooldown: {
     score: 5,        // 5sec
     claim: 30,       // 30sec
@@ -129,6 +122,17 @@ const global: GlobalInterface = {
     lootLeague: '1227836204087640084',
     mazeGeneration: '1244869387991781428',
     misc: '1244869433911152690'
+  },
+  env: {
+    FIREBASE_API_KEY: envVar('FIREBASE_API_KEY'),
+    FIREBASE_AUTH_DOMAIN: envVar('FIREBASE_AUTH_DOMAIN'),
+    FIREBASE_PROJECT_ID: envVar('FIREBASE_PROJECT_ID'),
+    FIREBASE_STORAGE_BUCKET: envVar('FIREBASE_STORAGE_BUCKET'),
+    FIREBASE_MESSAGE_SENDER_ID: envVar('FIREBASE_MESSAGE_SENDER_ID'),
+    FIREBASE_APP_ID: envVar('FIREBASE_APP_ID'),
+    FIREBASE_MEASUREMENT_ID: envVar('FIREBASE_MEASUREMENT_ID'),
+    BOT_TOKEN: envVar('BOT_TOKEN'),
+    BOT_CLIENT_ID: envVar('BOT_CLIENT_ID'),
   }
 }
 

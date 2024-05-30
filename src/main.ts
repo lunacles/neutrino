@@ -1,4 +1,4 @@
-import dotenv from 'dotenv'
+import global from 'global.js'
 import {
   Client,
   GatewayIntentBits,
@@ -18,12 +18,11 @@ import Build from './utilities/repo.js'
 /*import {
   MobileNetModel,
   MobileNetModelInterface
-} from './tensorflow/model.js'*/
+} from './tensorflow/model.js'
 import { ready, setBackend } from '@tensorflow/tfjs-node'
-
-dotenv.config()
-setBackend('tensorflow')
-await ready()
+*/
+//setBackend('tensorflow')
+//await ready()
 
 const Bot = class {
   public client: Client
@@ -37,7 +36,7 @@ const Bot = class {
   }
   public async init(): Promise<void> {
     // login
-    await this.client.login(process.env.BOT_TOKEN)
+    await this.client.login(global.env.BOT_TOKEN)
 
     this.client.on(Events.ClientReady, async (): Promise<void> => {
       if (!this.client || !this.client.user) throw new Error('User not found')
@@ -69,7 +68,7 @@ const Bot = class {
       version: '10'
     }).setToken(this.client.token)
 
-    await this.rest.put(Routes.applicationCommands(process.env.BOT_CLIENT_ID), {
+    await this.rest.put(Routes.applicationCommands(global.env.BOT_CLIENT_ID), {
       body: commands,
     })
   }

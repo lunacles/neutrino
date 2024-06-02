@@ -32,7 +32,7 @@ enum Chance {
 
 const Gamble: CommandInterface = {
   name: 'gamble',
-  description: `Gamble some points! ${util.formatSeconds(global.cooldown.claim)} cooldown.`,
+  description: `Gamble some points! ${util.formatSeconds(global.cooldown.gamble)} cooldown.`,
   data: new SlashCommandBuilder()
     .addIntegerOption((option: SlashCommandIntegerOption ): SlashCommandIntegerOption => option
     .setName('amount')

@@ -9,6 +9,7 @@ interface CommandCooldownInterface {
   readonly gamble: number
   readonly shield: number
   readonly leaderboard: number
+  readonly blackjack: number
 }
 
 interface Direction {
@@ -93,7 +94,8 @@ const global: GlobalInterface = {
     steal: 60 * 2,   // 2min
     gamble: 60,      // 1min
     shield: 60 * 60, // 1hr
-    leaderboard: 30  // 30sec
+    leaderboard: 30, // 30sec
+    blackjack: 60,   // 1min
   },
   shieldDuration: 60 * 30, // 30min
   direction: Direction,

@@ -15,6 +15,7 @@ const Build: BuildInterface = {
   message: '',
   diff: '',
   async load(): Promise<void> {
+    if (process.env.NODE_ENV === 'DEV') return
     try {
       let response: Response = await fetch('https://api.github.com/repos/lunacles/neutrino/commits/main')
       if (!response.ok)

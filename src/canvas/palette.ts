@@ -1,28 +1,30 @@
 import Color from './color.js'
 
 const Colors = {
-  pureBlack: new Color('#000000'),
-  pureWhite: new Color('#ffffff'),
-  white: new Color('#f6f6f6'),
-  black: new Color('#0e0e0e'),
+  pureBlack: Color.fromHex('#000000'),
+  pureWhite: Color.fromHex('#ffffff'),
+  white: Color.fromHex('#f6f6f6'),
+  black: Color.fromHex('#0e0e0e'),
 
-  darkBlue: new Color('#081322'),
-  glacialBlue: new Color('#afe1fb'),
-  cyan: new Color('#6191ae'),
-  pastelBlue: new Color('#8ec6e6'),
+  darkBlue: Color.fromHex('#081322'),
+  glacialBlue: Color.fromHex('#afe1fb'),
+  cyan: Color.fromHex('#6191ae'),
+  pastelBlue: Color.fromHex('#8ec6e6'),
 
-  gray: new Color('#b2b2b2'),
-  red: new Color('#de7076'),
+  gray: Color.fromHex('#b2b2b2'),
+  red: Color.fromHex('#de7076'),
 
-  wall: new Color('#999999'),
+  wall: Color.fromHex('#999999'),
 
-  snow: new Color('#FFFAFA'),
+  snow: Color.fromHex('#FFFAFA'),
   darkGray: null,
-  carrot: new Color('#EB8921'),
-  brown: new Color('#654321'),
+  carrot: Color.fromHex('#EB8921'),
+  brown: Color.fromHex('#654321'),
 
-  error: new Color('#cc0000'),
+  error: Color.fromHex('#cc0000'),
+
+  green: Color.fromHex('#116e5d'),
 }
-Colors.darkGray = Color.blend(Colors.gray ?? '#ffffff', Colors.black, 0.6)
+Colors.darkGray = Color.blend(Colors.gray, Colors.black, 0.6)
 
 export default Colors

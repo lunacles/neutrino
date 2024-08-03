@@ -1,5 +1,3 @@
-import { PRNGInterface } from '../types.d.js'
-
 const PRNG: PRNGInterface = {
   // Why not include this lol
   MathRandom(): () => number {
@@ -13,11 +11,11 @@ const PRNG: PRNGInterface = {
   },
   // Small Fast Counter 32-Bit - https://pracrand.sourceforge.net/
   sfc32(a: number = 1, b: number = 1, c: number = 1, d: number = 1): () => number {
-    a >>>= 0
-    b >>>= 0
-    c >>>= 0
-    d >>>= 0
     return (): number => {
+      a >>>= 0
+      b >>>= 0
+      c >>>= 0
+      d >>>= 0
       let t = (a + b) | 0
       a = b ^ b >>> 9
       b = c + (c << 3) | 0

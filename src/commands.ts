@@ -1,15 +1,11 @@
 import fs from 'fs/promises'
 import path from 'path'
 import Log from './utilities/log.js'
-import {
-  CommandInterface
-} from './types.js'
 import { fileURLToPath } from 'url'
 import bot from './main.js'
 
 type File = [string, string]
-
-export interface CommandsInterface {
+interface CommandsInterface {
   locate(folder: string): Promise<Array<File>>
   compile(): Promise<Array<CommandInterface>>
 }

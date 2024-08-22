@@ -2,36 +2,20 @@ import { loadImage } from 'canvas'
 import NodeCanvas from './canvas'
 import Color from './color.js'
 import Colors from './palette'
-import {
-  Radii,
-  ClipType,
-  Pair,
-  Cached,
-  LinearGradient,
-  RadialGradient,
-  RectangleInterface,
-  RoundRectangleInterface,
-  LineInterface,
-  CurveInterface,
-  TextInterface,
-  MediaInterface,
-  Wall,
-  MapDimensions,
-  NodeCanvasInterface,
-  MazeInterface,
-  ColorValue,
-  CanvasColor,
-} from '../types.d.js'
+import Interpolator from './interpolator'
+import { Ease, Suits } from 'types/enum.d.js'
 
 export const Element = class {
   public readonly canvas: NodeCanvasInterface
-  public readonly ctx: any
+  public ctx: any
   public cache: Cached
 
   public x: number
   public y: number
   public width: number
   public height: number
+
+  public restore: boolean
   constructor() {
     this.canvas = NodeCanvas.activeCanvas.canvas
     this.ctx = NodeCanvas.activeCanvas.ctx
@@ -79,6 +63,7 @@ export const Element = class {
     if (alphaReset)
       this.ctx.globalAlpha = 1
 
+    this.endTransform()
     this.resetCache()
     return this
   }
@@ -98,6 +83,7 @@ export const Element = class {
     if (alphaReset)
       this.ctx.globalAlpha = 1
 
+    this.endTransform()
     this.resetCache()
     return this
   }
@@ -197,14 +183,15 @@ export const Element = class {
     return this
   }
   public measureText(text: string, size: number): TextMetrics {
-    this.ctx.font = global.fontFromSize(size)
+    this.ctx.font = `${this.ctx.style} ${size}px ${this.ctx.family}`
     return this.ctx.measureText(text)
   }
-  public flip(direction: 'horizontal' | 'vertical'): this {
+  public flip(direction: 'horizontal' | 'vertical', restore: boolean = true): this {
+    this.restore = restore
     this.ctx.save()
 
-    let centerX = this.x + this.width * 0.5
-    let centerY = this.y + this.height * 0.5
+    let centerX: number = this.x + this.width * 0.5
+    let centerY: number = this.y + this.height * 0.5
     this.ctx.translate(centerX, centerY)
 
     let scaleX: number = direction === 'horizontal' ? -1 : 1
@@ -214,6 +201,12 @@ export const Element = class {
     this.ctx.translate(-centerX, -centerY)
 
     return this
+  }
+  public endTransform(force: boolean = false): void {
+    if (this.restore || force) {
+      this.ctx.restore()
+      this.restore = false
+    }
   }
 }
 
@@ -258,8 +251,6 @@ export const RoundRect = class extends Element {
     this.ctx.roundRect(this.x, this.y, this.width, this.height, this.radii)
   }
 }
-
-
 
 export const Line = class extends Element {
   public static draw({ x1 = 0, y1 = 0, x2 = 0, y2 = 0 }: LineInterface) {
@@ -331,15 +322,18 @@ export const Circle = class extends Element {
 }
 
 export const Text = class extends Element {
-  public static draw({ x = 0, y = 0, size = 0, text = '', align = 'center' as CanvasTextAlign, style = global.fontConfig.style, family = global.fontConfig.family }: TextInterface) {
-    return new Text(x, y, size, text, align, style, family)
+  public static draw({ x = 0, y = 0, size = 0, text = '', align = 'center' as CanvasTextAlign, style = global.fontConfig.style, family = global.fontConfig.family, fitToWidth = null, fitToHeight = null }: TextInterface) {
+    return new Text(x, y, text, size, align, style, family, fitToWidth, fitToHeight)
   }
   private size: number
   private text: string
   private align: CanvasTextAlign
   private style: string
   private family: string
-  constructor(x: number, y: number, size: number, text: string, align?: CanvasTextAlign, style?: string, family?: string) {
+  private metrics: TextMetrics
+  private fitToWidth: number
+  private fitToHeight: number
+  constructor(x: number, y: number, text: string, size?: number, align?: CanvasTextAlign, style?: string, family?: string, fitToWidth?: number, fitToHeight?: number) {
     super()
 
     this.x = x
@@ -348,28 +342,45 @@ export const Text = class extends Element {
     this.text = text
     this.align = align
     this.style = style
+    this.ctx.style = style
     this.family = family
+    this.ctx.family = family
+
+    this.metrics = this.measureText(this.text, 128)
+    this.fitToWidth = fitToWidth
+    this.fitToHeight = fitToHeight
 
     this.draw()
   }
+  private fitToArea(): number {
+    let aspectRatio: number = this.metrics.width / 128
+    let maxSizeWidth: number = this.fitToWidth / aspectRatio
+    return Math.min(maxSizeWidth, this.fitToHeight)
+  }
   private draw(): void {
-    this.ctx.font = `${this.style} ${this.size}px ${this.family}`
     this.ctx.lineCap = 'round'
     this.ctx.lineJoin = 'round'
     this.ctx.textAlign = this.align
+    this.ctx.font = `${this.style} ${this.fitToWidth || this.fitToHeight ? this.fitToArea() : this.size}px ${this.family}`
+
     this.ctx.beginPath()
     this.setCache({
       type: 'text',
-      run: ({ fill = null, stroke = null, lineWidth = null, }) => {
+      run: ({ fill = null, stroke = null, lineWidth = null, }: CacheFunction) => {
+        this.ctx.save()
+        this.ctx.translate(this.x, this.y)
+
         if (stroke != null) {
           this.ctx.strokeStyle = stroke
           this.ctx.lineWidth = lineWidth
-          this.ctx.strokeText(this.text, this.x, this.y)
+          this.ctx.strokeText(this.text, 0, 0)
         }
         if (fill != null) {
           this.ctx.fillStyle = fill
-          this.ctx.fillText(this.text, this.x, this.y)
+          this.ctx.fillText(this.text, 0, 0)
         }
+
+        this.ctx.restore()
       }
     })
   }
@@ -393,7 +404,7 @@ export const Bar = class extends Element {
     this.ctx.beginPath()
     this.setCache({
       type: 'bar',
-      run: ({ fill, stroke, lineWidth }) => {
+      run: ({ fill, stroke, lineWidth }: CacheFunction) => {
         this.ctx.lineCap = 'round'
         Line.draw({
           x1: this.x + this.height * 0.5, y1: this.y + this.height * 0.5,
@@ -415,7 +426,7 @@ export const Clip = class extends Element {
   public static circle({ x = 0, y = 0, radius = 0 }: CurveInterface) {
     return new Clip('circle', { x, y, radius })
   }
-  public static poly(path: Array<Pair>) {
+  public static poly(path: Array<Pair<number>>) {
     return new Clip('path', { x: 0, y: 0, width: 0, height: 0 }, path)
   }
   public static end() {
@@ -426,8 +437,8 @@ export const Clip = class extends Element {
 
   private type: ClipType
   private radius: number
-  private path: Array<Pair>
-  constructor(type: ClipType, { x = 0, y = 0, width = 0, height = 0, radius = 0 }, path?: Array<Pair>) {
+  private path: Array<Pair<number>>
+  constructor(type: ClipType, { x = 0, y = 0, width = 0, height = 0, radius = 0 }, path?: Array<Pair<number>>) {
     super()
     Clip.instances.push(this)
 
@@ -461,11 +472,11 @@ export const Clip = class extends Element {
 }
 
 export const Poly = class extends Element {
-  static draw(path: Array<Pair> = []) {
+  static draw(path: Array<Pair<number>> = []) {
     return new Poly(path)
   }
-  private path: Array<Pair>
-  constructor(path: Array<Pair>) {
+  private path: Array<Pair<number>>
+  constructor(path: Array<Pair<number>>) {
     super()
 
     this.path = path
@@ -487,7 +498,7 @@ export const Media = class extends Element {
   public static async draw({ x = 0, y = 0, width = 0, height = 0, dir = '' }: MediaInterface) {
     return await new Media(x, y, width, height, dir).draw()
   }
-  private dir: string
+  private dir: string | HTMLImageElement
   constructor(x: number, y: number, width: number, height: number, dir: string) {
     super()
 
@@ -500,8 +511,7 @@ export const Media = class extends Element {
   }
   private async draw(): Promise<any> {
     this.ctx.beginPath()
-    let media = await loadImage(this.dir)
-    this.ctx.drawImage(media, this.x, this.y, this.width, this.height)
+    this.ctx.drawImage(typeof this.dir === 'string' ? await loadImage(this.dir) : this.dir, this.x, this.y, this.width, this.height)
 
     return Rect.draw({
       x: this.x, y: this.y,
@@ -546,7 +556,7 @@ export const MazeWall = class extends Element {
   private draw(): void {
     this.setCache({
       type: 'rect',
-      run: ({ fill = null, stroke = null, lineWidth = null, }) => {
+      run: ({ fill = null, stroke = null, lineWidth = null, }: CacheFunction) => {
         Rect.draw({
           x: this.x, y: this.y,
           width: this.width, height: this.height
@@ -646,7 +656,7 @@ export const Heart = class extends Element {
     if (!this.parent) {
       this.setCache({
         type: 'heart',
-        run: ({ fill = null, stroke = null, lineWidth = null, }) => {
+        run: ({ fill = null, stroke = null, lineWidth = null, }: CacheFunction) => {
           this.context.beginPath()
 
           this.drawContext()
@@ -738,7 +748,7 @@ export const Club = class extends Element {
     let leafSize: number = this.width * 0.25
     this.setCache({
       type: 'club',
-      run: ({ fill = null, stroke = null, lineWidth = null, }) => {
+      run: ({ fill = null, stroke = null, lineWidth = null, }: CacheFunction) => {
         this.ctx.beginPath()
         // leaves
         this.ctx.moveTo(centerX + this.width * 0.25, centerY + this.height * 0.1)
@@ -790,7 +800,7 @@ export const Spade = class extends Element {
   private draw(): void {
     this.setCache({
       type: 'spade',
-      run: ({ fill = null, stroke = null, lineWidth = null, }) => {
+      run: ({ fill = null, stroke = null, lineWidth = null, }: CacheFunction) => {
         this.ctx.beginPath()
         Heart.draw({
           x: this.x, y: this.y + this.height * 0.2,
@@ -829,8 +839,185 @@ export const Spade = class extends Element {
           this.ctx.fillStyle = fill
           this.ctx.fill()
         }
-
       }
     })
+  }
+}
+
+export const Pattern = class extends Element {
+  static draw({ x = 0, y = 0, width = 1, height = 1 }: RectangleInterface) {
+    return new Pattern(x, y, width, height)
+  }
+  constructor(x: number, y: number, width: number, height: number) {
+    super()
+
+    this.x = x
+    this.y = y
+    this.width = width
+    this.height = height
+
+    this.draw()
+  }
+  private draw(): void {
+    let spacing: number = this.height / 12
+    Clip.rect({
+      x: this.x, y: this.y,
+      width: this.width, height: this.height
+    })
+    for (let i = 0; i < 16; i++) {
+      Line.draw({
+        x1: this.x, y1: this.y + spacing * i,
+        x2: this.x + this.width, y2: this.y + spacing * i + this.height,
+      }).stroke(Colors.black, this.width / 32)
+      Line.draw({
+        x1: this.x, y1: this.y - spacing * i,
+        x2: this.x + this.width, y2: this.y - spacing * i + this.height,
+      }).stroke(Colors.black, this.width / 32)
+
+      Line.draw({
+        x1: this.x + this.width, y1: this.y + spacing * i,
+        x2: this.x, y2: this.y + spacing * i + this.height,
+      }).stroke(Colors.black, this.width / 32)
+      Line.draw({
+        x1: this.x + this.width, y1: this.y - spacing * i,
+        x2: this.x, y2: this.y - spacing * i + this.height,
+      }).stroke(Colors.black, this.width / 32)
+    }
+    Clip.end()
+  }
+}
+
+export const Card = class extends Element {
+  public static draw({ x = 0, y = 0, size = 1,  }: CardImageInterface, suit: Suit, rank: PlayingCard, facing: number) {
+    return new Card(x, y, size, suit, rank, facing)
+  }
+  public suit: Suit
+  public rank: PlayingCard
+  public facing: number
+  private flipInterpolator: InterpolatorInterface
+  constructor(x: number, y: number, size: number, suit: Suit, rank: PlayingCard, facing: number) {
+    super()
+
+    this.suit = suit
+    this.rank = rank
+    this.facing = facing
+
+    this.x = x
+    this.y = y
+    this.width = size
+    this.height = size * 1.5
+
+    this.flipInterpolator = new Interpolator(Ease.Linear, 6)
+    this.draw()
+  }
+  private drawFace(border: number): void {
+    let borderColor = ['h', 'd'].includes(this.suit) ? Color.blend(Colors.error, Colors.black, 0.6) : Color.blend(Colors.darkGray, Colors.black, 0.6)
+    let symbolSize: number = this.width * 0.15
+    let spacing: number = symbolSize * 0.125
+
+    switch (this.suit) {
+      case Suits.Clubs:
+        this.ctx.save()
+
+        Club.draw({
+          x: this.x + spacing * 2, y: this.y + spacing * 2,
+          width: symbolSize, height: symbolSize,
+        }).both(Colors.darkGray, borderColor, border)
+        Club.draw({
+          x: this.x + this.width - spacing * 2 - symbolSize, y: this.y + this.height - spacing * 2 - symbolSize,
+          width: symbolSize, height: symbolSize,
+        }).flip('vertical', false).both(Colors.darkGray, borderColor, border)
+
+        this.endTransform(true)
+        break
+      case Suits.Spades:
+        this.ctx.save()
+
+        Spade.draw({
+          x: this.x + spacing * 2, y: this.y + spacing * 2,
+          width: symbolSize, height: symbolSize,
+        }).flip('vertical', false).both(Colors.darkGray, borderColor, border)
+        Spade.draw({
+          x: this.x + this.width - spacing * 2 - symbolSize, y: this.y + this.height - spacing * 2 - symbolSize,
+          width: symbolSize, height: symbolSize,
+        }).both(Colors.darkGray, borderColor, border)
+
+        this.endTransform(true)
+        break
+      case Suits.Diamonds:
+        let symbolX = this.x + spacing + symbolSize * 0.6
+        let symbolY = this.y + spacing + symbolSize * 0.6
+        Poly.draw([
+          [symbolX - symbolSize * 0.4, symbolY],
+          [symbolX, symbolY - symbolSize * 0.5],
+          [symbolX + symbolSize * 0.4, symbolY],
+          [symbolX, symbolY + symbolSize * 0.5],
+          [symbolX - symbolSize * 0.4, symbolY],
+        ]).both(Colors.error, borderColor, border)
+        symbolX = this.x + this.width - spacing * 2 - symbolSize * 0.6
+        symbolY = this.y + this.height - spacing * 2 - symbolSize * 0.6
+        Poly.draw([
+          [symbolX - symbolSize * 0.4, symbolY],
+          [symbolX, symbolY - symbolSize * 0.5],
+          [symbolX + symbolSize * 0.4, symbolY],
+          [symbolX, symbolY + symbolSize * 0.5],
+          [symbolX - symbolSize * 0.4, symbolY],
+        ]).both(Colors.error, borderColor, border)
+
+        this.endTransform(true)
+        break
+      case Suits.Hearts:
+        this.ctx.save()
+
+        Heart.draw({
+          x: this.x + spacing * 2, y: this.y + spacing * 2,
+          width: symbolSize, height: symbolSize,
+        }).both(Colors.error, borderColor, border)
+        Heart.draw({
+          x: this.x + this.width - spacing * 2 - symbolSize, y: this.y + this.height - spacing * 2 - symbolSize,
+          width: symbolSize, height: symbolSize,
+        }).flip('vertical', false).both(Colors.error, borderColor, border)
+
+        this.endTransform(true)
+        break
+    }
+
+    Text.draw({
+      x: this.x + this.width * 0.5, y: this.y + this.width * 0.9,
+      size: this.width * 0.5,
+      text: typeof this.rank === 'number' ? this.rank.toString() : this.rank.toUpperCase(),
+      align: 'center',
+      family: 'Ubuntu', style: 'bold',
+    }).both(['h', 'd'].includes(this.suit) ? Colors.error : Colors.darkGray, borderColor, border)
+  }
+  private drawBack(border: number): void {
+    Pattern.draw({
+      x: this.x + border, y: this.y + border,
+      width: this.width - border * 2, height: this.height - border * 2,
+    })
+  }
+  private draw(): void {
+    let border: number = 4
+    this.ctx.save()
+
+    let scaleX: number = Math.cos(this.flipInterpolator.get(this.facing) * Math.PI)
+
+    this.ctx.translate(this.x + this.width * 0.5, this.y + this.height * 0.5)
+    this.ctx.scale(scaleX, 1)
+    this.ctx.translate(-this.x - this.width * 0.5, -this.y - this.height * 0.5)
+
+    RoundRect.draw({
+      x: this.x, y: this.y,
+      width: this.width, height: this.height,
+      radii: [this.width / 10, this.width / 10, this.width / 10, this.width / 10],
+    }).both(Colors.white, Color.blend(Colors.white, Colors.black, 0.6), border * 2)
+
+    if (this.flipInterpolator.get(this.facing) < 0.5) {
+      this.drawBack(border)
+    } else {
+      this.drawFace(border)
+    }
+
+    this.endTransform(true)
   }
 }

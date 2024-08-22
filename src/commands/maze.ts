@@ -5,17 +5,11 @@ import NodeCanvas from '../canvas/canvas.js'
 import {
   MazeMap
 } from '../canvas/elements.js'
-import {
-  Maze,
-} from '../mazes/maze.js'
+import Maze from '../mazes/maze.js'
 import PRNG from '../utilities/prng.js'
-import {
-  NodeCanvasInterface,
-  PlacementType,
-  Algorithm,
-} from '../types.d.js'
+import { PlacementType } from 'types/enum.d.js'
 
-const generateMaze = (algorithm: Algorithm, seed: string, width: number, height: number): any => {
+const generateMaze = (algorithm: MazeAlgorithm, seed: string, width: number, height: number): any => {
   let c: NodeCanvasInterface = new NodeCanvas(width * 32, height * 32)
   const maze = new Maze()
     .setWidth(width)

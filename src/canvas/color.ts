@@ -1,29 +1,28 @@
-import { ColorInterface, RGBTuple, RGBAQuaple, RGBValue, Tuple, NumberRange, LABTuple, ChromaticValue, LuminosityValue, HSVTuple, Hue, Saturation } from 'types.d.js'
 import * as util from 'utilities/util.js'
 
-const Color = class {
+const Color = class implements ColorInterface {
   public static fromHex(hex: string): ColorInterface {
     let color: ColorInterface = new Color()
-    color.hex = hex
-    color.rgb = Color.hexToRGB(hex)
-    color.lab = Color.hexToLAB(hex)
-    color.getHSV()
+      .setHex(hex)
+      .setRGB(Color.hexToRGB(hex))
+      .setLAB(Color.hexToLAB(hex))
+      .getHSV()
     return color
   }
-  public static fromRGB(rgb: RGBTuple): ColorInterface {
+  public static fromRGB(rgb: RGBTuple, alpha: RGBValue = 255): ColorInterface {
     let color: ColorInterface = new Color()
-    color.hex = Color.rgbToHex(rgb)
-    color.rgb = rgb
-    color.lab = Color.rgbToLAB(rgb)
-    color.getHSV()
+      .setRGB(rgb, alpha)
+      .setHex(Color.rgbToHex(rgb))
+      .setLAB(Color.rgbToLAB(rgb))
+      .getHSV()
     return color
   }
   public static fromLAB(lab: LABTuple): ColorInterface {
     let color: ColorInterface = new Color()
-    color.hex = Color.labToHex(lab)
-    color.rgb = Color.labToRGB(lab)
-    color.lab = lab
-    color.getHSV()
+      .setLAB(lab)
+      .setHex(Color.labToHex(lab))
+      .setRGB(Color.labToRGB(lab))
+      .getHSV()
     return color
   }
   public static hexToRGB(hex: string): RGBTuple {
@@ -47,7 +46,7 @@ const Color = class {
   public static correctGammaInverse(c: number): number {
     return c <= 0.0031308 ? 12.92 * c : 1.055 * Math.pow(c, 1 / 2.4) - 0.055
   }
-  public static rgbToXYZ(r: RGBValue, g: RGBValue, b: RGBValue, a?: number): Tuple {
+  public static rgbToXYZ(r: RGBValue, g: RGBValue, b: RGBValue, a?: number): Tuple<number> {
     let lr: number = Color.correctGamma(r)
     let lg: number = Color.correctGamma(g)
     let lb: number = Color.correctGamma(b)
@@ -72,22 +71,21 @@ const Color = class {
   }
   public static rgbToLAB(rgba: RGBAQuaple | RGBTuple): LABTuple {
     // convert to linear RGB
-    console.log(rgba)
     let lr = Color.correctGamma(rgba[0] / 255)
     let lg = Color.correctGamma(rgba[1] / 255)
     let lb = Color.correctGamma(rgba[2] / 255)
     let la = rgba[3]
 
     // convert linear RGB to XYZ
-    let [x, y, z]: Tuple = Color.rgbToXYZ(lr, lg, lb)
+    let [x, y, z]: Tuple<number> = Color.rgbToXYZ(lr, lg, lb)
     // convert XYZ to LAB
-    let lab: Tuple = Color.xyzToLAB(x, y, z)
+    let lab: Tuple<number> = Color.xyzToLAB(x, y, z)
     if (la)
       lab.push(la)
 
     return lab
   }
-  public static labToXYZ(l: LuminosityValue, a: ChromaticValue, b: ChromaticValue): Tuple {
+  public static labToXYZ(l: LuminosityValue, a: ChromaticValue, b: ChromaticValue): Tuple<number> {
     let fy: number = (l + 16) / 116
     let fx: number = a / 500 + fy
     let fz: number = fy - b / 200
@@ -110,7 +108,7 @@ const Color = class {
   public static labToRGB(laba: Array<number>): LABTuple {
     let [x, y, z] = Color.labToXYZ(laba[0], laba[1], laba[0])
     let [lr, lg, lb] = Color.xyzToRGB(x, y, z)
-    let rgb: Tuple = [
+    let rgb: Tuple<number> = [
       Math.round(util.clamp(Color.correctGammaInverse(lr), 0, 0xff)),
       Math.round(util.clamp(Color.correctGammaInverse(lg), 0, 0xff)),
       Math.round(util.clamp(Color.correctGammaInverse(lb), 0, 0xff)),
@@ -143,7 +141,7 @@ const Color = class {
   public static euclideanDist(a: Array<number>, b: Array<number>): number {
     return Math.sqrt(Color.euclideanDistSqrd(a, b))
   }
-  public static blend(color1: ColorInterface, color2: ColorInterface, weight2: NumberRange<0, 1>): object {
+  public static blend(color1: ColorInterface, color2: ColorInterface, weight2: NumberRange<0, 1>): ColorInterface {
     if (weight2 <= 0) return color1
     if (weight2 >= 1) return color2
     let weight1: number = 1 - weight2
@@ -157,6 +155,7 @@ const Color = class {
   public hex: string
 
   public rgb: RGBTuple
+  public rgba: RGBAQuaple
   public red: RGBValue
   public green: RGBValue
   public blue: RGBValue
@@ -170,6 +169,8 @@ const Color = class {
   public hue: Hue
   public saturation: Saturation
   public value: Value
+
+  public alpha: RGBValue
   constructor() {
     this.hex = '#000000'
 
@@ -185,8 +186,31 @@ const Color = class {
     this.hue = 0
     this.saturation = 0
     this.value = 0
+
+    this.alpha = 255
   }
-  public getHSV(): void {
+  public setRGB(rgb: RGBTuple, alpha: RGBValue = 255): this {
+    this.rgb = rgb
+    this.red = rgb[0]
+    this.green = rgb[1]
+    this.blue = rgb[2]
+
+    this.alpha = alpha
+    this.rgba = [...rgb, alpha]
+    return this
+  }
+  public setHex(hex: string): this {
+    this.hex = hex
+    return this
+  }
+  public setLAB(lab: LABTuple): this {
+    this.lab = lab
+    this.luminosity = lab[0]
+    this.chromaticA = lab[1]
+    this.chromaticB = lab[2]
+    return this
+  }
+  public getHSV(): this {
     let r: number = this.red / 255
     let g: number = this.green / 255
     let b: number = this.blue / 255
@@ -212,6 +236,7 @@ const Color = class {
     })) as number * 100
     this.saturation = (max === 0 ? 0 : d / max) * 100
     this.value = max * 100
+    return this
   }
   public rotateHue(hue: Hue): this {
     this.hue = util.clamp(this.hue + hue, 0, 100)

@@ -17,18 +17,15 @@ import {
   ChannelSelectMenuInteraction,
   CollectedInteraction,
   PermissionsBitField,
+  User,
 } from 'discord.js'
-import {
-  CommandInterface,
-  GuildCollectionInterface,
-  UserDataInterface,
-  LootLeagueInterface,
-} from '../../types.js'
-import GuildCollection from '../../user-manager/guildcollection.js'
+//import GuildCollection from '../../user-manager/guildcollection.js'
 import InteractionObserver from '../interactionobserver.js'
-import global from '../../global.js'
+import global from 'global.js'
 import * as util from '../../utilities/util.js'
 import Icon from '../../utilities/icon.js'
+import Database from 'db/database.js'
+import { Abort } from 'types/enum.d.js'
 
 type Action = StringSelectMenuInteraction<CacheType> | UserSelectMenuInteraction<CacheType> | RoleSelectMenuInteraction<CacheType> | MentionableSelectMenuInteraction<CacheType> | ChannelSelectMenuInteraction<CacheType> | ButtonInteraction<CacheType>
 type Component = InteractionCollector<CollectedInteraction<CacheType>>
@@ -38,22 +35,20 @@ const Shield: CommandInterface = {
   description: `Shield yourself from thieves for ${util.formatSeconds(global.shieldDuration)}! ${util.formatSeconds(global.cooldown.shield)} cooldown.`,
   data: new SlashCommandBuilder(),
   async execute(interaction: ChatInputCommandInteraction<CacheType>): Promise<void> {
-    await interaction.deferReply()
-    const observer = new InteractionObserver(interaction)
-    //if (interaction.guild.id !== global.testServerId) return await observer.abort(3)
+    const observer = await new InteractionObserver(interaction).defer()
+    const user: User = await util.fetchUser(interaction.user.id)
+
+    //if (interaction.guild.id !== global.testServerId) return await observer.abort(Abort.CommandUnavailableInServer)
     if (interaction.channel.id !== global.commandChannels.lootLeague && !observer.checkPermissions([PermissionsBitField.Flags.ManageMessages], interaction.channel))
-      return await observer.abort(5)
+      return await observer.abort(Abort.CommandRestrictedChannel)
 
-    let guild: GuildCollectionInterface = await GuildCollection.fetch(interaction.guildId)
-    let userData: UserDataInterface = await guild.fetchMember(interaction.user.id)
-    let lootLeague: LootLeagueInterface = userData.lootLeague
+    let userData: DatabaseInstanceInterface = await Database.discord.users.fetch(user.id)
 
-    let cooldown: number = Math.floor((Date.now() - lootLeague.cooldown.shield) / 1e3)
-    if (lootLeague.shieldEnd > Date.now()) {
-      interaction.editReply(`You cannot create a shield while one is active!\nRemaining shield time: **${util.formatSeconds(Math.floor((lootLeague.shieldEnd - Date.now()) / 1e3), true)}!**`)
+    if (userData.shieldEnd > Date.now()) {
+      await interaction.editReply(`You cannot create a shield while one is active!\nRemaining shield time: **${util.formatSeconds(Math.floor((userData.shieldEnd - Date.now()) / 1e3), true)}!**`)
       return
-    } else if (cooldown < global.cooldown.shield) {
-      interaction.editReply(`This command is on cooldown for **${util.formatSeconds(global.cooldown.shield - cooldown, true)}!**`)
+    } else if (observer.isOnCooldown('shield')) {
+      await interaction.editReply(`This command is on cooldown for **${util.formatSeconds(observer.getCooldown('shield'), true)}!**`)
       return
     } else {
       const row = new ActionRowBuilder<ButtonBuilder>()
@@ -69,13 +64,13 @@ const Shield: CommandInterface = {
         )
 
       const confirmationEmbed = new EmbedBuilder()
-        .setColor(userData.user.hexAccentColor)
+        .setColor(user.accentColor)
         .setAuthor({
-          name: `${userData.user.username}`,
-          iconURL: userData.user.avatarURL(),
+          name: `${user.username}`,
+          iconURL: user.avatarURL(),
         })
         .setThumbnail(`attachment://${Icon.HazardSign}`)
-        .setDescription(`# Are you sure you want to activate a shield <@${interaction.user.id}> for ${util.formatSeconds(global.shieldDuration), true}?\nThis action will cost __20%__ of your total points!`)
+        .setDescription(`# Are you sure you want to activate a shield <@${user.id}> for ${util.formatSeconds(global.shieldDuration), true}?\nThis action will cost __20%__ of your total points!`)
         .addFields({
           name: 'WARNING!',
           value: 'If you activate a shield, you forfeit your ability to gamble and steal!',
@@ -98,13 +93,13 @@ const Shield: CommandInterface = {
       collector.on('collect', async (action: Action): Promise<void> => {
         let expireTime: number = Math.floor(Date.now() / 1e3 + global.shieldDuration)
         const confirmatedEmbed = new EmbedBuilder()
-          .setColor(userData.user.hexAccentColor)
+          .setColor(user.accentColor)
           .setAuthor({
-            name: `${userData.user.username}`,
-            iconURL: userData.user.avatarURL(),
+            name: `${user.username}`,
+            iconURL: user.avatarURL(),
           })
           .setThumbnail(`attachment://${Icon.TemporaryShield}`)
-          .setDescription(`# <@${interaction.user.id}> has activated a shield for ${util.formatSeconds(global.shieldDuration)}s!`)
+          .setDescription(`# <@${user.id}> has activated a shield for ${util.formatSeconds(global.shieldDuration)}s!`)
           .addFields({
             name: 'Expires At',
             value: `<t:${expireTime}> (<t:${expireTime}:R>)`,
@@ -120,9 +115,10 @@ const Shield: CommandInterface = {
             components: []
           })
 
-          await lootLeague.setScore(lootLeague.score * 0.8)
-          await lootLeague.setCooldown('shield', Date.now())
-          await lootLeague.setShield(Date.now() + global.shieldDuration * 1e3)
+          await userData.setScore(Math.floor(userData.score * 0.8))
+          await userData.setShield(Date.now() + global.shieldDuration * 1e3)
+          observer.resetCooldown('shield')
+
         } else if (action.customId === 'cancelShield') {
           await action.update({
             content: 'Shield activation canceled.',
@@ -130,14 +126,15 @@ const Shield: CommandInterface = {
           })
         }
       })
-      await lootLeague.setCooldown('shield', Date.now())
+      observer.resetCooldown('shield')
 
-      collector.on('end', (collected: Collection<string, CollectedInteraction<CacheType>>) => {
-        if (collected.size === 0)
-          interaction.editReply({
-          content: 'No response received, shield activation timed out.',
-          components: []
-        })
+      collector.on('end', async (collected: Collection<string, CollectedInteraction<CacheType>>): Promise<void> => {
+        if (collected.size === 0) {
+          await interaction.editReply({
+            content: 'No response received, shield activation timed out.',
+            components: []
+          })
+        }
       })
     }
   },

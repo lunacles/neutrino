@@ -4,63 +4,51 @@ import {
   SlashCommandBuilder,
   EmbedBuilder,
   PermissionsBitField,
+  User,
 } from 'discord.js'
 import InteractionObserver from '../interactionobserver.js'
-import global from '../../global.js'
-import * as util from '../../utilities/util.js'
-import Icon from '../../utilities/icon.js'
-import {
-  CommandInterface,
-  GuildCollectionInterface,
-  UserDataInterface,
-  LootLeagueInterface,
-} from '../../types.js'
-import GuildCollection from '../../user-manager/guildcollection.js'
+import * as util from 'utilities/util.js'
+import Icon from 'utilities/icon.js'
+import Database from 'db/database.js'
+import { Abort } from 'types/enum.d.js'
+import global from 'global.js'
 
 const Leaderboard: CommandInterface = {
   name: 'leaderboard',
   description: `Shows the top 10 users. ${util.formatSeconds(global.cooldown.score)} cooldown.`,
   data: new SlashCommandBuilder(),
   async execute(interaction: ChatInputCommandInteraction<CacheType>): Promise<void> {
-    await interaction.deferReply()
-    const observer = new InteractionObserver(interaction)
-    //if (interaction.guild.id !== global.testServerId) return await observer.abort(3)
+    const observer = await new InteractionObserver(interaction).defer()
+    const user: User = await util.fetchUser(interaction.user.id)
+
+    //if (interaction.guild.id !== global.testServerId) return await observer.abort(Abort.CommandUnavailableInServer)
     if (interaction.channel.id !== global.commandChannels.lootLeague && !observer.checkPermissions([PermissionsBitField.Flags.ManageMessages], interaction.channel))
-      return await observer.abort(5)
+      return await observer.abort(Abort.CommandRestrictedChannel)
 
-    let guild: GuildCollectionInterface = await GuildCollection.fetch(interaction.guildId)
-    let userData: UserDataInterface = await guild.fetchMember(interaction.user.id)
-    let lootLeague: LootLeagueInterface = userData.lootLeague
-
-    //let top = Array.from(Database.users.values()).sort((a, b) => b.data.scoregame.data.score - (a.data.scoregame.data?.score ?? 0)).slice(0, 10).map((user, index) => `**${index + 1}:** <@${user.data.id}> - **${user.data.scoregame.data.score.toLocaleString()}**`).join('\n')
-    let top = Array.from(guild.members.values())
-      .filter((user: UserDataInterface): boolean => user && user.lootLeague && typeof user.lootLeague.score === 'number') // Filter out any users without a proper score
-      .sort((a: UserDataInterface, b: UserDataInterface): number => {
-        let scoreA = a.lootLeague?.score ?? 0
-        let scoreB = b.lootLeague?.score ?? 0
-        return scoreB - scoreA
-      })
-      .slice(0, 10)
-      .map((user: UserDataInterface, index: number): string => `**${index + 1}:** <@${user.member.id}> - **${user.lootLeague.score.toLocaleString()}**`)
+    Database.discord.refreshLeaderboard()
+    if (Database.discord.leaderboard.heap.length <= 0) {
+      return await observer.abort(Abort.EmptyLeaderboard)
+    }
+    let top = Database.discord.leaderboard.heap
+      .map((user, index: number): string => `**${index + 1}:** <@${user}> - **${Database.discord.users.cache.get(user).score.toLocaleString()}**`)
       .join('\n')
 
-    let cooldown: number = Math.floor((Date.now() - lootLeague.cooldown.leaderboard) / 1e3)
-    if (cooldown < global.cooldown.leaderboard) {
-      interaction.editReply(`This command is on cooldown for **${util.formatSeconds(global.cooldown.leaderboard - cooldown, true)}!**`)
+    if (observer.isOnCooldown('leaderboard')) {
+      await interaction.editReply(`This command is on cooldown for **${util.formatSeconds(observer.getCooldown('leaderboard'), true)}!**`)
       return
     } else {
 
       const embed = new EmbedBuilder()
-        .setColor(userData.user.hexAccentColor)
+        .setColor(user.accentColor)
         .setAuthor({
-          name: `${userData.user.username}`,
-          iconURL: userData.user.avatarURL(),
+          name: `${user.username}`,
+          iconURL: user.avatarURL(),
         })
         .setTitle('Top 10 Users')
         .setThumbnail(`attachment://${Icon.Podium}`)
         .setDescription(top)
 
-      interaction.editReply({
+      await interaction.editReply({
         embeds: [embed],
         files: [{
           attachment: `./src/utilities/assets/${Icon.Podium}`,
@@ -68,7 +56,7 @@ const Leaderboard: CommandInterface = {
         }]
       })
 
-      await lootLeague.setCooldown('leaderboard', Date.now())
+      observer.resetCooldown('leaderboard')
     }
   },
   test(): boolean {

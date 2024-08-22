@@ -5,14 +5,12 @@ import {
   SlashCommandStringOption,
   SlashCommandUserOption,
   User,
+  SlashCommandBooleanOption,
 } from 'discord.js'
-import {
-  CommandInterface,
-  GuildCollectionInterface,
-} from '../../types.d.js'
 import InteractionObserver from '../interactionobserver.js'
 import global from '../../global.js'
-import GuildCollection from '../../user-manager/guildcollection.js'
+import Database from 'db/database.js'
+import { Abort } from 'types/enum.d.js'
 
 const FetchUserData: CommandInterface = {
   name: 'fetch',
@@ -21,27 +19,33 @@ const FetchUserData: CommandInterface = {
     .addUserOption((option: SlashCommandUserOption ): SlashCommandUserOption => option
       .setName('user')
       .setDescription('The user to fetch.')
-    )
-    .addStringOption((option: SlashCommandStringOption): SlashCommandStringOption => option
+    ).addStringOption((option: SlashCommandStringOption): SlashCommandStringOption => option
       .setName('user-id')
       .setDescription('The user id to fetch.')
+    ).addBooleanOption((option: SlashCommandBooleanOption): SlashCommandBooleanOption => option
+      .setName('redact')
+      .setDescription('Redact sensitive info. True by default.')
     ),
   async execute(interaction: ChatInputCommandInteraction<CacheType>): Promise<void> {
-    await interaction.deferReply()
-    const targetUserOption = interaction.options.getUser('user', false)
-    const targetUserId = interaction.options.getString('user-id', false)
-    const observer = new InteractionObserver(interaction)
+    const observer = await new InteractionObserver(interaction).defer()
+    const targetUserOption: User = interaction.options.getUser('user', false)
+    const targetUserId: string = interaction.options.getString('user-id', false)
+    const redact: boolean = interaction.options.getBoolean('redact', false) ?? true
 
-    if (interaction.user.id !== global.ownerId) return await observer.abort(0)
+    if (interaction.user.id !== global.ownerId) return await observer.abort(Abort.InsufficientPermissions)
     let targetUser: string
 
-    if (targetUserOption instanceof User) {
+    if (targetUserOption) {
       targetUser = targetUserOption.id
     } else if (targetUserId) {
       targetUser = targetUserId
+    } else {
+      return await observer.abort(Abort.TargetNotGiven)
     }
-    let guild: GuildCollectionInterface = await GuildCollection.fetch(interaction.guildId)
-    let userData: string = JSON.stringify((await guild.fetchMember(targetUser)).data, null, 2)
+
+    let userData: string = JSON.stringify((await Database.discord.users.fetch(targetUser)).data, null, 2)
+    if (redact)
+      userData = userData.replace(/("prng":\s*\[\s*)(\d+,\s*)(\d+,\s*)(\d+,\s*)(\d+\s*)(\])/g, '$1REDACTED, REDACTED, REDACTED, REDACTED\n  $6')
     let dataChunks: Array<string> = []
 
     for (let i = 0; i < userData.length; i += 1900)

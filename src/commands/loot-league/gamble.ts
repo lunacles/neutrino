@@ -5,18 +5,14 @@ import {
   SlashCommandIntegerOption,
   EmbedBuilder,
   PermissionsBitField,
+  User,
 } from 'discord.js'
-import {
-  CommandInterface,
-  GuildCollectionInterface,
-  UserDataInterface,
-  LootLeagueInterface,
-} from '../../types.js'
-import GuildCollection from '../../user-manager/guildcollection.js'
 import InteractionObserver from '../interactionobserver.js'
-import global from '../../global.js'
-import * as util from '../../utilities/util.js'
-import Icon from '../../utilities/icon.js'
+import * as util from 'utilities/util.js'
+import Icon from 'utilities/icon.js'
+import Database from 'db/database.js'
+import { Abort } from 'types/enum.d.js'
+import global from 'global.js'
 
 let chance: number = 0
 let setChance = (set: number): number => chance += set
@@ -41,31 +37,29 @@ const Gamble: CommandInterface = {
     .setRequired(true)
   ),
   async execute(interaction: ChatInputCommandInteraction<CacheType>): Promise<void> {
-    await interaction.deferReply()
+    const observer = await new InteractionObserver(interaction).defer()
     const amount = interaction.options.getInteger('amount', true)
-    const observer = new InteractionObserver(interaction)
-    //if (interaction.guild.id !== global.testServerId) return await observer.abort(3)
+    const user: User = await util.fetchUser(interaction.user.id)
+
+    //if (interaction.guild.id !== global.testServerId) return await observer.abort(Abort.server423)
     if (interaction.channel.id !== global.commandChannels.lootLeague && !observer.checkPermissions([PermissionsBitField.Flags.ManageMessages], interaction.channel))
-      return await observer.abort(5)
+      return await observer.abort(Abort.CommandRestrictedChannel)
 
-    let guild: GuildCollectionInterface = await GuildCollection.fetch(interaction.guildId)
-    let userData: UserDataInterface = await guild.fetchMember(interaction.user.id)
-    let lootLeague: LootLeagueInterface = userData.lootLeague
+    let userData: DatabaseInstanceInterface = await Database.discord.users.fetch(user)
 
-    let cooldown: number = Math.floor((Date.now() - lootLeague.cooldown.gamble) / 1e3)
-    if (lootLeague.shieldEnd > Date.now()) {
+    if (userData.shieldEnd > Date.now()) {
       interaction.editReply('You cannot gamble while you have a shield active!')
       return
-    } else if (cooldown < global.cooldown.gamble) {
-      interaction.editReply(`This command is on cooldown for **${util.formatSeconds(global.cooldown.gamble - cooldown, true)}!**`)
+    } else if (observer.isOnCooldown('gamble')) {
+      await interaction.editReply(`This command is on cooldown for **${util.formatSeconds(observer.getCooldown('gamble'), true)}!**`)
       return
     } else {
-      if (amount > lootLeague.score) {
-        interaction.editReply('You cannot gamble more points than what you currently have!')
+      if (amount > userData.score) {
+        await interaction.editReply('You cannot gamble more points than what you currently have!')
       } else {
         let result: number
         let win: boolean
-        let chance = crypto.getRandomValues(new Uint32Array(1))[0] / 0x100000000
+        let chance = await userData.random()//crypto.getRandomValues(new Uint32Array(1))[0] / 0x100000000
         let icon: string
         if (chance < Chance.Lose25) {
           // 30% chance to lose 25% of the amount
@@ -104,13 +98,13 @@ const Gamble: CommandInterface = {
           `lost **${Math.floor(Math.abs(netResult)).toLocaleString()}**!`
         let roll: string = icon.match(/dice-(\w+)\.png/)[1]
 
-        await lootLeague.setScore(Math.floor(lootLeague.score - amount + result))
+        userData.setScore(Math.floor(userData.score - amount + result))
 
         const embed = new EmbedBuilder()
-          .setColor(userData.user.hexAccentColor)
+          .setColor(user.accentColor)
           .setAuthor({
-            name: `${userData.user.username}`,
-            iconURL: userData.user.avatarURL(),
+            name: `${user.username}`,
+            iconURL: user.avatarURL(),
           })
           .setThumbnail(`attachment://${icon}`)
           .setDescription(`# You rolled a ${roll} and ${resultMessage}!`)
@@ -124,10 +118,10 @@ const Gamble: CommandInterface = {
             inline: true,
           }, {
             name: 'New Total Points',
-            value: Math.floor(lootLeague.score).toLocaleString(),
+            value: Math.floor(userData.score).toLocaleString(),
           })
 
-        interaction.editReply({
+        await interaction.editReply({
           embeds: [embed],
           files: [{
             attachment: `./src/utilities/assets/${icon}`,
@@ -136,7 +130,7 @@ const Gamble: CommandInterface = {
         })
       }
 
-      await lootLeague.setCooldown('gamble', Date.now())
+      observer.resetCooldown('gamble')
     }
   },
   test(): boolean {

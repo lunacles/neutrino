@@ -5,18 +5,15 @@ import {
   SlashCommandUserOption,
   EmbedBuilder,
   PermissionsBitField,
+  User,
 } from 'discord.js'
-import {
-  CommandInterface,
-  GuildCollectionInterface,
-  UserDataInterface,
-  LootLeagueInterface,
-} from '../../types.js'
-import GuildCollection from '../../user-manager/guildcollection.js'
+//import GuildCollection from '../../user-manager/guildcollection.js'
 import InteractionObserver from '../interactionobserver.js'
-import global from '../../global.js'
 import * as util from '../../utilities/util.js'
 import Icon from '../../utilities/icon.js'
+import Database from 'db/database.js'
+import { Abort } from 'types/enum.d.js'
+import global from 'global.js'
 
 const Score: CommandInterface = {
   name: 'score',
@@ -27,35 +24,30 @@ const Score: CommandInterface = {
       .setDescription('The user to check the points of.')
     ),
   async execute(interaction: ChatInputCommandInteraction<CacheType>): Promise<void> {
-    await interaction.deferReply()
-    const targetUserOption = interaction.options.getUser('user', false)
-    const observer = new InteractionObserver(interaction)
-    //if (interaction.guild.id !== global.testServerId) return await observer.abort(3)
+    const observer = await new InteractionObserver(interaction).defer()
+    const user: User = await util.fetchUser(interaction.user.id)
+    const targetUserOption = interaction.options.getUser('user', false) ?? user
+
+    //if (interaction.guild.id !== global.testServerId) return await observer.abort(Abort.CommandUnavailableInServer)
     if (interaction.channel.id !== global.commandChannels.lootLeague && !observer.checkPermissions([PermissionsBitField.Flags.ManageMessages], interaction.channel))
-      return await observer.abort(5)
+      return await observer.abort(Abort.CommandRestrictedChannel)
 
-    let guild: GuildCollectionInterface = await GuildCollection.fetch(interaction.guildId)
-    let authorData: UserDataInterface = await guild.fetchMember(interaction.user.id)
+    let targetData: DatabaseInstanceInterface = await Database.discord.users.fetch(targetUserOption.id)
 
-    let targetUser: string = targetUserOption ? targetUserOption.id : interaction.user.id
-    let targetData: UserDataInterface = await guild.fetchMember(targetUser)
-
-    let lootLeague: LootLeagueInterface = authorData.lootLeague
-    let cooldown: number = Math.floor((Date.now() - lootLeague.cooldown.score) / 1e3)
-    if (cooldown < global.cooldown.score) {
-      interaction.editReply(`This command is on cooldown for **${util.formatSeconds(global.cooldown.score - cooldown, true)}!**`)
+    if (observer.isOnCooldown('score')) {
+      await interaction.editReply(`This command is on cooldown for **${util.formatSeconds(observer.getCooldown('score'), true)}!**`)
       return
     } else {
       const embed = new EmbedBuilder()
-        .setColor(authorData.user.hexAccentColor)
+        .setColor(user.accentColor)
         .setAuthor({
-          name: `${authorData.user.username}`,
-          iconURL: authorData.user.avatarURL(),
+          name: `${user.username}`,
+          iconURL: user.avatarURL(),
         })
         .setThumbnail(`attachment://${Icon.PiggyBank}`)
-        .setDescription(`# <@${targetData.user.id}>'s current balance is **${targetData.lootLeague.score.toLocaleString()}!**`)
+        .setDescription(`# <@${targetUserOption.id}>'s current balance is **${targetData.score.toLocaleString()}!**`)
 
-      interaction.editReply({
+      await interaction.editReply({
         embeds: [embed],
         files: [{
           attachment: `./src/utilities/assets/${Icon.PiggyBank}`,
@@ -63,7 +55,7 @@ const Score: CommandInterface = {
         }]
       })
 
-      await lootLeague.setCooldown('score', Date.now())
+      observer.resetCooldown('score')
     }
   },
   test(): boolean {

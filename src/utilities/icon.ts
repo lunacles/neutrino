@@ -77,6 +77,8 @@ enum Icon {
   HazardSign = 'hazard-sign.png',
 
   Podium = 'podium.png',
+
+  CardRandom = 'card-random.png',
 }
 
 export default Icon

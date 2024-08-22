@@ -1,14 +1,6 @@
 import * as util from './util.js'
 import Log from './log.js'
 
-interface BuildInterface {
-  id: string
-  date: string
-  message: string
-  diff: string
-  load(): Promise<void>
-}
-
 const Build: BuildInterface = {
   id: 'unknown',
   date: '',

@@ -5,10 +5,6 @@ import {
   AttachmentBuilder,
   PermissionsBitField,
 } from 'discord.js'
-import {
-  CommandInterface,
-  NodeCanvasInterface,
-} from '../../types.js'
 import NodeCanvas from '../../canvas/canvas.js'
 import Colors from '../../canvas/palette.js'
 import {
@@ -21,19 +17,17 @@ import {
 import Color from '../../canvas/color.js'
 import InteractionObserver from '../interactionobserver.js'
 import global from 'global.js'
-
-type Pair = [number, number]
+import { Abort } from 'types/enum.d.js'
 
 const Snowman: CommandInterface = {
   name: 'snowman',
   description: 'Sends a snowman.',
   data: new SlashCommandBuilder(),
   async execute(interaction: ChatInputCommandInteraction<CacheType>): Promise<void> {
-    await interaction.deferReply()
-    const observer = new InteractionObserver(interaction)
+    const observer = await new InteractionObserver(interaction).defer()
 
     if (interaction.channel.id !== global.commandChannels.misc && !observer.checkPermissions([PermissionsBitField.Flags.ManageMessages], interaction.channel))
-      return await observer.abort(8)
+      return await observer.abort(Abort.CommandRestrictedChannel)
 
     let size: number = 256
     let radii: number = size * 0.5
@@ -42,7 +36,7 @@ const Snowman: CommandInterface = {
     Background.fill(Colors.glacialBlue)
 
     // arms
-    let path = (path: Pair) => ((to: Pair): void => {
+    let path = (path: Pair<number>) => ((to: Pair<number>): void => {
       let [x1, y1] = path
       let [xTo, yTo] = to
       Line.draw({

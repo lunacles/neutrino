@@ -6,13 +6,11 @@ import {
   SlashCommandStringOption,
   SlashCommandNumberOption,
 } from 'discord.js'
-import {
-  CommandInterface,
-} from '../../types.js'
 import InteractionObserver from '../interactionobserver.js'
 import { Noise } from '../../mazes/algorithms/noise.js'
 import generateMaze from '../maze.js'
 import global from 'global.js'
+import { Abort } from 'types/enum.d.js'
 
 enum Min {
   Dimensions = 16,
@@ -55,19 +53,17 @@ const DomainWarpedNoiseMaze: CommandInterface = {
       .setMaxValue(Max.Warp)
     ),
   async execute(interaction: ChatInputCommandInteraction<CacheType>): Promise<void> {
-    await interaction.deferReply()
+    const observer = await new InteractionObserver(interaction).defer()
     const seed: string = interaction.options.getString('seed') ?? ''
     const width: number = interaction.options.getNumber('width') ?? 32
     const height: number = interaction.options.getNumber('height') ?? 32
     const zoom: number = interaction.options.getNumber('zoom') ?? 2
     const warp: number = interaction.options.getNumber('warp') ?? 50
 
-    const observer = new InteractionObserver(interaction)
-
     if (interaction.channel.id !== global.commandChannels.mazeGeneration && !observer.checkPermissions([PermissionsBitField.Flags.ManageMessages], interaction.channel))
-      return await observer.abort(7)
+      return await observer.abort(Abort.CommandRestrictedChannel)
 
-    //if (!observer.checkPermissions([PermissionsBitField.Flags.ManageMessages], interaction.channel)) return await observer.abort(0)
+    //if (!observer.checkPermissions([PermissionsBitField.Flags.ManageMessages], interaction.channel)) return await observer.abort(Abort.InsufficientPermissions)
     const algorithm = new Noise()
       .setType('domainWarped')
       .setZoom(zoom)

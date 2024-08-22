@@ -11,10 +11,8 @@ import {
   Message,
   PermissionsBitField,
 } from 'discord.js'
-import {
-  CommandInterface,
-} from '../../types.js'
 import InteractionObserver from '../interactionobserver.js'
+import { Abort } from 'types/enum.d.js'
 
 const RemovePins: CommandInterface = {
   name: 'remove-pins',
@@ -37,15 +35,14 @@ const RemovePins: CommandInterface = {
     ),
 
   async execute(interaction: ChatInputCommandInteraction<CacheType>): Promise<void> {
-    await interaction.deferReply()
+    const observer = await new InteractionObserver(interaction).defer()
     const targetChannel: TextChannel = interaction.options.getChannel('target')
     const amount: number = interaction.options.getInteger('amount') ?? 50
     const user: User = interaction.options.getUser('user')
-    const observer = new InteractionObserver(interaction)
 
     const pinnedMessages: Collection<string, Message<true>> = await targetChannel.messages.fetchPinned()
 
-    if (!observer.checkPermissions([PermissionsBitField.Flags.ManageMessages], targetChannel)) return await observer.abort(0)
+    if (!observer.checkPermissions([PermissionsBitField.Flags.ManageMessages], targetChannel)) return await observer.abort(Abort.InsufficientPermissions)
 
     let userAmount = pinnedMessages.filter((value: Message<true>) => value.author.id === user?.id)
     await interaction.editReply(`Unpinning ${user != null ? userAmount.size : pinnedMessages.size} message(s) ${user != null ? `by <@${user.id}> ` : '' }from <#${targetChannel.id}>...`)

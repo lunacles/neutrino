@@ -7,13 +7,11 @@ import {
   SlashCommandStringOption,
   SlashCommandNumberOption,
 } from 'discord.js'
-import {
-  CommandInterface,
-} from '../../types.js'
 import InteractionObserver from '../interactionobserver.js'
 import { RandomWalker } from '../../mazes/algorithms/randomwalker.js'
 import global from '../../global.js'
 import generateMaze from '../maze.js'
+import { Abort } from 'types/enum.d.js'
 
 enum Min {
   Dimensions = 16,
@@ -126,7 +124,7 @@ const SeedMaze: CommandInterface = {
       .setDescription('If a walker runs into another walker, terminate it. Default is false.')
     ),
   async execute(interaction: ChatInputCommandInteraction<CacheType>): Promise<void> {
-    await interaction.deferReply()
+    const observer = await new InteractionObserver(interaction).defer()
     const seed: string = interaction.options.getString('seed') ?? ''
     const width: number = interaction.options.getNumber('width') ?? 32
     const height: number = interaction.options.getNumber('height') ?? 32
@@ -145,12 +143,10 @@ const SeedMaze: CommandInterface = {
     const minBranches: number = interaction.options.getNumber('min-branches') ?? 0
     const maxBranches: number = interaction.options.getNumber('max-branches') ?? 0
 
-    const observer = new InteractionObserver(interaction)
-
     if (interaction.channel.id !== global.commandChannels.mazeGeneration && !observer.checkPermissions([PermissionsBitField.Flags.ManageMessages], interaction.channel))
-      return await observer.abort(7)
+      return await observer.abort(Abort.CommandRestrictedChannel)
 
-    //if (!observer.checkPermissions([PermissionsBitField.Flags.ManageMessages], interaction.channel)) return await observer.abort(0)
+    //if (!observer.checkPermissions([PermissionsBitField.Flags.ManageMessages], interaction.channel)) return await observer.abort(Abort.InsufficientPermissions)
     const algorithm = new RandomWalker()
       .setSeedAmount(seedAmount)
       .setPlacementType(+!placementType)

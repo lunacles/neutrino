@@ -9,21 +9,10 @@ import {
   ButtonBuilder,
   ActionRowBuilder,
   Collection,
-  InteractionCollector,
-  ButtonInteraction,
-  StringSelectMenuInteraction,
-  UserSelectMenuInteraction,
-  RoleSelectMenuInteraction,
-  MentionableSelectMenuInteraction,
-  ChannelSelectMenuInteraction,
   CollectedInteraction,
   Attachment,
   PermissionsBitField,
 } from 'discord.js'
-import {
-  CommandInterface,
-  NodeCanvasInterface,
-} from '../../types.js'
 import InteractionObserver from '../interactionobserver.js'
 import NodeCanvas from '../../canvas/canvas.js'
 import Colors from '../../canvas/palette.js'
@@ -34,28 +23,21 @@ import {
   Rect,
   Text,
 } from '../../canvas/elements.js'
-import GIFEncoder from 'gifencoder'
+import { GIFEncoder, pnnQuant, Palettize } from 'gifenc/index.js'
+import { Abort } from 'types/enum.d.js'
+import global from 'global.js'
 
-type Action = StringSelectMenuInteraction<CacheType> | UserSelectMenuInteraction<CacheType> | RoleSelectMenuInteraction<CacheType> | MentionableSelectMenuInteraction<CacheType> | ChannelSelectMenuInteraction<CacheType> | ButtonInteraction<CacheType>
-type Component = InteractionCollector<CollectedInteraction<CacheType>>
-type Pair = [number, number]
-
-let encodeGif = (c: NodeCanvasInterface): Promise<Buffer> => {
-  return new Promise((resolve, reject): void => {
-    const encoder = new GIFEncoder(c.width, c.height)
-    const stream = encoder.createReadStream()
-    let buffers: Array<Buffer> = []
-
-    stream.on('data', (data: Buffer): number => buffers.push(data))
-    stream.on('end', () => resolve(Buffer.concat(buffers)))
-    stream.on('error', reject('Gif encoding error'))
-    encoder.start()
-    encoder.setRepeat(0)
-    encoder.setQuality(10)
-    encoder.setTransparent(0x000000)
-    encoder.addFrame(c.ctx)
-    encoder.finish()
+let encodeGif = (c: NodeCanvasInterface): Buffer => {
+  const encoder = new GIFEncoder()
+  let canvas: ImageData = c.ctx.getImageData(0, 0, c.width, c.height)
+  let palette = pnnQuant.quantize(canvas.data, 256)
+  let index = Palettize.applyPalette(canvas.data, palette)
+  encoder.writeFrame(index, c.width, c.height, {
+    palette,
+    repeat: -1,
   })
+  encoder.finish()
+  return Buffer.from(encoder.buffer)
 }
 
 let drawBase = async (image: Attachment, depth: number): Promise<NodeCanvasInterface> => {
@@ -93,13 +75,12 @@ const SpeechBubble: CommandInterface = {
     .setRequired(true)
   ),
   async execute(interaction: ChatInputCommandInteraction<CacheType>): Promise<void> {
-    await interaction.deferReply()
+    const observer = await new InteractionObserver(interaction).defer()
     const image: Attachment = interaction.options.getAttachment('image')
     const side: boolean = interaction.options.getBoolean('flip') ?? false
-    const observer = new InteractionObserver(interaction)
 
     if (interaction.channel.id !== global.commandChannels.misc && !observer.checkPermissions([PermissionsBitField.Flags.ManageMessages], interaction.channel))
-      return await observer.abort(8)
+      return await observer.abort(Abort.CommandRestrictedChannel)
 
     try {
       let buttonWidth: number = image.width / 5
@@ -163,7 +144,7 @@ const SpeechBubble: CommandInterface = {
         time: 15e3,
       })
 
-      let selectedButton: Pair
+      let selectedButton: Pair<number>
       collector.on('collect', async (action: Action): Promise<void> => {
         if (action.customId === 'finish') {
           let attachment = new AttachmentBuilder(await encodeGif(c), {
@@ -180,7 +161,7 @@ const SpeechBubble: CommandInterface = {
 
         let drawArrow = async (x: number, y: number): Promise<AttachmentBuilder> => {
           c = await drawBase(image, buttonHeight)
-          let path: Array<Pair> = [[buttonWidth * x + buttonWidth * 0.5, buttonHeight * y + buttonHeight * 0.5]]
+          let path: Array<Pair<number>> = [[buttonWidth * x + buttonWidth * 0.5, buttonHeight * y + buttonHeight * 0.5]]
 
           if (side) {
             path.push([image.width - buttonWidth, 0], [image.width, 0], [image.width, buttonHeight])

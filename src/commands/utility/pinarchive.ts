@@ -17,13 +17,11 @@ import {
   SlashCommandChannelOption,
   PermissionsBitField,
 } from 'discord.js'
-import {
-  CommandInterface,
-} from '../../types.js'
 import Log from '../../utilities/log.js'
 import Icon from '../../utilities/icon.js'
 import InteractionObserver from '../interactionobserver.js'
 import DeletedUsers from '../../utilities/deletedusers.js'
+import { Abort } from 'types/enum.d.js'
 
 const PinArchive: CommandInterface = {
   name: 'archive-pins',
@@ -35,11 +33,10 @@ const PinArchive: CommandInterface = {
       .setRequired(true)
     ),
   async execute(interaction: ChatInputCommandInteraction<CacheType>): Promise<void> {
-    await interaction.deferReply()
+    const observer = await new InteractionObserver(interaction).defer()
     const targetChannel: TextChannel = interaction.options.getChannel('target')
-    const observer = new InteractionObserver(interaction)
 
-    if (!observer.checkPermissions([PermissionsBitField.Flags.ManageMessages], targetChannel)) return await observer.abort(0)
+    if (!observer.checkPermissions([PermissionsBitField.Flags.ManageMessages], targetChannel)) return await observer.abort(Abort.InsufficientPermissions)
 
     let archive: GuildBasedChannel = observer
       .filterChannels()

@@ -15,13 +15,10 @@ import {
 } from 'discord.js'
 import Colors from '../../canvas/palette.js'
 import fetch, { Response } from 'node-fetch'
-import {
-  CommandInterface,
-} from '../../types.js'
 import InteractionObserver from '../interactionobserver.js'
 import global from 'global.js'
+import { Abort } from 'types/enum.d.js'
 
-type StringPair = [string, string]
 type ImageSize = (typeof ALLOWED_SIZES)[number]
 interface Choice {
   name: string,
@@ -50,17 +47,16 @@ const Avatar: CommandInterface = {
     }))
   ),
   async execute(interaction: ChatInputCommandInteraction<CacheType>): Promise<void> {
-    await interaction.deferReply({ ephemeral: true })
+    const observer = await new InteractionObserver(interaction).defer()
     const user: User = interaction.options.getUser('user') ?? interaction.user
     const guildAvatar: boolean = interaction.options.getBoolean('guild-avatar') ?? false
     const size: number = interaction.options.getInteger('size') ?? 512
-    const observer = new InteractionObserver(interaction)
 
     if (interaction.channel.id !== global.commandChannels.misc && !observer.checkPermissions([PermissionsBitField.Flags.ManageMessages], interaction.channel))
-      return await observer.abort(8)
+      return await observer.abort(Abort.CommandRestrictedChannel)
 
     let options: ImageURLOptions = { size: size as ImageSize, extension: 'png' }
-    let hyperlink: StringPair = [`${guildAvatar ? 'Global' : 'Guild'} Avatar URL`, guildAvatar ? user.displayAvatarURL(options) : user.avatarURL(options)]
+    let hyperlink: Pair<string> = [`${guildAvatar ? 'Global' : 'Guild'} Avatar URL`, guildAvatar ? user.displayAvatarURL(options) : user.avatarURL(options)]
     let buffer: Buffer
     try {
       let response: Response = await fetch(hyperlink[1])

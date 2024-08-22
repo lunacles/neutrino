@@ -7,24 +7,21 @@ import {
   PermissionsBitField,
 } from 'discord.js'
 import { version } from 'discord.js'
-import {
-  CommandInterface,
-} from '../../types.js'
 import InteractionObserver from '../interactionobserver.js'
 import global from 'global.js'
 import Colors from '../../canvas/palette.js'
 import Log from '../../utilities/log.js'
+import { Abort } from 'types/enum.d.js'
 
 const Info: CommandInterface = {
   name: 'info',
   description: 'Bot info.',
   data: new SlashCommandBuilder(),
   async execute(interaction: ChatInputCommandInteraction<CacheType>): Promise<void> {
-    await interaction.deferReply()
-    const observer = new InteractionObserver(interaction)
+    const observer = await new InteractionObserver(interaction).defer()
 
     if (interaction.channel.id !== global.commandChannels.misc && !observer.checkPermissions([PermissionsBitField.Flags.ManageMessages], interaction.channel))
-      return await observer.abort(8)
+      return await observer.abort(Abort.CommandRestrictedChannel)
 
     const embed = new EmbedBuilder()
       .setAuthor({

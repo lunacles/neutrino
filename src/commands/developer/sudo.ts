@@ -6,11 +6,9 @@ import {
   SlashCommandChannelOption,
   TextChannel,
 } from 'discord.js'
-import {
-  CommandInterface,
-} from '../../types.js'
 import InteractionObserver from '../interactionobserver.js'
 import global from '../../global.js'
+import { Abort } from 'types/enum.d.js'
 const Sudo: CommandInterface = {
   name: 'sudo',
   description: 'Sudo\'s the bot.',
@@ -28,13 +26,12 @@ const Sudo: CommandInterface = {
     .setDescription('The message to sudo.')
   ),
   async execute(interaction: ChatInputCommandInteraction<CacheType>): Promise<void> {
-    await interaction.deferReply()
+    const observer = await new InteractionObserver(interaction).defer()
     const targetChannelOption = interaction.options.getChannel('channel', false)
     const targetChannelId = interaction.options.getString('channel-id', false)
     const targetMessage: string = interaction.options.getString('message')
-    const observer = new InteractionObserver(interaction)
 
-    if (interaction.user.id !== global.ownerId) return await observer.abort(0)
+    if (interaction.user.id !== global.ownerId) return await observer.abort(Abort.InsufficientPermissions)
     let targetChannel: TextChannel
 
     if (targetChannelOption instanceof TextChannel) {
@@ -43,10 +40,10 @@ const Sudo: CommandInterface = {
       try {
         targetChannel = await interaction.client.channels.fetch(targetChannelId) as TextChannel
       } catch (err) {
-        return await observer.abort(2)
+        return await observer.abort(Abort.InvalidChannelType)
       }
     }
-    if (!targetChannel) return await observer.abort(2)
+    if (!targetChannel) return await observer.abort(Abort.InvalidChannelType)
 
     await targetChannel.send(targetMessage)
 

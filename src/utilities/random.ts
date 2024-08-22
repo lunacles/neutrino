@@ -1,4 +1,4 @@
-const Random = class RandomInterface {
+const Random = class implements RandomInterface {
   public prng: Function
   public result: number
   constructor(prng: Function = () => Math.random()) {

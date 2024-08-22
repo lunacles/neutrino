@@ -1,4 +1,3 @@
-import { SecretInterface } from '../types.js'
 import crypto from 'crypto'
 
 const Secret: SecretInterface = {

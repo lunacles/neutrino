@@ -1,47 +1,48 @@
 import {
   Message,
   Events,
+  AttachmentBuilder,
 } from 'discord.js'
-import GuildCollection from '../../user-manager/guildcollection.js'
-import fetch from 'node-fetch'
-import Log from '../../utilities/log.js'
-import global from '../../global.js'
-import {
-  Observer
-} from '../../types.js'
+import global from 'global'
+import nodeUtil from 'node:util'
 
 const MessageCreate: Observer = {
-  eventID: Events.MessageCreate,
+  id: Events.MessageCreate,
   active: false,
-  async react(bot: any, message: Message): Promise<void> {
+  async react(bot: any, message: Message, db): Promise<void> {
     // if the user is a bot, ignore them
     if (message.author.bot) return
 
-    /*
-    let attachments: Collection<Snowflake, Attachment> = message.attachments
-    if (message.guild.id === global.testServerId && attachments.size > 0) {
-      let map: Array<Attachment> = attachments.map((message: Attachment) => message)
-
-      for (let attachment of map) {
-        if (['image/png', 'image/jpeg', 'image/gif', 'image/jpg'].includes(attachment.contentType)) {
-          let response = await fetch(attachment.url)
-          let buffer: Buffer = await response.buffer()
-          let similarity: number | Array<number> = await bot.model.compare(buffer)
-          if (Array.isArray(similarity)) {
-            Log.info(`Unable to find matches. ${similarity}`)
-          } else {
-            Log.info(`Found a match! ${similarity}`)
-            await message.delete()
-          }
-        }
+    if (message.content.startsWith(`${global.prefix}eval`)) {
+      if (message.author.id !== global.ownerId) {
+        message.reply('fuck off')
+        return
       }
 
+      try {
+        let code = message.content.slice(6).trim()
+        let evalResult = eval(code)
+        if (typeof evalResult !== 'string')
+          evalResult = nodeUtil.inspect(evalResult)
 
-      // let guild: GuildCollectionInterface = await GuildCollection.fetch(message.guild.id)
-      // let userData = await guild.fetchMember(message.author.id)
-      // await userData.xpData.passiveXP()
+        let mdContent = `# Eval Output\n\`\`\`js\n${evalResult}\n\`\`\``
+        const buffer = Buffer.from(mdContent, 'utf-8')
 
-    }*/
+        let attachment = new AttachmentBuilder(buffer, {
+          name: 'output.md'
+        })
+        await message.channel.send({ files: [attachment] })
+
+      } catch (err) {
+        let mdErrContent = `# Eval Error\n\`\`\`js\n${err.message}\n\`\`\``
+        const errBuffer = Buffer.from(mdErrContent, 'utf-8')
+
+        let attachment = new AttachmentBuilder(errBuffer, {
+          name: 'output.md'
+        })
+        await message.channel.send({ files: [attachment] })
+      }
+    }
   }
 }
 

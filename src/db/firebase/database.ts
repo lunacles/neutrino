@@ -18,10 +18,7 @@ import serviceAccount from './serviceaccount.js'
 import {
   getStorage,
 } from 'firebase-admin/storage'
-import Log from '../utilities/log.js'
-import {
-  GuildCollectionInterface,
-} from '../types.d.js'
+import Log from '../../utilities/log.js'
 
 export const app: App = initializeApp({
   credential: cert(serviceAccount as ServiceAccount),
@@ -30,7 +27,24 @@ export const app: App = initializeApp({
 export const bucket = getStorage().bucket()
 export const db: Firestore = getFirestore(app)
 
-export const Database = class DatabaseInterface {
+export const FirebaseDatabase = class implements FirebaseDatabaseInterface {
+  public static readonly cache = new Map<string, any>()
+  public static async fetchLeaderboard(): Promise<Array<string>> {
+    const lbdb: FirebaseDatabaseInterface = new FirebaseDatabase()
+    let leaderboardDoc: DocumentReference = lbdb.getdoc('leaderboard')
+
+    let doc: DocumentSnapshot = await leaderboardDoc.get()
+    if (!doc.exists) {
+      Log.error('Unable to locate leaderboard document. Creating a new instance...')
+      doc = await (await lbdb.mkdir('leaderboard', {
+        members: Array(10).fill(null),
+      })).get()
+    } else {
+      Log.info('Fetching leaderboard data...')
+    }
+
+    return doc.data().members
+  }
   static batchWrite(operations: any): Promise<Array<WriteResult>> {
     let batch: WriteBatch = db.batch()
 
@@ -58,24 +72,25 @@ export const Database = class DatabaseInterface {
     // special handling for Timestamps
     if (data instanceof Timestamp) return data
     // handling for Arrays
-    if (Array.isArray(data)) return data.map(item => Database.structureData(item))
+    if (Array.isArray(data)) return data.map(item => FirebaseDatabase.structureData(item))
     // handling for Maps and Objects
     let entries: Array<[string, unknown]> = data instanceof Map ? Array.from(data.entries()) : Object.entries(data)
-    let result: object = Object.fromEntries(entries.map(([key, value]) => [key, Database.structureData(value)]))
+    let result: object = Object.fromEntries(entries.map(([key, value]) => [key, FirebaseDatabase.structureData(value)]))
     return result
   }
-  static guilds: Map<string, GuildCollectionInterface> = new Map()
+  //static guilds: Map<string, GuildCollectionInterface> = new Map()
   public collection: CollectionReference
   public doc: DocumentReference
   private path: string
   private homeDir: string
+  public leaderboard: Array<string>
   constructor() {
     this.collection = null
     this.doc = null
     this.path = ''
-    this.homeDir = 'guilds'
+    this.homeDir = 'users'
 
-    this.cd('~')
+    this.cd('~/')
   }
   private normalizePath(path: string): string {
     let parts: Array<string> = path.split('/').reduce((acc: Array<string>, cur: string) => {
@@ -105,7 +120,7 @@ export const Database = class DatabaseInterface {
       if (!this.collection) throw new Error('Collection has not been set.')
 
       let doc: DocumentReference = this.collection.doc(name)
-      await doc.set(Database.structureData(data))
+      await doc.set(FirebaseDatabase.structureData(data))
       this.doc = doc
       return doc
     } catch (err) {
@@ -142,7 +157,7 @@ export const Database = class DatabaseInterface {
     try {
       if (!this.doc) throw new Error('Doc has not been concatenated.')
 
-      await this.doc.update(Database.structureData(data))
+      await this.doc.update(FirebaseDatabase.structureData(data))
     } catch (err) {
       Log.error(`Filed to write data to document "${this.doc}" at path "${this.path}"`, err)
     }

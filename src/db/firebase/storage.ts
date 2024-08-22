@@ -7,7 +7,7 @@ import {
   Bucket,
   File,
 } from '@google-cloud/storage'
-import Log from '../utilities/log'
+import Log from '../../utilities/log.js'
 import {
   bucket,
 } from './database.js'

@@ -2,10 +2,6 @@ import {
   createCanvas,
   registerFont
 } from 'canvas'
-import {
-  NodeCanvasInterface,
-  Viewport
-} from '../types.d.js'
 
 registerFont('../neutrino/src/utilities/fonts/Ubuntu-Bold.ttf', { family: 'Ubuntu', weight: '16', style: 'bold' })
 

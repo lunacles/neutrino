@@ -1,55 +1,36 @@
-
-import {
-  Coordinate,
-  MazeInterface,
-  Movement,
-  Pair,
-  RandomInterface,
-  WalkerChances,
-  WalkerConfig,
-  WalkerInstructions,
-  WalkerLimits,
-  WalkerSettings,
-  WalkerSetup
-} from '../types.d.js'
 import global from '../global.js'
 
-export const Walker = class WalkerInterface {
-  public setup: WalkerSetup
-  public chances: WalkerChances
-  public instructions: WalkerInstructions
-  public settings: WalkerSettings
-  public limits: WalkerLimits
+export const Walker = class implements WalkerInterface {
+  public readonly chances: WalkerChances
+  public readonly settings: WalkerSettings
 
   public x: number
   public y: number
-  private maze: MazeInterface
-  private ran: RandomInterface
+  public maze: MazeInterface
+  public ran: RandomInterface
 
-  private straightChance: number
-  private turnChance: number
-  private branchChance: number
+  private readonly straightChance: number
+  private readonly turnChance: number
+  private readonly branchChance: number
 
-  private startDirections: Movement
-  private branchDirections: Movement
-  private placementType: number
+  private readonly startDirections: Movement
+  private readonly branchDirections: Movement
+  private readonly placementType: number
 
-  private borderWrapping: boolean
-  private terminateOnContact: boolean
-  private maxLength: number
-  private maxTurns: number
-  private maxBranches: number
-  private minLength: number
-  private minTurns: number
-  private minBranches: number
+  private readonly borderWrapping: boolean
+  private readonly terminateOnContact: boolean
+  private readonly maxLength: number
+  private readonly maxTurns: number
+  private readonly maxBranches: number
+  private readonly minLength: number
+  private readonly minTurns: number
+  private readonly minBranches: number
 
   private length: number
   private turns: number
   private branches: number
   constructor({ setup, chances, instructions, settings, limits }: WalkerConfig) {
-    this.setup = setup
     this.chances = chances
-    this.instructions = instructions
     this.settings = settings
 
     this.x = setup.x
@@ -78,7 +59,7 @@ export const Walker = class WalkerInterface {
     this.turns = 0
     this.branches = 0
   }
-  public directionToPair(direction: number): Pair {
+  public directionToPair(direction: number): Pair<number> {
     let x = 0
     let y = 0
 
@@ -112,15 +93,15 @@ export const Walker = class WalkerInterface {
     }
   }
   public walk(type: number): void {
-    let perpendicular = ([x, y]: Pair): Array<Pair> => [[y, -x], [-y, x]]
+    let perpendicular = ([x, y]: Pair<number>): Array<Pair<number>> => [[y, -x], [-y, x]]
     //let traveledCells: Array<Coordinate> = [{ x: this.x, y: this.y }]
 
     // get our starting direction
     let direction: number = Array.isArray(this.startDirections) ? this.ran.fromArray(this.startDirections) : this.startDirections
     // convert the direction to a pair
-    let dir: Pair = this.directionToPair(direction)
+    let dir: Pair<number> = this.directionToPair(direction)
     // choose a perpendicular direction for either our turn or branch to use
-    let perpendicularDirection: Pair = this.ran.fromArray(perpendicular(dir))
+    let perpendicularDirection: Pair<number> = this.ran.fromArray(perpendicular(dir))
 
     // limited for loop to prevent stack overflow
     for (let i = 0; i < 1e3; i++) {

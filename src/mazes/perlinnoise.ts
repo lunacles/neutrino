@@ -1,8 +1,4 @@
 // Created using Ken Perlin's Java reference implementation of improved noise https://cs.nyu.edu/~perlin/
-import {
-  DomainWarp,
-  Mutation,
-} from '../types.d.js'
 import Random from '../utilities/random.js'
 
 const ImprovedNoise = class ImprovedNoiseInterface {

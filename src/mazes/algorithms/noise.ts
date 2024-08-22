@@ -1,12 +1,4 @@
 import ImprovedNoise from '../perlinnoise.js'
-import {
-  Coordinate,
-  NoiseAlgorithms,
-  Turbulence,
-  MazeInterface,
-  RandomInterface,
-  ImprovedNoiseInterface,
-} from '../../types.js'
 
 enum DefaultSettings {
   Zoom = 1,
@@ -26,10 +18,10 @@ enum DefaultSettings {
 }
 
 export const Noise = class NoiseInterface {
-  public maze: MazeInterface
-  public ran: RandomInterface
-  public perlin: ImprovedNoiseInterface
-  private type: NoiseAlgorithms
+  maze: MazeInterface
+  ran: RandomInterface
+  perlin: ImprovedNoiseInterface
+  type: NoiseAlgorithms
 
   private zoom: number
   private threshold: number

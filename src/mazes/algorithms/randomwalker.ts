@@ -11,6 +11,7 @@ import {
   Movement,
   RandomInterface,
   MazeInterface,
+  RandomWalkerInterface,
 } from '../../types.js'
 
 const defaultWalkerChances: WalkerChances = {
@@ -39,30 +40,17 @@ const defaultWalkerLimits: WalkerLimits = {
   maxBranches: Infinity,
 }
 
-export interface RandomWalkerInterface {
+export const RandomWalker = class RandomWalker implements RandomWalkerInterface {
   maze: MazeInterface
   seedAmount: number
-  ran: RandomInterface
 
   walkerChances: WalkerChances
   walkerInstructions: WalkerInstructions
   walkerSettings: WalkerSettings
   walkerLimits: WalkerLimits
 
-  init(): void
-}
-
-export const RandomWalker = class RandomWalkerInterface {
-  public maze: MazeInterface
-  public seedAmount: number
-
-  public walkerChances: WalkerChances
-  public walkerInstructions: WalkerInstructions
-  public walkerSettings: WalkerSettings
-  public walkerLimits: WalkerLimits
-
-  public ran: RandomInterface
-  private seeds: Array<Coordinate>
+  ran: RandomInterface
+  seeds: Array<Coordinate>
   constructor() {
     this.maze = null
     this.ran = null

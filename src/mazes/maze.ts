@@ -2,15 +2,9 @@ import Random from '../utilities/random.js'
 import PRNG from '../utilities/prng.js'
 import Log from './../utilities/log.js'
 import Hash from '../utilities/secret.js'
-import {
-  PlacementType,
-  RandomInterface,
-  Wall,
-  Algorithm,
-  Pair
-} from '../types.d.js'
+import { PlacementType } from 'types/enum.d.js'
 
-export const Maze = class MazeInterface {
+const Maze = class Maze implements MazeInterface {
   public width: number
   public height: number
   public type: number
@@ -46,7 +40,7 @@ export const Maze = class MazeInterface {
     return x > 0 && x < this.width - 1 && y > 0 && y < this.height - 1
   }
   public findPockets(): this {
-    let queue: Array<Pair> = [[0, 0]]
+    let queue: Array<Pair<number>> = [[0, 0]]
     this.set(0, 0, 2)
 
     let checkedIndices = new Set([0])
@@ -84,7 +78,7 @@ export const Maze = class MazeInterface {
     let walls: Array<Wall> = []
     let array = this.array.slice()
     do {
-      let best: Pair
+      let best: Pair<number>
       let maxSize: number = 0
       for (let [x, y, r] of this.entries()) {
         if (r !== 1) continue
@@ -149,7 +143,7 @@ export const Maze = class MazeInterface {
     this.array = array
     return this
   }
-  public runAlgorithm(algorithm: Algorithm): this {
+  public runAlgorithm(algorithm: MazeAlgorithm): this {
     algorithm.maze = this
     algorithm.ran = this.ran
     algorithm.init()
@@ -181,3 +175,5 @@ export const Maze = class MazeInterface {
     return this
   }
 }
+
+export default Maze

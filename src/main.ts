@@ -13,26 +13,17 @@ import Log from './utilities/log.js'
 import {
   Commands,
 } from './commands.js'
-import MessageCreate from './observer/message/messageCreate.js'
 import Build from './utilities/repo.js'
-/*import {
-  MobileNetModel,
-  MobileNetModelInterface
-} from './tensorflow/model.js'
-import { ready, setBackend } from '@tensorflow/tfjs-node'
-*/
-//setBackend('tensorflow')
-//await ready()
+import EventObservers from 'observer/observers.js'
+import Database from 'db/database.js'
 
 const Bot = class {
   public client: Client
   private rest: REST
   public commands: Collection<any, any>
-  //public model: MobileNetModelInterface
   constructor(client: Client) {
     this.client = client
     this.commands = new Collection()
-    //this.model = null
   }
   public async init(): Promise<void> {
     // login
@@ -49,10 +40,6 @@ const Bot = class {
       // get the build info
       Log.info('Getting build information...')
       await Build.load()
-
-      // load the mobilenet model
-      //Log.info('Loading mobilenet model...')
-      //this.model = await MobileNetModel.load()
 
       // await interactions
       Log.info(`${this.client.user.tag} is now accepting interactions`)
@@ -79,6 +66,11 @@ const Bot = class {
       const command = this.commands.get(interaction.commandName)
 
       try {
+        if (interaction.guildId !== '1198061774512078879') {
+          await interaction.reply('no you cant use this here rn or something idk im making sure it no brakey')
+          return
+        }
+
         await command.execute(interaction)
       } catch (err) {
         Log.error(`Command execution ${interaction.commandName} failed`, err)
@@ -86,16 +78,17 @@ const Bot = class {
     })
   }
   public events(): void {
-    this.client.on(Events.MessageCreate as never, async (message) => {
-      try {
-        await MessageCreate.react(this, message)
-      } catch (err) {
-        Log.error(`Client event ${Events.MessageCreate} failed`, err)
-      }
-    })
+    for (let event of Object.values(EventObservers)) {
+      this.client.on(event.id as never, async (data) => {
+        try {
+          await event.react(this, data, Database)
+        } catch (err) {
+          Log.error(`Client event ${event.id} failed`, err)
+        }
+      })
+    }
   }
 }
-
 const bot = new Bot(new Client({
   intents: [
     GatewayIntentBits.AutoModerationConfiguration,
@@ -131,6 +124,6 @@ const bot = new Bot(new Client({
     parse: ['everyone', 'roles', 'users'],
   },
 }))
+
 bot.init()
-//bot.events()
 export default bot

@@ -7,6 +7,7 @@
   "scripts": {
     "prod": "NODE_ENV=PROD tsx watch src/main.ts",
     "dev": "NODE_ENV=DEV tsx watch src/main.ts",
+    "enc": "NODE_ENV=DEVV tsx watch --inspect src/main.ts",
     "start": "node dist/main.js",
     "build": "tsup src/main.ts --minify"
   },
@@ -14,8 +15,9 @@
   "author": "",
   "license": "ISC",
   "devDependencies": {
+    "@types/stream-json": "^1.7.7",
     "tsup": "^8.0.2",
-    "tsx": "^4.7.1",
+    "tsx": "^4.16.2",
     "typescript": "^5.4.2"
   },
   "dependencies": {
@@ -28,6 +30,7 @@
     "dotenv": "^16.4.5",
     "firebase": "^10.9.0",
     "firebase-admin": "^12.0.0",
-    "gifencoder": "^2.0.1"
+    "gifenc": "^1.0.3",
+    "ts-node": "^10.9.2"
   }
 }

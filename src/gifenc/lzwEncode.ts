@@ -1,6 +1,5 @@
 // Modified from: https://github.com/mattdesl/gifenc/tree/master
 // plan on improving later.
-import { GifStreamInterface } from 'types.js'
 import GifStream from './stream.js'
 
 const lzwEncode = class {

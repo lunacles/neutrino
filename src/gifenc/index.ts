@@ -1,11 +1,10 @@
 // Modified from: https://github.com/mattdesl/gifenc/tree/master
 // plan on improving later.
-import { GifStreamInterface, PaletteValue } from 'types.d.js'
-import GifStream from './stream.js'
 import Const from './constants.js'
-import lzwEncode from './lzwEncode.js'
 import pnnQuant from './pnnquant2.js'
 import Palettize from './palettize.js'
+import lzwEncode from './lzwEncode.js'
+import GifStream from './stream.js'
 
 interface GifEncoderOptions {
   readonly initialCapacity?: number

@@ -11,30 +11,16 @@ import {
   TextChannel,
   Message,
 } from 'discord.js'
-import {
-  ObserverInterface,
-  Action,
-} from '../types.d.js'
 //import Secret from 'utilities/secret.js'
 import Colors from 'canvas/palette.js'
 import global from 'global.js'
 import Icon from 'utilities/icon.js'
+import { Abort } from 'types/enum.d.js'
 
-const Observer = class<T extends CommandInteraction> implements ObserverInterface {
-  public static abortReasons = new Map([
-    [0, 'You have insufficient permissions to run this command'],
-    [1, 'Command unavailable'],
-    [2, 'Invalid channel type'],
-    [3, 'Command is not available in this server'],
-    [4, 'The selected user cannot be yourself'],
-    [5, 'This command can only be used in <#1227836204087640084>'],
-    [6, 'Selected channel does not support permission overwrites'],
-    [7, 'This command can only be used in <#1244869387991781428>'],
-    [8, 'This command can only be used in <#1244869433911152690>'],
-  ])
-  public readonly interaction: T
+const Observer = class implements ObserverInterface {
+  public readonly interaction: CommandInteraction
   public filter: Collection<string, GuildBasedChannel>
-  public constructor(interaction: T) {
+  public constructor(interaction: CommandInteraction) {
     this.interaction = interaction
 
     this.filter = new Collection()
@@ -64,8 +50,11 @@ const Observer = class<T extends CommandInteraction> implements ObserverInterfac
     this.filter.clear()
     return filter
   }
-  public componentsFilter(components: Array<string>): (component: Action) => boolean {
-    return (component: Action): boolean => components.includes(component.customId) && component.user.id === this.interaction.user.id
+  public componentsFilter(components: Array<string>): (component: Action) => Promise<boolean> {
+    return async (component: Action): Promise<boolean> => {
+      await component.deferUpdate()
+      return components.includes(component.customId) && component.user.id === this.interaction.user.id
+    }
   }
   public checkPermissions(permissions: Array<bigint>, channel: GuildChannel | GuildTextBasedChannel): boolean {
     const memberPermissions: Readonly<PermissionsBitField> = channel.permissionsFor(this.interaction.member.user.id)
@@ -75,8 +64,8 @@ const Observer = class<T extends CommandInteraction> implements ObserverInterfac
 
     return true
   }
-  public async abort(code: number): Promise<void> {
-    await this.interaction.editReply(`${Observer.abortReasons.get(code)} (Error code ${code})`)
+  public async abort(info: typeof Abort[keyof typeof Abort]): Promise<void> {
+    await this.interaction.editReply(`${info} (Error code ${Object.keys(Abort).find(key => Abort[key] === info)})`)
   }
   public async panic(error: Error, command: string): Promise<void> {
     /*
@@ -87,6 +76,7 @@ const Observer = class<T extends CommandInteraction> implements ObserverInterfac
     */
     let message: Message<boolean> = await this.interaction.editReply({
       content: 'Oopsie! Something went wrong. The bot creator has been notified!',
+      components: [],
       //embeds: [embed],
     })
 
@@ -106,6 +96,46 @@ const Observer = class<T extends CommandInteraction> implements ObserverInterfac
           `**Stack Trace**: \`\`\`${error.stack}\`\`\``
         ].join('\n'))
       ]
+    })
+  }
+  public async defer(ephemeral?: boolean): Promise<this> {
+    await this.interaction.deferReply({ ephemeral: ephemeral })
+    return this
+  }
+  public async fetchAbort(): Promise<void> {
+    await this.interaction.deleteReply()
+    await this.interaction.followUp({
+      ephemeral: true,
+      content: 'It seems the bot has not fetched this server\'s data yet (probably due to a recent restart)!\nPlease wait a few seconds for it to fetch it.',
+    })
+  }
+  private createUserCooldown(): void {
+    global.cooldowns.set(this.interaction.user.id, {
+      score: 0,
+      claim: 0,
+      steal: 0,
+      gamble: 0,
+      shield: 0,
+      leaderboard: 0,
+      blackjack: 0,
+    })
+  }
+  public isOnCooldown(type: Cooldowns): boolean {
+    if (!global.cooldowns.has(this.interaction.user.id))
+      this.createUserCooldown()
+
+    return Math.floor((Date.now() - global.cooldowns.get(this.interaction.user.id)[type]) / 1e3) < global.cooldown[type] && this.interaction.user.id !== global.ownerId
+  }
+  public getCooldown(type: Cooldowns): number {
+    return global.cooldown[type] - Math.floor((Date.now() - global.cooldowns.get(this.interaction.user.id)[type]) / 1e3)
+  }
+  public resetCooldown(type: Cooldowns): void {
+    if (!global.cooldowns.has(this.interaction.user.id))
+      this.createUserCooldown()
+
+    global.cooldowns.set(this.interaction.user.id, {
+      ...global.cooldowns.get(this.interaction.user.id),
+      [type]: Date.now()
     })
   }
 }

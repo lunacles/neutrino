@@ -29,8 +29,8 @@ const Score: CommandInterface = {
     const targetUserOption = interaction.options.getUser('user', false) ?? user
 
     //if (interaction.guild.id !== global.testServerId) return await observer.abort(Abort.CommandUnavailableInServer)
-    if (interaction.channel.id !== global.commandChannels.lootLeague && !observer.checkPermissions([PermissionsBitField.Flags.ManageMessages], interaction.channel))
-      return await observer.abort(Abort.CommandRestrictedChannel)
+    //if (interaction.channel.id !== global.commandChannels.lootLeague && !observer.checkPermissions([PermissionsBitField.Flags.ManageMessages], interaction.channel))
+      //return await observer.abort(Abort.CommandRestrictedChannel)
 
     let targetData: DatabaseInstanceInterface = await Database.discord.users.fetch(targetUserOption.id)
 

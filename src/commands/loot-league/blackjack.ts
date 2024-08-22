@@ -430,8 +430,8 @@ const Blackjack: CommandInterface = {
     const amount: number = interaction.options.getInteger('amount', false)
     const user: User = await util.fetchUser(interaction.user.id)
 
-    if (interaction.channel.id !== global.commandChannels.lootLeague && !observer.checkPermissions([PermissionsBitField.Flags.ManageMessages], interaction.channel))
-      return await observer.abort(Abort.CommandRestrictedChannel)
+    //if (interaction.channel.id !== global.commandChannels.lootLeague && !observer.checkPermissions([PermissionsBitField.Flags.ManageMessages], interaction.channel))
+      //return await observer.abort(Abort.CommandRestrictedChannel)
 
     let userData: DatabaseInstanceInterface = await Database.discord.users.fetch(user)
     let neutrinoData: any = await Database.discord.users.fetch(global.botId)

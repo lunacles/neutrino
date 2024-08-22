@@ -30,8 +30,8 @@ const Steal: CommandInterface = {
     const targetUserOption = interaction.options.getUser('user', true)
 
     //if (interaction.guild.id !== global.testServerId) return await observer.abort(Abort.CommandUnavailableInServer)
-    if (interaction.channel.id !== global.commandChannels.lootLeague && !observer.checkPermissions([PermissionsBitField.Flags.ManageMessages], interaction.channel))
-      return await observer.abort(Abort.CommandRestrictedChannel)
+    //if (interaction.channel.id !== global.commandChannels.lootLeague && !observer.checkPermissions([PermissionsBitField.Flags.ManageMessages], interaction.channel))
+      //return await observer.abort(Abort.CommandRestrictedChannel)
 
     if (targetUserOption.id === user.id) return await observer.abort(Abort.SelfTargetNotAllowed)
 

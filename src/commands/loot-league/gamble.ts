@@ -42,8 +42,8 @@ const Gamble: CommandInterface = {
     const user: User = await util.fetchUser(interaction.user.id)
 
     //if (interaction.guild.id !== global.testServerId) return await observer.abort(Abort.server423)
-    if (interaction.channel.id !== global.commandChannels.lootLeague && !observer.checkPermissions([PermissionsBitField.Flags.ManageMessages], interaction.channel))
-      return await observer.abort(Abort.CommandRestrictedChannel)
+    //if (interaction.channel.id !== global.commandChannels.lootLeague && !observer.checkPermissions([PermissionsBitField.Flags.ManageMessages], interaction.channel))
+      //return await observer.abort(Abort.CommandRestrictedChannel)
 
     let userData: DatabaseInstanceInterface = await Database.discord.users.fetch(user)
 

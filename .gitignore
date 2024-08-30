@@ -7,8 +7,7 @@ init.js.map
 package-lock.json
 prod-serviceaccount.json
 dev-serviceaccount.json
-tensorflow
 items.md
 tcg
-gifenc-rewrite
+legacy
 db.json

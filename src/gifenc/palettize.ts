@@ -1,6 +1,6 @@
 // Modified from: https://github.com/mattdesl/gifenc/tree/master
 // plan on improving later.
-import { Format } from 'types/enum.d.js'
+import { Format } from 'types/enum.js'
 import RGBPacker from './rgb-packing.js'
 import Color from 'canvas/color.js'
 

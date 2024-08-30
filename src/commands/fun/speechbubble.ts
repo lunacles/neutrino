@@ -23,9 +23,9 @@ import {
   Rect,
   Text,
 } from '../../canvas/elements.js'
-import { GIFEncoder, pnnQuant, Palettize } from 'gifenc/index.js'
-import { Abort } from 'types/enum.d.js'
-import global from 'global.js'
+import { GIFEncoder, pnnQuant, Palettize } from '../../gifenc/index.js'
+import { Abort } from '../../types/enum.js'
+import global from '../../global.js'
 
 let encodeGif = (c: NodeCanvasInterface): Buffer => {
   const encoder = new GIFEncoder()

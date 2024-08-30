@@ -16,8 +16,8 @@ import {
 import Colors from '../../canvas/palette.js'
 import fetch, { Response } from 'node-fetch'
 import InteractionObserver from '../interactionobserver.js'
-import global from 'global.js'
-import { Abort } from 'types/enum.d.js'
+import global from '../../global.js'
+import { Abort } from '../../types/enum.js'
 
 type ImageSize = (typeof ALLOWED_SIZES)[number]
 interface Choice {

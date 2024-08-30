@@ -12,10 +12,10 @@ import {
   Message,
 } from 'discord.js'
 //import Secret from 'utilities/secret.js'
-import Colors from 'canvas/palette.js'
-import global from 'global.js'
-import Icon from 'utilities/icon.js'
-import { Abort } from 'types/enum.d.js'
+import Colors from '../canvas/palette.js'
+import global from '../global.js'
+import Icon from '../utilities/icon.js'
+import { Abort } from '../types/enum.js'
 
 const Observer = class implements ObserverInterface {
   public readonly interaction: CommandInteraction

@@ -1,6 +1,8 @@
 import { User } from 'discord.js'
-import JSONDatabase from './database'
-import Secret from 'utilities/secret'
+import JSONDatabase from './database.js'
+import Secret from '../../utilities/secret.js'
+import AutoComplete from '../../commands/autocomplete.js'
+import Database from '../database.js'
 
 const JSONDBInstance = class implements JSONDBInstanceInterface {
   protected user: User

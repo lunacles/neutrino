@@ -7,11 +7,11 @@ import {
   User,
 } from 'discord.js'
 import InteractionObserver from '../interactionobserver.js'
-import * as util from 'utilities/util.js'
-import Icon from 'utilities/icon.js'
-import Database from 'db/database.js'
-import { Abort } from 'types/enum.d.js'
-import global from 'global.js'
+import * as util from '../../utilities/util.js'
+import Icon from '../../utilities/icon.js'
+import Database from '../../db/database.js'
+import { Abort } from '../../types/enum.js'
+import global from '../../global.js'
 
 const Leaderboard: CommandInterface = {
   name: 'leaderboard',

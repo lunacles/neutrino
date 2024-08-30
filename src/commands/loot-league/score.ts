@@ -11,9 +11,9 @@ import {
 import InteractionObserver from '../interactionobserver.js'
 import * as util from '../../utilities/util.js'
 import Icon from '../../utilities/icon.js'
-import Database from 'db/database.js'
-import { Abort } from 'types/enum.d.js'
-import global from 'global.js'
+import Database from '../../db/database.js'
+import global from '../../global.js'
+import AutoComplete from '../autocomplete.js'
 
 const Score: CommandInterface = {
   name: 'score',

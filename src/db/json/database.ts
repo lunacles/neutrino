@@ -1,6 +1,6 @@
 import fs from 'fs'
 import path from 'path'
-import Log from 'utilities/log'
+import Log from '../../utilities/log.js'
 import { fileURLToPath } from 'url'
 
 const JSONDatabase = class implements JSONDatabaseInterface {

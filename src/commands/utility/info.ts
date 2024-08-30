@@ -8,10 +8,10 @@ import {
 } from 'discord.js'
 import { version } from 'discord.js'
 import InteractionObserver from '../interactionobserver.js'
-import global from 'global.js'
+import global from '../../global.js'
 import Colors from '../../canvas/palette.js'
 import Log from '../../utilities/log.js'
-import { Abort } from 'types/enum.d.js'
+import { Abort } from '../../types/enum.js'
 
 const Info: CommandInterface = {
   name: 'info',

@@ -2,7 +2,7 @@ import Random from '../utilities/random.js'
 import PRNG from '../utilities/prng.js'
 import Log from './../utilities/log.js'
 import Hash from '../utilities/secret.js'
-import { PlacementType } from 'types/enum.d.js'
+import { PlacementType } from 'types/enum.js'
 
 const Maze = class Maze implements MazeInterface {
   public width: number

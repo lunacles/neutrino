@@ -8,7 +8,7 @@ import {
 } from 'discord.js'
 import InteractionObserver from '../interactionobserver.js'
 import global from '../../global.js'
-import { Abort } from 'types/enum.d.js'
+import { Abort } from '../../types/enum.js'
 const Sudo: CommandInterface = {
   name: 'sudo',
   description: 'Sudo\'s the bot.',

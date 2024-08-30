@@ -1,4 +1,4 @@
-import global from 'global.js'
+import global from './global.js'
 import {
   Client,
   GatewayIntentBits,
@@ -14,8 +14,8 @@ import {
   Commands,
 } from './commands.js'
 import Build from './utilities/repo.js'
-import EventObservers from 'observer/observers.js'
-import Database from 'db/database.js'
+import EventObservers from './observer/observers.js'
+import Database from './db/database.js'
 
 const Bot = class {
   public client: Client

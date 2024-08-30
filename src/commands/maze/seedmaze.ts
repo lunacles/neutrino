@@ -11,7 +11,7 @@ import InteractionObserver from '../interactionobserver.js'
 import { RandomWalker } from '../../mazes/algorithms/randomwalker.js'
 import global from '../../global.js'
 import generateMaze from '../maze.js'
-import { Abort } from 'types/enum.d.js'
+import { Abort } from '../../types/enum.js'
 
 enum Min {
   Dimensions = 16,

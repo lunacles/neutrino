@@ -12,7 +12,7 @@ import {
   PermissionsBitField,
 } from 'discord.js'
 import InteractionObserver from '../interactionobserver.js'
-import { Abort } from 'types/enum.d.js'
+import { Abort } from '../../types/enum.js'
 
 const RemovePins: CommandInterface = {
   name: 'remove-pins',

@@ -1,6 +1,6 @@
 import dotenv from 'dotenv'
 dotenv.config()
-import Build from 'utilities/repo'
+import Build from './utilities/repo.js'
 
 const envVar = (key: string): string => process.env[`${process.env.NODE_ENV}_${key}`]
 const Direction: Direction = {

@@ -9,8 +9,8 @@ import {
 import InteractionObserver from '../interactionobserver.js'
 import { Noise } from '../../mazes/algorithms/noise.js'
 import generateMaze from '../maze.js'
-import global from 'global.js'
-import { Abort } from 'types/enum.d.js'
+import global from '../../global.js'
+import { Abort } from '../../types/enum.js'
 
 enum Min {
   Dimensions = 16,

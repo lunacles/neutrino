@@ -21,7 +21,7 @@ import Log from '../../utilities/log.js'
 import Icon from '../../utilities/icon.js'
 import InteractionObserver from '../interactionobserver.js'
 import DeletedUsers from '../../utilities/deletedusers.js'
-import { Abort } from 'types/enum.d.js'
+import { Abort } from '../../types/enum.js'
 
 const PinArchive: CommandInterface = {
   name: 'archive-pins',

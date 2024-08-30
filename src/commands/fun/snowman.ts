@@ -16,8 +16,8 @@ import {
 } from '../../canvas/elements.js'
 import Color from '../../canvas/color.js'
 import InteractionObserver from '../interactionobserver.js'
-import global from 'global.js'
-import { Abort } from 'types/enum.d.js'
+import global from '../../global.js'
+import { Abort } from '../../types/enum.js'
 
 const Snowman: CommandInterface = {
   name: 'snowman',

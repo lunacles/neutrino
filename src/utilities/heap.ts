@@ -1,4 +1,4 @@
-import Log from 'utilities/log'
+import Log from './log.js'
 
 const BinaryHeap = class<T> implements BinaryHeapInterface<T> {
   private maxSize: number

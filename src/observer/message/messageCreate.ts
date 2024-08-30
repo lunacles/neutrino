@@ -3,7 +3,7 @@ import {
   Events,
   AttachmentBuilder,
 } from 'discord.js'
-import global from 'global'
+import global from '../../global.js'
 import nodeUtil from 'node:util'
 
 const MessageCreate: Observer = {

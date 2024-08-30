@@ -21,11 +21,10 @@ import {
 } from 'discord.js'
 //import GuildCollection from '../../user-manager/guildcollection.js'
 import InteractionObserver from '../interactionobserver.js'
-import global from 'global.js'
+import global from '../../global.js'
 import * as util from '../../utilities/util.js'
 import Icon from '../../utilities/icon.js'
-import Database from 'db/database.js'
-import { Abort } from 'types/enum.d.js'
+import Database from '../../db/database.js'
 
 type Action = StringSelectMenuInteraction<CacheType> | UserSelectMenuInteraction<CacheType> | RoleSelectMenuInteraction<CacheType> | MentionableSelectMenuInteraction<CacheType> | ChannelSelectMenuInteraction<CacheType> | ButtonInteraction<CacheType>
 type Component = InteractionCollector<CollectedInteraction<CacheType>>

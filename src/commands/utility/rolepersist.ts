@@ -12,8 +12,8 @@ import {
   User,
 } from 'discord.js'
 import InteractionObserver from '../interactionobserver.js'
-import Database from 'db/database.js'
-import { Abort } from 'types/enum.d.js'
+import Database from '../../db/database.js'
+import { Abort } from '../../types/enum.js'
 
 const RolePersist: CommandInterface = {
   name: 'role-persist',

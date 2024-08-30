@@ -1,4 +1,4 @@
-import { Ease } from 'types/enum.d.js'
+import { Ease } from 'types/enum.js'
 
 const Easing = {
   linear(x: number): number {

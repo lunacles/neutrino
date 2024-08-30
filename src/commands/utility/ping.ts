@@ -5,8 +5,8 @@ import {
   PermissionsBitField,
 } from 'discord.js'
 import InteractionObserver from '../interactionobserver.js'
-import global from 'global.js'
-import { Abort } from 'types/enum.d.js'
+import global from '../../global.js'
+import { Abort } from '../../types/enum.js'
 
 const PingCommand: CommandInterface = {
   name: 'ping',

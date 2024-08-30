@@ -7,7 +7,7 @@ import {
 } from '../canvas/elements.js'
 import Maze from '../mazes/maze.js'
 import PRNG from '../utilities/prng.js'
-import { PlacementType } from 'types/enum.d.js'
+import { PlacementType } from '../types/enum.js'
 
 const generateMaze = (algorithm: MazeAlgorithm, seed: string, width: number, height: number): any => {
   let c: NodeCanvasInterface = new NodeCanvas(width * 32, height * 32)

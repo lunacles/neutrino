@@ -26,7 +26,7 @@ import Colors from '../../canvas/palette.js'
 import global from '../../global.js'
 import Color from '../../canvas/color.js'
 import * as util from '../../utilities/util.js'
-import { Abort } from 'types/enum.d.js'
+import { Abort } from '../../types/enum.js'
 
 type Trio = [number, number, number]
 type Colour = typeof Color | Array<number> | string | object

@@ -3,15 +3,17 @@ import {
 } from 'discord.js'
 import {
   FirebaseDatabase
-} from 'db/firebase/database.js'
+} from './database.js'
 import {
   DocumentReference,
   DocumentSnapshot,
   FieldValue
 } from 'firebase-admin/firestore'
-import Log from 'utilities/log.js'
-import { OperationType } from 'types/enum.d.js'
-import Secret from 'utilities/secret'
+import Log from '../../utilities/log.js'
+import { OperationType } from '../../types/enum.js'
+import Secret from '../../utilities/secret.js'
+import AutoComplete from '../../commands/autocomplete.js'
+import Database from '../database.js'
 
 let operations: Array<OperationInterface> = []
 

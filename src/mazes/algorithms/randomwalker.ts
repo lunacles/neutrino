@@ -2,17 +2,6 @@ import {
   Walker,
 } from '../walker.js'
 import global from '../../global.js'
-import {
-  Coordinate,
-  WalkerChances,
-  WalkerInstructions,
-  WalkerSettings,
-  WalkerLimits,
-  Movement,
-  RandomInterface,
-  MazeInterface,
-  RandomWalkerInterface,
-} from '../../types.js'
 
 const defaultWalkerChances: WalkerChances = {
   straightChance: 0.6,

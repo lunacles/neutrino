@@ -8,8 +8,8 @@ import BinaryHeap from '../utilities/heap.js'
 import { FirebaseDatabase } from './firebase/database.js'
 import JSONDatabase from './json/database.js'
 import FirebaseInstance from './firebase/instance.js'
-import bot from '../main.js'
-import AutoComplete from '../commands/autocomplete.js'
+import config from '../config.js'
+import bot from '../index.js'
 
 interface DatabaseInterface {
   readonly version: number

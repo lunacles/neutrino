@@ -1,5 +1,5 @@
 import { Guild, GuildMember, User } from 'discord.js'
-import bot from '../main.js'
+import bot from '../index.js'
 import Log from './log.js'
 
 export const formatSeconds = (seconds: number, s: boolean = false): string => {

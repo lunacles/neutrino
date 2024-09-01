@@ -129,31 +129,6 @@ const Table = class implements TableInterface {
     this.height = 1024
     this.c = new NodeCanvas(this.width, this.height)
 
-    /*
-    let colors = [
-      Colors.pureRed,
-      Colors.pureOrange,
-      Colors.pureYellow,
-      Colors.pureYellowGreen,
-      Colors.pureGreen,
-      Colors.pureTeal,
-      Colors.pureAqua,
-      Colors.pureSlateBlue,
-      Colors.pureBlue,
-      Colors.purePurple,
-      Colors.pureMagenta,
-      Colors.pureHotPink,
-
-      Colors.darkBlue,
-      Colors.white,
-      Colors.black,
-      Colors.green,
-      Colors.brown,
-      Colors.error,
-      Colors.darkGray,
-      Color.blend(Colors.white, Colors.black, 0.6),
-    ]*/
-
     this.radius = 64
     this.deckX = this.width - this.cardSize * 1.5 - this.bgBorder - this.spacing - this.radius
     this.deckY = this.width * 0.5 - this.cardSize * 0.75

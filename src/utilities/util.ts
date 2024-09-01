@@ -53,21 +53,6 @@ export const formatDate = (string: string): string => {
 
 export const capitalize = (string: string): string => string.split(' ').map((r: string): string => `${r[0].toUpperCase()}${r.slice(1)}`).join(' ')
 
-export const fetchGuild = async (id: string): Promise<Guild> => await bot.client.guilds.fetch(id)
-const cacheRequests = new Map<string, number>()
-export const fetchUser = async (id: string): Promise<User> => {
-  let reqs: number = cacheRequests.get(id)
-  if (reqs == null || reqs >= 5) {
-    reqs = 0
-    cacheRequests.set(id, reqs)
-    return await bot.client.users.fetch(id, { force: true })
-  } else {
-    cacheRequests.set(id, reqs + 1)
-    return await bot.client.users.fetch(id)
-  }
-}
-export const fetchGuildMember = async (id: string, guild: Guild): Promise<GuildMember> => await guild.members.fetch(id)
-
 export const remove = (array: Array<unknown>, elementOrIndex: unknown | number): void => {
   let index: number = typeof elementOrIndex === 'number' ? elementOrIndex : array.indexOf(elementOrIndex)
   if (index === -1) return

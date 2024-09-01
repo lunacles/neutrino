@@ -12,6 +12,9 @@ import config from '../../config.js'
 import Colors from '../../canvas/palette.js'
 import Log from '../../utilities/log.js'
 import { Abort } from '../../types/enum.js'
+const { version: packageVersion } = (await import('../../../package.json', {
+  assert: { type: 'json' }
+})).default
 
 const Info: CommandInterface = {
   name: 'info',
@@ -29,11 +32,13 @@ const Info: CommandInterface = {
         iconURL: interaction.client.user.displayAvatarURL(),
       })
       .setColor(Colors.darkBlue.hex as ColorResolvable)
-      .setDescription(`**Bot Creator:** \`_damocles (<@342038795757027329>)\`
+      .setDescription(`**Bot Creator:** \`_damocles\` (<@${config.ownerId}>)
       **Uptime:** \`${Log.uptime}\`
-      **Version:** \`${config.build.id} (${config.build.date})\`
+      **Version:** \`v${packageVersion}\`
+      **Commit:** \`${config.build.id} (${config.build.date})\`
       **Node Version:** \`${process.version}\`
       **Discord.js Version:** \`${version}\`
+      **Shard:** \`#${interaction.guild.shardId}\`
       **Memory Usage:** \`${Math.floor(process.memoryUsage().heapUsed / 1024 / 1024)}MB\`
       **Ping:** \`${interaction.client.ws.ping < 0 ? 'Unknown ' : interaction.client.ws.ping}ms\`
       **Repository:** [Github Link](<https://github.com/lunacles/neutrino>)`)

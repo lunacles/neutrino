@@ -25,6 +25,22 @@ const MessageCreate: Observer = {
         if (typeof evalResult !== 'string')
           evalResult = nodeUtil.inspect(evalResult)
 
+        // censor env variables from it if they are present
+        for (let value of [
+          config.env.FIREBASE_API_KEY,
+          config.env.FIREBASE_AUTH_DOMAIN,
+          config.env.FIREBASE_PROJECT_ID,
+          config.env.FIREBASE_STORAGE_BUCKET,
+          config.env.FIREBASE_MESSAGE_SENDER_ID,
+          config.env.FIREBASE_APP_ID,
+          config.env.FIREBASE_MEASUREMENT_ID,
+          config.env.BOT_TOKEN,
+          config.env.BOT_CLIENT_ID,
+        ]) {
+          let regex = new RegExp(value, 'g')
+          evalResult = evalResult.replace(regex, '[REDACTED]')
+        }
+
         let mdContent = `# Eval Output\n\`\`\`js\n${evalResult}\n\`\`\``
         const buffer = Buffer.from(mdContent, 'utf-8')
 

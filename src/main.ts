@@ -1,4 +1,4 @@
-import { Client, ShardingManager, Shard, Status } from 'discord.js'
+import { ShardingManager, Shard, /*Status, Client*/ } from 'discord.js'
 import config from './config.js'
 import path from 'path'
 import { fileURLToPath } from 'url'
@@ -38,7 +38,7 @@ manager.on('shardCreate', async (shard: Shard): Promise<void> => {
 await manager.spawn({
   amount: 'auto',
 })
-
+/*
 setInterval(async () => {
   let responses: Array<Status> = await manager.broadcastEval((client: Client<boolean>): Status => client.ws.ping)
   let statuses = {
@@ -57,5 +57,5 @@ setInterval(async () => {
 
   console.log('shard heartbeat req', statuses)
 }, config.heartbeatInterval)
-
+*/
 export default manager

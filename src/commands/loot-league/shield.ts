@@ -69,7 +69,7 @@ const Shield: CommandInterface = {
           iconURL: user.avatarURL(),
         })
         .setThumbnail(`attachment://${Icon.HazardSign}`)
-        .setDescription(`# Are you sure you want to activate a shield <@${user.id}> for ${util.formatSeconds(global.shieldDuration), true}?\nThis action will cost __20%__ of your total points!`)
+        .setDescription(`# Are you sure you want to activate a shield <@${user.id}> for ${util.formatSeconds(config.shieldDuration), true}?\nThis action will cost __20%__ of your total points!`)
         .addFields({
           name: 'WARNING!',
           value: 'If you activate a shield, you forfeit your ability to gamble and steal!',
@@ -90,7 +90,7 @@ const Shield: CommandInterface = {
       })
 
       collector.on('collect', async (action: Action): Promise<void> => {
-        let expireTime: number = Math.floor(Date.now() / 1e3 + global.shieldDuration)
+        let expireTime: number = Math.floor(Date.now() / 1e3 + config.shieldDuration)
         const confirmatedEmbed = new EmbedBuilder()
           .setColor(user.accentColor)
           .setAuthor({
@@ -98,7 +98,7 @@ const Shield: CommandInterface = {
             iconURL: user.avatarURL(),
           })
           .setThumbnail(`attachment://${Icon.TemporaryShield}`)
-          .setDescription(`# <@${user.id}> has activated a shield for ${util.formatSeconds(global.shieldDuration)}s!`)
+          .setDescription(`# <@${user.id}> has activated a shield for ${util.formatSeconds(config.shieldDuration)}s!`)
           .addFields({
             name: 'Expires At',
             value: `<t:${expireTime}> (<t:${expireTime}:R>)`,
@@ -115,7 +115,7 @@ const Shield: CommandInterface = {
           })
 
           await userData.setScore(Math.floor(userData.score * 0.8))
-          await userData.setShield(Date.now() + global.shieldDuration * 1e3)
+          await userData.setShield(Date.now() + config.shieldDuration * 1e3)
           observer.resetCooldown('shield')
 
         } else if (action.customId === 'cancelShield') {

@@ -3,7 +3,7 @@ import NodeCanvas from './canvas.js'
 import Color from './color.js'
 import Colors from './palette.js'
 import Interpolator from './interpolator.js'
-import { Ease, Suits } from 'types/enum.js'
+import { Ease, Suits } from '../types/enum.js'
 
 export const Element = class {
   public readonly canvas: NodeCanvasInterface

@@ -1,4 +1,4 @@
-import * as util from 'utilities/util.js'
+import * as util from '../utilities/util.js'
 
 const Color = class implements ColorInterface {
   public static fromHex(hex: string): ColorInterface {

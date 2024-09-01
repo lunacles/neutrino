@@ -84,7 +84,18 @@ const FirebaseInstance = class implements FirebaseInstanceInterface {
     })
   }
   public async create(): Promise<DocumentReference> {
+    let neutrinoId = `anon${Secret.hash('neutrino::' + this.user.id).slice(0, 8)}`
+    AutoComplete.add(neutrinoId)
+    Database.discord.members.set(neutrinoId, this.user.id)
+
+    this.db.cd('~/').getdoc('members')
+    await this.db.write({
+      [`map.${neutrinoId}`]: this.user.id
+    })
+
     return await this.db.cd('~/').mkdir(this.id, {
+      neutrino_id: neutrinoId,
+
       avatar: this.user.avatarURL(),
       avatar_decoration: this.user.avatarDecoration,
       banner: this.user.bannerURL(),
@@ -113,6 +124,7 @@ const FirebaseInstance = class implements FirebaseInstanceInterface {
         return seeds as Quaple<number>
       })()
     } satisfies DiscordUserData)
+
   }
   private async pushOperation(operation: OperationInterface): Promise<this> {
     operations.push(operation)

@@ -18,6 +18,7 @@ interface DatabaseInterface {
     },
     refreshLeaderboard(): void
     leaderboard: BinaryHeapInterface<string>
+    members: Map<string, string>
   },
 }
 
@@ -37,6 +38,7 @@ const DatabaseInstance = class extends Type implements DatabaseInstanceInterface
   public rolePersist: {
     [key: string]: string
   }
+  public neutrinoId: string
   constructor(user: User) {
     super(user)
     this.data = null
@@ -47,7 +49,7 @@ const DatabaseInstance = class extends Type implements DatabaseInstanceInterface
   public async getData(): Promise<void> {
     this.data = await this.fetch()
     this.prng = PRNG.sfc32(...this.data.prng)
-    this.ran = new Random()
+    this.ran = new Random(this.prng)
 
     this.xp = this.data.xp_data.xp
     this.level = this.data.xp_data.level
@@ -55,6 +57,7 @@ const DatabaseInstance = class extends Type implements DatabaseInstanceInterface
     this.score = this.data.loot_league.score
     this.shieldEnd = this.data.loot_league.shield_end
     this.rolePersist = this.data.role_persist
+    this.neutrinoId = this.data.neutrino_id
   }
   public async random(n: number = 1.0): Promise<number> {
     let rng = this.ran.float(n)
@@ -128,7 +131,13 @@ const Database: DatabaseInterface = {
     users: {
       cache: new Map<string, DatabaseInstanceInterface>(),
       async fetch(user: string | User): Promise<DatabaseInstanceInterface> {
-        user = typeof user === 'string' ? await util.fetchUser(user) : user
+        if (typeof user === 'string') {
+          if (user.startsWith('anon')) {
+            user = await bot.fetchUser(Database.discord.members.get(user))
+          } else {
+            user = await bot.fetchUser(user)
+          }
+        }
         let cached: DatabaseInstanceInterface = this.cache.get(user.id)
 
         if (!cached) {
@@ -144,43 +153,16 @@ const Database: DatabaseInterface = {
       if (config.databaseType === 'json') {
         JSONDatabase.data.leaderboard = this.leaderboard.heap
       } else {
-        const db = global.database as FirebaseDatabaseInterface
+        const db: FirebaseDatabaseInterface = new FirebaseDatabase()
         db.cd('~/').getdoc('leaderboard')
         await db.write(FirebaseDatabase.structureData({
           members: this.leaderboard.heap
         }))
       }
     },
-    leaderboard: null
+    leaderboard: null,
+    members: null
   }
 }
-
-if (databaseType === 'json') {
-  global.database = new JSONDatabase()
-  JSONDatabase.data = global.database.read()
-} else {
-  global.database = new FirebaseDatabase()
-}
-
-let leaderboard = databaseType === 'json' ? JSONDatabase.data.leaderboard : await FirebaseDatabase.fetchLeaderboard()
-// add all the users on the leaderboard to the cache
-
-Database.discord.leaderboard = new BinaryHeap<string>((a: string, b: string): boolean => {
-  // because of the databaseinstance structure the entries we check will always be in the cache
-  let adi = Database.discord.users.cache.get(a)?.score ?? 0
-  let bdi = Database.discord.users.cache.get(b)?.score ?? 0
-
-  return adi > bdi
-}, 10).build(leaderboard)
-
-const init = setInterval(async () => {
-  if (bot.client) {
-    await (async (): Promise<void> => {
-      for (let entry of leaderboard)
-        await Database.discord.users.fetch(entry)
-    })()
-    clearInterval(init)
-  }
-}, 3e3)
 
 export default Database

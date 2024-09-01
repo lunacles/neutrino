@@ -17,7 +17,7 @@ const DiagonalDirections: DiagonalDirection = {
   downRight: Direction.right | Direction.down
 }
 
-const global: GlobalInterface = {
+const config: ConfigInterface = {
   build: Build,
   ownerId: '342038795757027329',
   testServerId: '954026848361254993',
@@ -69,11 +69,13 @@ const global: GlobalInterface = {
     FIREBASE_MEASUREMENT_ID: envVar('FIREBASE_MEASUREMENT_ID'),
     BOT_TOKEN: envVar('BOT_TOKEN'),
     BOT_CLIENT_ID: envVar('BOT_CLIENT_ID'),
+    NODE_ENV: envVar('NODE_ENV'),
   },
   botId: '1195601709909692486',
-  database: null,
+  databaseType: 'firebase',
   rolePersistCap: 10,
   prefix: '!$',
+  heartbeatInterval: 30e3,
 }
 
-export default global
+export default config

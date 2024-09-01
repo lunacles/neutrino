@@ -1,4 +1,4 @@
-// global
+// config
 interface CommandCooldownInterface {
   readonly score: number
   readonly claim: number
@@ -42,9 +42,10 @@ interface ENV {
   readonly FIREBASE_MEASUREMENT_ID: string
   readonly BOT_TOKEN: string
   readonly BOT_CLIENT_ID: string
+  readonly NODE_ENV: string
 }
 
-interface GlobalInterface {
+interface ConfigInterface {
   readonly build: any
   readonly ownerId: string
   readonly testServerId: string
@@ -59,9 +60,10 @@ interface GlobalInterface {
   readonly commandChannels: CommandChannels
   readonly env: ENV
   readonly botId: string
-  database: JSONDatabaseInterface | FirebaseDatabaseInterface
+  readonly databaseType: DatabaseType
   readonly rolePersistCap: number
   readonly prefix: string
+  readonly heartbeatInterval: number
 }
 
 // utilities
@@ -194,6 +196,7 @@ interface CommandInterface {
   readonly description: string
   readonly data: any,
 
+  autocomplete?: (interaction: AutocompleteInteraction<CacheType>) => Promise<void>
   execute(interaction: ChatInputCommandInteraction<CacheType>): Promise<void>
   test(): boolean
 }
@@ -439,8 +442,8 @@ interface HashTable {
 interface LSHInterface {
   hashTables: Array<HashTable>
   reset(): this
-  ann(color: Array<number>): Array<number>
-  insertData(data: Array<Array<number>>): this
+  ann(str: string): Array<string>
+  insertData(data: Array<string>): this
 }
 interface ColorInterface {
   hex: string
@@ -477,6 +480,8 @@ interface LootLeague {
   shield_end: number
 }
 interface DiscordUserData {
+  neutrino_id: string
+
   avatar: string
   avatar_decoration: string
   banner: string
@@ -496,6 +501,16 @@ interface DiscordUserData {
   prng: Quaple<number>
 }
 
+interface DatabaseActions {
+  user: User
+  fetch(): Promise<DiscordUserData> | DiscordUserData
+  updateField(field: Keys<DiscordUserData>, data: unknown): Promise<void> | void
+  updateFieldValue(field: Keys<DiscordUserData>, key: Keys<DiscordUserData>, data: unknown): Promise<void> | void
+  setField(field: Keys<DiscordUserData>, data: unknown): Promise<void> | void
+  setFieldValue(field: Keys<DiscordUserData>, key: string, data: unknown): Promise<void> | void
+  removeFieldValue(field: Keys<DiscordUserData>, name: string): Promise<void> | void
+}
+
 interface DatabaseInstanceInterface {
   ran: RandomInterface
   data: DiscordUserData
@@ -507,6 +522,7 @@ interface DatabaseInstanceInterface {
   rolePersist: {
     [key: string]: string
   }
+  neutrinoId: string
   random(n: number = 1.0): Promise<number>
   randomInt(n: number = 1.0): Promise<number>
   fromRange(min: number, max: number, type: 'Integer' | 'Float' = 'Integer'): Promise<number>
@@ -522,15 +538,9 @@ interface DatabaseInstanceInterface {
   removeRolePersistence(roleId: string): Promise<void>
 }
 
-interface FirebaseInstanceInterface {
+interface FirebaseInstanceInterface extends DatabaseActions {
   db: FirebaseDatabaseInterface
   ref: DocumentReference
-  fetch(): Promise<DiscordUserData>
-  updateField(field: Keys<DiscordUserData>, data: unknown): void
-  updateFieldValue(field: Keys<DiscordUserData>, key: Keys<DiscordUserData>, data: unknown): void
-  setField(field: Keys<DiscordUserData>, data: unknown): void
-  setFieldValue(field: Keys<DiscordUserData>, key: string, data: unknown): Promise<void>
-  removeFieldValue(field: Keys<DiscordUserData>, name: string): Promise<void>
   create(): Promise<DocumentReference>
   writeBatch(batch?: Array<OperationInterface>): Promise<this>
 }
@@ -541,6 +551,7 @@ interface JSONDatabase {
     [key: string]: DiscordUserData
   }
   leaderboard: Array<string>
+  members: Array<string>
 }
 
 interface JSONDatabaseInterface {
@@ -549,14 +560,7 @@ interface JSONDatabaseInterface {
   get version(): number
 }
 
-interface JSONDBInstanceInterface {
-  updateField(field: Keys<DiscordUserData>, data: unknown): void
-  updateFieldValue(field: Keys<DiscordUserData>, key: Keys<DiscordUserData>, data: unknown): void
-  setField(field: Keys<DiscordUserData>, data: unknown): void
-  setFieldValue(field: Keys<DiscordUserData>, key: Keys<DiscordUserData>, data: unknown): void
-  removeFieldValue(field: Keys<DiscordUserData>, key: Keys<DiscordUserData>): void
-  fetch(): DiscordUserData
-}
+interface JSONDBInstanceInterface extends DatabaseActions {}
 
 interface BinaryHeapInterface<T> {
   heap: Array<T>

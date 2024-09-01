@@ -1,7 +1,7 @@
 {
     "compilerOptions": {
-        "target": "es2022",
-        "module": "es2022",
+        "target": "ESNext",
+        "module": "ESNext",
         "sourceMap": true,
         "esModuleInterop": true,
         "resolveJsonModule": true,
@@ -23,12 +23,24 @@
           "*": ["src/*"]
         }
     },
+    "ts-node": {
+        "esm": true,
+        "transpileOnly": true,
+        "compilerOptions": {
+            "module": "ESNext"
+        },
+    },
     "include": [
         "src/**/*",
-        "src/global.ts",
+        "src/config.ts",
         "src/types/*.d.ts"
     ],
     "paths": {
         "*": ["src/types/*.d.ts"]
-    }
+    },
+    "exclude": [
+      "node_modules",
+      "dist",
+      "src/legacy",
+    ]
 }

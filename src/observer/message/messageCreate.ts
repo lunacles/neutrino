@@ -32,7 +32,6 @@ const MessageCreate: Observer = {
           name: 'output.md'
         })
         await message.channel.send({ files: [attachment] })
-
       } catch (err) {
         let mdErrContent = `# Eval Error\n\`\`\`js\n${err.message}\n\`\`\``
         const errBuffer = Buffer.from(mdErrContent, 'utf-8')

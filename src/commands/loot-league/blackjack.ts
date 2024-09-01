@@ -398,7 +398,7 @@ const Blackjack: CommandInterface = {
     .setName('amount')
     .setDescription('The amount of points you want to gamble.')
     .setMinValue(100)
-    .setRequired(false)
+    .setRequired(true)
   ),
   async execute(interaction: ChatInputCommandInteraction<CacheType>): Promise<void> {
     const observer = await new InteractionObserver(interaction).defer()

@@ -8,7 +8,7 @@ import {
   SlashCommandBooleanOption,
 } from 'discord.js'
 import InteractionObserver from '../interactionobserver.js'
-import global from '../../global.js'
+import config from '../../config.js'
 import Database from '../../db/database.js'
 import { Abort } from '../../types/enum.js'
 
@@ -32,7 +32,7 @@ const FetchUserData: CommandInterface = {
     const targetUserId: string = interaction.options.getString('user-id', false)
     const redact: boolean = interaction.options.getBoolean('redact', false) ?? true
 
-    if (interaction.user.id !== global.ownerId) return await observer.abort(Abort.InsufficientPermissions)
+    if (interaction.user.id !== config.ownerId) return await observer.abort(Abort.InsufficientPermissions)
     let targetUser: string
 
     if (targetUserOption) {

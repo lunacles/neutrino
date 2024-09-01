@@ -24,7 +24,7 @@ const MemberAdd: Observer = {
 */
     /*
     let attachments: Collection<Snowflake, Attachment> = message.attachments
-    if (message.guild.id === global.testServerId && attachments.size > 0) {
+    if (message.guild.id === config.testServerId && attachments.size > 0) {
       let map: Array<Attachment> = attachments.map((message: Attachment) => message)
 
       for (let attachment of map) {

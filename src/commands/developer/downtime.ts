@@ -23,7 +23,7 @@ import {
   Text
 } from '../../canvas/elements.js'
 import Colors from '../../canvas/palette.js'
-import global from '../../global.js'
+import config from '../../config.js'
 import Color from '../../canvas/color.js'
 import * as util from '../../utilities/util.js'
 import { Abort } from '../../types/enum.js'
@@ -74,7 +74,7 @@ const DownTime: CommandInterface = {
     //const reason: string = interaction.options.getString('reason') ?? 'Unspecified'
     const targetChannel = interaction.options.getChannel('channel')
 
-    if (interaction.user.id !== global.ownerId) return await observer.abort(Abort.InsufficientPermissions)
+    if (interaction.user.id !== config.ownerId) return await observer.abort(Abort.InsufficientPermissions)
     if (targetChannel.type !== ChannelType.GuildText) return await observer.abort(Abort.InvalidChannelType)
     if (!targetChannel || !((channel: any): channel is TextChannel | NewsChannel | VoiceChannel | StageChannel | ForumChannel => 'permissionOverwrites' in channel)(targetChannel)) return await observer.abort(Abort.ChannelNoPermissionOverwrites)
 

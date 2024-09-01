@@ -14,6 +14,7 @@ import {
 import InteractionObserver from '../interactionobserver.js'
 import Database from '../../db/database.js'
 import { Abort } from '../../types/enum.js'
+import config from '../../config.js'
 
 const RolePersist: CommandInterface = {
   name: 'role-persist',
@@ -63,7 +64,7 @@ const RolePersist: CommandInterface = {
       interaction.editReply(`Removed ${role.name} from role persistance.`)
     } else {
       let serverRoles = Object.values(userData.rolePersist).filter((serverId: string): boolean => serverId === interaction.guildId).length
-      if (serverRoles >= global.rolePersistCap)
+      if (serverRoles >= config.rolePersistCap)
         observer.abort(Abort.MaxPersistence)
 
       await userData.addRolePersistence(role.id, interaction.guildId)

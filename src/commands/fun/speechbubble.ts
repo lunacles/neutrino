@@ -25,7 +25,7 @@ import {
 } from '../../canvas/elements.js'
 import { GIFEncoder, pnnQuant, Palettize } from '../../gifenc/index.js'
 import { Abort } from '../../types/enum.js'
-import global from '../../global.js'
+import config from '../../config.js'
 
 let encodeGif = (c: NodeCanvasInterface): Buffer => {
   const encoder = new GIFEncoder()
@@ -79,7 +79,7 @@ const SpeechBubble: CommandInterface = {
     const image: Attachment = interaction.options.getAttachment('image')
     const side: boolean = interaction.options.getBoolean('flip') ?? false
 
-    if (interaction.channel.id !== global.commandChannels.misc && !observer.checkPermissions([PermissionsBitField.Flags.ManageMessages], interaction.channel))
+    if (interaction.channel.id !== config.commandChannels.misc && !observer.checkPermissions([PermissionsBitField.Flags.ManageMessages], interaction.channel))
       return await observer.abort(Abort.CommandRestrictedChannel)
 
     try {

@@ -7,7 +7,7 @@ import {
   TextChannel,
 } from 'discord.js'
 import InteractionObserver from '../interactionobserver.js'
-import global from '../../global.js'
+import config from '../../config.js'
 import { Abort } from '../../types/enum.js'
 const Sudo: CommandInterface = {
   name: 'sudo',
@@ -31,7 +31,7 @@ const Sudo: CommandInterface = {
     const targetChannelId = interaction.options.getString('channel-id', false)
     const targetMessage: string = interaction.options.getString('message')
 
-    if (interaction.user.id !== global.ownerId) return await observer.abort(Abort.InsufficientPermissions)
+    if (interaction.user.id !== config.ownerId) return await observer.abort(Abort.InsufficientPermissions)
     let targetChannel: TextChannel
 
     if (targetChannelOption instanceof TextChannel) {

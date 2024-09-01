@@ -8,7 +8,7 @@ import {
 } from 'discord.js'
 import { version } from 'discord.js'
 import InteractionObserver from '../interactionobserver.js'
-import global from '../../global.js'
+import config from '../../config.js'
 import Colors from '../../canvas/palette.js'
 import Log from '../../utilities/log.js'
 import { Abort } from '../../types/enum.js'
@@ -20,7 +20,7 @@ const Info: CommandInterface = {
   async execute(interaction: ChatInputCommandInteraction<CacheType>): Promise<void> {
     const observer = await new InteractionObserver(interaction).defer()
 
-    if (interaction.channel.id !== global.commandChannels.misc && !observer.checkPermissions([PermissionsBitField.Flags.ManageMessages], interaction.channel))
+    if (interaction.channel.id !== config.commandChannels.misc && !observer.checkPermissions([PermissionsBitField.Flags.ManageMessages], interaction.channel))
       return await observer.abort(Abort.CommandRestrictedChannel)
 
     const embed = new EmbedBuilder()
@@ -31,7 +31,7 @@ const Info: CommandInterface = {
       .setColor(Colors.darkBlue.hex as ColorResolvable)
       .setDescription(`**Bot Creator:** \`_damocles (<@342038795757027329>)\`
       **Uptime:** \`${Log.uptime}\`
-      **Version:** \`${global.build.id} (${global.build.date})\`
+      **Version:** \`${config.build.id} (${config.build.date})\`
       **Node Version:** \`${process.version}\`
       **Discord.js Version:** \`${version}\`
       **Memory Usage:** \`${Math.floor(process.memoryUsage().heapUsed / 1024 / 1024)}MB\`

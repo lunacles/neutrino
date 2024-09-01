@@ -11,7 +11,8 @@ import InteractionObserver from '../interactionobserver.js'
 import * as util from '../../utilities/util.js'
 import Icon from '../../utilities/icon.js'
 import Database from '../../db/database.js'
-import global from '../../global.js'
+import config from '../../config.js'
+import bot from '../../index.js'
 
 let chance: number = 0
 let setChance = (set: number): number => chance += set
@@ -27,7 +28,7 @@ enum Chance {
 
 const Gamble: CommandInterface = {
   name: 'gamble',
-  description: `Gamble some points! ${util.formatSeconds(global.cooldown.gamble)} cooldown.`,
+  description: `Gamble some points! ${util.formatSeconds(config.cooldown.gamble)} cooldown.`,
   data: new SlashCommandBuilder()
     .addIntegerOption((option: SlashCommandIntegerOption ): SlashCommandIntegerOption => option
     .setName('amount')

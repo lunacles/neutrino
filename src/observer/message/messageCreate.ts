@@ -3,7 +3,7 @@ import {
   Events,
   AttachmentBuilder,
 } from 'discord.js'
-import global from '../../global.js'
+import config from '../../config.js'
 import nodeUtil from 'node:util'
 
 const MessageCreate: Observer = {
@@ -13,8 +13,8 @@ const MessageCreate: Observer = {
     // if the user is a bot, ignore them
     if (message.author.bot) return
 
-    if (message.content.startsWith(`${global.prefix}eval`)) {
-      if (message.author.id !== global.ownerId) {
+    if (message.content.startsWith(`${config.prefix}eval`)) {
+      if (message.author.id !== config.ownerId) {
         message.reply('fuck off')
         return
       }

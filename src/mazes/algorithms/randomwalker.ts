@@ -1,7 +1,7 @@
 import {
   Walker,
 } from '../walker.js'
-import global from '../../global.js'
+import config from '../../config.js'
 
 const defaultWalkerChances: WalkerChances = {
   straightChance: 0.6,
@@ -10,8 +10,8 @@ const defaultWalkerChances: WalkerChances = {
 }
 
 const defaultWalkerInstructions: WalkerInstructions = {
-  startDirections: [...global.movementOptions.horizontal as Array<number>, ...global.movementOptions.vertical as Array<number>],
-  branchDirections: [...global.movementOptions.horizontal as Array<number>, ...global.movementOptions.vertical as Array<number>],
+  startDirections: [...config.movementOptions.horizontal as Array<number>, ...config.movementOptions.vertical as Array<number>],
+  branchDirections: [...config.movementOptions.horizontal as Array<number>, ...config.movementOptions.vertical as Array<number>],
   placementType: 1,
 }
 

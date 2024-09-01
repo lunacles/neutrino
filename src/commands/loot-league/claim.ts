@@ -10,11 +10,12 @@ import InteractionObserver from '../interactionobserver.js'
 import * as util from '../../utilities/util.js'
 import Icon from '../../utilities/icon.js'
 import Database from '../../db/database.js'
-import global from '../../global.js'
+import config from '../../config.js'
+import bot from '../../index.js'
 
 const Claim: CommandInterface = {
   name: 'claim',
-  description: `Claim some points! ${util.formatSeconds(global.cooldown.claim)} cooldown.`,
+  description: `Claim some points! ${util.formatSeconds(config.cooldown.claim)} cooldown.`,
   data: new SlashCommandBuilder(),
   async execute(interaction: ChatInputCommandInteraction<CacheType>): Promise<void> {
     const observer = await new InteractionObserver(interaction).defer()

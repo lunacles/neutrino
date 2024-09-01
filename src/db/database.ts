@@ -26,10 +26,7 @@ interface DatabaseInterface {
 const xpReward: Pair<number> = [15, 25]
 const cooldown: number = 1e3 * 5//60 // 60 seconds
 
-const databaseType: DatabaseType = 'firebase' as DatabaseType
-global.database = new FirebaseDatabase() as FirebaseDatabaseInterface//new JSONDatabase()
-const Type = FirebaseInstance//JSONDBInstance // FirebaseInstance
-
+const Type = (config.databaseType === 'json' ? JSONDBInstance : FirebaseInstance) as { new (user: User): DatabaseActions }
 const DatabaseInstance = class extends Type implements DatabaseInstanceInterface {
   public data: DiscordUserData
   public prng: Function
@@ -146,7 +143,7 @@ const Database: DatabaseInterface = {
     },
     async refreshLeaderboard(): Promise<void> {
       this.leaderboard.refresh()
-      if (databaseType === 'json') {
+      if (config.databaseType === 'json') {
         JSONDatabase.data.leaderboard = this.leaderboard.heap
       } else {
         const db = global.database as FirebaseDatabaseInterface

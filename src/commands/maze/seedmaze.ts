@@ -9,7 +9,7 @@ import {
 } from 'discord.js'
 import InteractionObserver from '../interactionobserver.js'
 import { RandomWalker } from '../../mazes/algorithms/randomwalker.js'
-import global from '../../global.js'
+import config from '../../config.js'
 import generateMaze from '../maze.js'
 import { Abort } from '../../types/enum.js'
 
@@ -143,7 +143,7 @@ const SeedMaze: CommandInterface = {
     const minBranches: number = interaction.options.getNumber('min-branches') ?? 0
     const maxBranches: number = interaction.options.getNumber('max-branches') ?? 0
 
-    if (interaction.channel.id !== global.commandChannels.mazeGeneration && !observer.checkPermissions([PermissionsBitField.Flags.ManageMessages], interaction.channel))
+    if (interaction.channel.id !== config.commandChannels.mazeGeneration && !observer.checkPermissions([PermissionsBitField.Flags.ManageMessages], interaction.channel))
       return await observer.abort(Abort.CommandRestrictedChannel)
 
     //if (!observer.checkPermissions([PermissionsBitField.Flags.ManageMessages], interaction.channel)) return await observer.abort(Abort.InsufficientPermissions)
@@ -162,8 +162,8 @@ const SeedMaze: CommandInterface = {
       .setMinBranches(minBranches)
       .setMaxBranches(maxBranches)
       .setWalkerInstructions([
-        ...global.movementOptions.horizontal as Array<number>,
-        ...global.movementOptions.vertical as Array<number>,
+        ...config.movementOptions.horizontal as Array<number>,
+        ...config.movementOptions.vertical as Array<number>,
       ])
 
     const [attachment, mazeSeed] = generateMaze(algorithm, seed, width, height)

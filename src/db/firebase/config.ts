@@ -1,4 +1,4 @@
-import global from '../../global.js'
+import gconfig from '../../config.js'
 
 interface Config {
   readonly apiKey: string
@@ -11,13 +11,13 @@ interface Config {
 }
 
 const config: Config = {
-  apiKey: global.env.FIREBASE_API_KEY,
-  authDomain: global.env.FIREBASE_AUTH_DOMAIN,
-  projectId: global.env.FIREBASE_PROJECT_ID,
-  storageBucket: global.env.FIREBASE_STORAGE_BUCKET,
-  messagingSenderId: global.env.FIREBASE_MESSAGE_SENDER_ID,
-  appId: global.env.FIREBASE_APP_ID,
-  measurementId: global.env.FIREBASE_MEASUREMENT_ID,
+  apiKey: gconfig.env.FIREBASE_API_KEY,
+  authDomain: gconfig.env.FIREBASE_AUTH_DOMAIN,
+  projectId: gconfig.env.FIREBASE_PROJECT_ID,
+  storageBucket: gconfig.env.FIREBASE_STORAGE_BUCKET,
+  messagingSenderId: gconfig.env.FIREBASE_MESSAGE_SENDER_ID,
+  appId: gconfig.env.FIREBASE_APP_ID,
+  measurementId: gconfig.env.FIREBASE_MEASUREMENT_ID,
 }
 
 export default config

@@ -4,34 +4,45 @@ import {
   SlashCommandBuilder,
   SlashCommandUserOption,
   EmbedBuilder,
-  PermissionsBitField,
   User,
+  AutocompleteInteraction,
+  SlashCommandStringOption,
 } from 'discord.js'
 //import GuildCollection from '../../user-manager/guildcollection.js'
 import InteractionObserver from '../interactionobserver.js'
-import global from '../../global.js'
+import config from '../../config.js'
 import * as util from '../../utilities/util.js'
 import Icon from '../../utilities/icon.js'
 import Database from '../../db/database.js'
 import { Abort } from '../../types/enum.js'
 import AutoComplete from '../autocomplete.js'
+import bot from '../../index.js'
 
 const Steal: CommandInterface = {
   name: 'steal',
-  description: `Attempt to steal some points from anotehr player! ${util.formatSeconds(global.cooldown.steal)} cooldown.`,
+  description: `Attempt to steal some points from anotehr player! ${util.formatSeconds(config.cooldown.steal)} cooldown.`,
   data: new SlashCommandBuilder()
   .addUserOption((option: SlashCommandUserOption ): SlashCommandUserOption => option
     .setName('user')
     .setDescription('The user to steal from.')
     .setRequired(true)
+  ).addStringOption((option: SlashCommandStringOption): SlashCommandStringOption => option
+    .setName('neutrino-id')
+    .setDescription('The neutrino id to fetch.')
+    .setAutocomplete(true)
   ),
+  async autocomplete(interaction: AutocompleteInteraction<CacheType>) {
+    let focused: string = interaction.options.getFocused()
+    let filter = AutoComplete.fetch(focused)
+    await interaction.respond(filter.map(choice => ({ name: choice, value: choice })))
+  },
   async execute(interaction: ChatInputCommandInteraction<CacheType>): Promise<void> {
     const observer = await new InteractionObserver(interaction).defer()
-    const user: User = await util.fetchUser(interaction.user.id)
+    const user: User = await bot.fetchUser(interaction.user.id)
     const targetUserOption = interaction.options.getUser('user', true)
 
-    //if (interaction.guild.id !== global.testServerId) return await observer.abort(Abort.CommandUnavailableInServer)
-    //if (interaction.channel.id !== global.commandChannels.lootLeague && !observer.checkPermissions([PermissionsBitField.Flags.ManageMessages], interaction.channel))
+    //if (interaction.guild.id !== config.testServerId) return await observer.abort(Abort.CommandUnavailableInServer)
+    //if (interaction.channel.id !== config.commandChannels.lootLeague && !observer.checkPermissions([PermissionsBitField.Flags.ManageMessages], interaction.channel))
       //return await observer.abort(Abort.CommandRestrictedChannel)
 
     if (targetUserOption.id === user.id) return await observer.abort(Abort.SelfTargetNotAllowed)

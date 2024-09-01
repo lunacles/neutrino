@@ -14,10 +14,11 @@ import Icon from '../../utilities/icon.js'
 import Database from '../../db/database.js'
 import global from '../../global.js'
 import AutoComplete from '../autocomplete.js'
+import bot from '../../index.js'
 
 const Score: CommandInterface = {
   name: 'score',
-  description: `Shows the given user\'s current points. ${util.formatSeconds(global.cooldown.score)} cooldown.`,
+  description: `Shows the given user\'s current points. ${util.formatSeconds(config.cooldown.score)} cooldown.`,
   data: new SlashCommandBuilder()
     .addUserOption((option: SlashCommandUserOption ): SlashCommandUserOption => option
       .setName('user')

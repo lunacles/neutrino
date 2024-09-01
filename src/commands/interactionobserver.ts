@@ -13,7 +13,7 @@ import {
 } from 'discord.js'
 //import Secret from 'utilities/secret.js'
 import Colors from '../canvas/palette.js'
-import global from '../global.js'
+import config from '../config.js'
 import Icon from '../utilities/icon.js'
 import { Abort } from '../types/enum.js'
 
@@ -80,9 +80,9 @@ const Observer = class implements ObserverInterface {
       //embeds: [embed],
     })
 
-    let errorTrace = await this.interaction.client.channels.fetch(global.errorTraceChannel) as TextChannel
+    let errorTrace = await this.interaction.client.channels.fetch(config.errorTraceChannel) as TextChannel
     await errorTrace.send({
-      content: `<@${global.ownerId}>`,
+      content: `<@${config.ownerId}>`,
       embeds: [new EmbedBuilder()
         .setColor(Colors.error.hex as ColorResolvable)
         .setThumbnail(`attachment://${Icon.HazardSign}`)
@@ -110,7 +110,7 @@ const Observer = class implements ObserverInterface {
     })
   }
   private createUserCooldown(): void {
-    global.cooldowns.set(this.interaction.user.id, {
+    config.cooldowns.set(this.interaction.user.id, {
       score: 0,
       claim: 0,
       steal: 0,
@@ -121,20 +121,20 @@ const Observer = class implements ObserverInterface {
     })
   }
   public isOnCooldown(type: Cooldowns): boolean {
-    if (!global.cooldowns.has(this.interaction.user.id))
+    if (!config.cooldowns.has(this.interaction.user.id))
       this.createUserCooldown()
 
-    return Math.floor((Date.now() - global.cooldowns.get(this.interaction.user.id)[type]) / 1e3) < global.cooldown[type] && this.interaction.user.id !== global.ownerId
+    return Math.floor((Date.now() - config.cooldowns.get(this.interaction.user.id)[type]) / 1e3) < config.cooldown[type] && this.interaction.user.id !== config.ownerId
   }
   public getCooldown(type: Cooldowns): number {
-    return global.cooldown[type] - Math.floor((Date.now() - global.cooldowns.get(this.interaction.user.id)[type]) / 1e3)
+    return config.cooldown[type] - Math.floor((Date.now() - config.cooldowns.get(this.interaction.user.id)[type]) / 1e3)
   }
   public resetCooldown(type: Cooldowns): void {
-    if (!global.cooldowns.has(this.interaction.user.id))
+    if (!config.cooldowns.has(this.interaction.user.id))
       this.createUserCooldown()
 
-    global.cooldowns.set(this.interaction.user.id, {
-      ...global.cooldowns.get(this.interaction.user.id),
+    config.cooldowns.set(this.interaction.user.id, {
+      ...config.cooldowns.get(this.interaction.user.id),
       [type]: Date.now()
     })
   }

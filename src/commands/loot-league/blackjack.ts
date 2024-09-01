@@ -14,7 +14,7 @@ import {
   Message,
 } from 'discord.js'
 import InteractionObserver from '../interactionobserver.js'
-import global from 'global.js'
+import config from '../../config.js'
 import * as util from '../../utilities/util.js'
 import Random from 'utilities/random.js'
 import { Background, Card, Circle, Clip, Media, RoundRect, Text } from 'canvas/elements.js'
@@ -417,7 +417,7 @@ Table.neutrinoIcon = await loadImage('./src/utilities/assets/neutrino.png')
 
 const Blackjack: CommandInterface = {
   name: 'blackjack',
-  description: `Play Blackjack against Neutrino to and gamble some points! ${util.formatSeconds(global.cooldown.blackjack)} cooldown.`,
+  description: `Play Blackjack against Neutrino to and gamble some points! ${util.formatSeconds(config.cooldown.blackjack)} cooldown.`,
   data: new SlashCommandBuilder()
     .addIntegerOption((option: SlashCommandIntegerOption ): SlashCommandIntegerOption => option
     .setName('amount')
@@ -510,7 +510,7 @@ const Blackjack: CommandInterface = {
                 await action.editReply({
                   content: message
                     .replace('player', action.user.id)
-                    .replace('bot', global.botId)
+                    .replace('bot', config.botId)
                     .replace('1x', table.amount.toLocaleString())
                     .replace('0.5x', Math.floor(table.amount * 0.5).toLocaleString()),
                   files: [attachment],

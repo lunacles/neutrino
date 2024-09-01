@@ -11,11 +11,12 @@ import * as util from '../../utilities/util.js'
 import Icon from '../../utilities/icon.js'
 import Database from '../../db/database.js'
 import { Abort } from '../../types/enum.js'
-import global from '../../global.js'
+import config from '../../config.js'
+import bot from '../../index.js'
 
 const Leaderboard: CommandInterface = {
   name: 'leaderboard',
-  description: `Shows the top 10 users. ${util.formatSeconds(global.cooldown.score)} cooldown.`,
+  description: `Shows the top 10 users. ${util.formatSeconds(config.cooldown.score)} cooldown.`,
   data: new SlashCommandBuilder(),
   async execute(interaction: ChatInputCommandInteraction<CacheType>): Promise<void> {
     const observer = await new InteractionObserver(interaction).defer()

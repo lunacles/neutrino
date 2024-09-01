@@ -9,7 +9,7 @@ import {
 import InteractionObserver from '../interactionobserver.js'
 import { Noise } from '../../mazes/algorithms/noise.js'
 import generateMaze from '../maze.js'
-import global from '../../global.js'
+import config from '../../config.js'
 import { Abort } from '../../types/enum.js'
 
 enum Min {
@@ -52,7 +52,7 @@ const NoiseMaze: CommandInterface = {
     const height: number = interaction.options.getNumber('height') ?? 32
     const zoom: number = interaction.options.getNumber('zoom') ?? 4
 
-    if (interaction.channel.id !== global.commandChannels.mazeGeneration && !observer.checkPermissions([PermissionsBitField.Flags.ManageMessages], interaction.channel))
+    if (interaction.channel.id !== config.commandChannels.mazeGeneration && !observer.checkPermissions([PermissionsBitField.Flags.ManageMessages], interaction.channel))
       return await observer.abort(Abort.CommandRestrictedChannel)
 
     //if (!observer.checkPermissions([PermissionsBitField.Flags.ManageMessages], interaction.channel)) return await observer.abort(Abort.InsufficientPermissions)

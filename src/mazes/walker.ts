@@ -1,4 +1,4 @@
-import global from '../global.js'
+import config from '../config.js'
 
 export const Walker = class implements WalkerInterface {
   public readonly chances: WalkerChances
@@ -63,13 +63,13 @@ export const Walker = class implements WalkerInterface {
     let x = 0
     let y = 0
 
-    if (direction & global.direction.left)
+    if (direction & config.direction.left)
       x -= 1
-    if (direction & global.direction.right)
+    if (direction & config.direction.right)
       x += 1
-    if (direction & global.direction.up)
+    if (direction & config.direction.up)
       y -= 1
-    if (direction & global.direction.down)
+    if (direction & config.direction.down)
       y += 1
 
     return [x, y]

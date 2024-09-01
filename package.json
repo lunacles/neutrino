@@ -1,24 +1,25 @@
 {
   "name": "neutrino",
-  "version": "1.0.0",
+  "version": "0.1.4",
   "description": "",
   "main": "main.js",
   "type": "module",
   "scripts": {
-    "prod": "NODE_ENV=PROD tsx watch src/main.ts",
-    "dev": "NODE_ENV=DEV tsx watch src/main.ts",
-    "enc": "NODE_ENV=DEVV tsx watch --inspect src/main.ts",
+    "dev": "NODE_ENV=DEV node --no-warnings=ExperimentalWarning --loader ts-node/esm src/main.ts",
+    "prod": "NODE_ENV=PROD node --no-warnings=ExperimentalWarning --loader ts-node/esm src/main.ts --minify --format esm,cjs --dts",
+    "inspect": "NODE_ENV=DEV tsx watch --inspect src/main.ts",
     "start": "node dist/main.js",
-    "build": "tsup src/main.ts --minify"
+    "build": "tsup src/main.ts --format esm,cjs --dts"
   },
   "keywords": [],
   "author": "",
   "license": "ISC",
   "devDependencies": {
     "@types/stream-json": "^1.7.7",
+    "ts-node": "^10.9.2",
     "tsup": "^8.0.2",
     "tsx": "^4.16.2",
-    "typescript": "^5.4.2"
+    "typescript": "^5.5.4"
   },
   "dependencies": {
     "@tensorflow-models/mobilenet": "^2.1.1",
@@ -30,7 +31,6 @@
     "dotenv": "^16.4.5",
     "firebase": "^10.9.0",
     "firebase-admin": "^12.0.0",
-    "gifenc": "^1.0.3",
-    "ts-node": "^10.9.2"
+    "gifenc": "^1.0.3"
   }
 }

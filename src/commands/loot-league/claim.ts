@@ -3,7 +3,6 @@ import {
   CacheType,
   SlashCommandBuilder,
   EmbedBuilder,
-  PermissionsBitField,
   User,
 } from 'discord.js'
 import InteractionObserver from '../interactionobserver.js'
@@ -19,13 +18,13 @@ const Claim: CommandInterface = {
   data: new SlashCommandBuilder(),
   async execute(interaction: ChatInputCommandInteraction<CacheType>): Promise<void> {
     const observer = await new InteractionObserver(interaction).defer()
-    const user: User = await util.fetchUser(interaction.user.id)
+    const user: User = await bot.fetchUser(interaction.user.id)
 
-    //if (interaction.guild.id !== global.testServerId) return await observer.abort(Abort.CommandUnavailableInServer)
-    //if (interaction.channel.id !== global.commandChannels.lootLeague && !observer.checkPermissions([PermissionsBitField.Flags.ManageMessages], interaction.channel))
+    //if (interaction.guild.id !== config.testServerId) return await observer.abort(Abort.CommandUnavailableInServer)
+    //if (interaction.channel.id !== config.commandChannels.lootLeague && !observer.checkPermissions([PermissionsBitField.Flags.ManageMessages], interaction.channel))
       //return await observer.abort(Abort.CommandRestrictedChannel)
 
-    try {
+    //try {
       let userData: DatabaseInstanceInterface = await Database.discord.users.fetch(user)
 
       if (observer.isOnCooldown('claim')) {
@@ -66,9 +65,9 @@ const Claim: CommandInterface = {
           }]
         })
       }
-    } catch (err) {
-      await observer.panic(err, this.name)
-    }
+    //} catch (err) {
+      //await observer.panic(err, this.name)
+    //}
   },
   test(): boolean {
     return true

@@ -16,29 +16,29 @@ import {
   MentionableSelectMenuInteraction,
   ChannelSelectMenuInteraction,
   CollectedInteraction,
-  PermissionsBitField,
   User,
 } from 'discord.js'
 //import GuildCollection from '../../user-manager/guildcollection.js'
 import InteractionObserver from '../interactionobserver.js'
-import global from '../../global.js'
+import config from '../../config.js'
 import * as util from '../../utilities/util.js'
 import Icon from '../../utilities/icon.js'
 import Database from '../../db/database.js'
+import bot from '../../index.js'
 
 type Action = StringSelectMenuInteraction<CacheType> | UserSelectMenuInteraction<CacheType> | RoleSelectMenuInteraction<CacheType> | MentionableSelectMenuInteraction<CacheType> | ChannelSelectMenuInteraction<CacheType> | ButtonInteraction<CacheType>
 type Component = InteractionCollector<CollectedInteraction<CacheType>>
 
 const Shield: CommandInterface = {
   name: 'shield',
-  description: `Shield yourself from thieves for ${util.formatSeconds(global.shieldDuration)}! ${util.formatSeconds(global.cooldown.shield)} cooldown.`,
+  description: `Shield yourself from thieves for ${util.formatSeconds(config.shieldDuration)}! ${util.formatSeconds(config.cooldown.shield)} cooldown.`,
   data: new SlashCommandBuilder(),
   async execute(interaction: ChatInputCommandInteraction<CacheType>): Promise<void> {
     const observer = await new InteractionObserver(interaction).defer()
-    const user: User = await util.fetchUser(interaction.user.id)
+    const user: User = await bot.fetchUser(interaction.user.id)
 
-    //if (interaction.guild.id !== global.testServerId) return await observer.abort(Abort.CommandUnavailableInServer)
-    //if (interaction.channel.id !== global.commandChannels.lootLeague && !observer.checkPermissions([PermissionsBitField.Flags.ManageMessages], interaction.channel))
+    //if (interaction.guild.id !== config.testServerId) return await observer.abort(Abort.CommandUnavailableInServer)
+    //if (interaction.channel.id !== config.commandChannels.lootLeague && !observer.checkPermissions([PermissionsBitField.Flags.ManageMessages], interaction.channel))
       //return await observer.abort(Abort.CommandRestrictedChannel)
 
     let userData: DatabaseInstanceInterface = await Database.discord.users.fetch(user.id)

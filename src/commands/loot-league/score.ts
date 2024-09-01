@@ -12,7 +12,7 @@ import InteractionObserver from '../interactionobserver.js'
 import * as util from '../../utilities/util.js'
 import Icon from '../../utilities/icon.js'
 import Database from '../../db/database.js'
-import global from '../../global.js'
+import config from '../../config.js'
 import AutoComplete from '../autocomplete.js'
 import bot from '../../index.js'
 

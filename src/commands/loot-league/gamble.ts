@@ -4,7 +4,6 @@ import {
   SlashCommandBuilder,
   SlashCommandIntegerOption,
   EmbedBuilder,
-  PermissionsBitField,
   User,
 } from 'discord.js'
 import InteractionObserver from '../interactionobserver.js'
@@ -39,10 +38,10 @@ const Gamble: CommandInterface = {
   async execute(interaction: ChatInputCommandInteraction<CacheType>): Promise<void> {
     const observer = await new InteractionObserver(interaction).defer()
     const amount = interaction.options.getInteger('amount', true)
-    const user: User = await util.fetchUser(interaction.user.id)
+    const user: User = await bot.fetchUser(interaction.user.id)
 
-    //if (interaction.guild.id !== global.testServerId) return await observer.abort(Abort.server423)
-    //if (interaction.channel.id !== global.commandChannels.lootLeague && !observer.checkPermissions([PermissionsBitField.Flags.ManageMessages], interaction.channel))
+    //if (interaction.guild.id !== config.testServerId) return await observer.abort(Abort.server423)
+    //if (interaction.channel.id !== config.commandChannels.lootLeague && !observer.checkPermissions([PermissionsBitField.Flags.ManageMessages], interaction.channel))
       //return await observer.abort(Abort.CommandRestrictedChannel)
 
     let userData: DatabaseInstanceInterface = await Database.discord.users.fetch(user)

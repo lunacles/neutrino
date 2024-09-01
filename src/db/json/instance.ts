@@ -5,7 +5,7 @@ import AutoComplete from '../../commands/autocomplete.js'
 import Database from '../database.js'
 
 const JSONDBInstance = class implements JSONDBInstanceInterface {
-  protected user: User
+  public user: User
   constructor(user: User) {
 
     this.user = user
@@ -32,6 +32,8 @@ const JSONDBInstance = class implements JSONDBInstanceInterface {
   }
   private createRecord(user: User): DiscordUserData {
     JSONDatabase.data.users[user.id] = {
+      neutrino_id: `anon${Secret.hash('neutrino::' + user.id).slice(0, 8)}`,
+
       avatar: user.avatarURL() ?? user.defaultAvatarURL,
       avatar_decoration: user.avatarDecorationURL(),
       banner: user.bannerURL(),
@@ -62,6 +64,9 @@ const JSONDBInstance = class implements JSONDBInstanceInterface {
         return seeds as Quaple<number>
       })()
     }
+    AutoComplete.add(JSONDatabase.data.users[user.id].neutrino_id)
+    Database.discord.members.set(JSONDatabase.data.users[user.id].neutrino_id, user.id)
+
     return JSONDatabase.data.users[user.id]
   }
 }

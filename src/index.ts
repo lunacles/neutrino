@@ -106,10 +106,10 @@ const Bot = class {
       const command = this.commands.get(name)
 
       try {
-        //if (interaction.guildId !== '1198061774512078879') {
-        //  await interaction.reply('no you cant use this here rn or something idk im making sure it no brakey')
-        //  return
-        //}
+        if (interaction.guildId !== '1198061774512078879') {
+          await interaction.reply('no you cant use this here rn or something idk im making sure it no brakey')
+          return
+        }
         if (interaction.isAutocomplete()) {
           if (!command) {
             Log.error(`No command matching ${name} was found.`)

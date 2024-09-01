@@ -24,7 +24,7 @@ const Claim: CommandInterface = {
     //if (interaction.channel.id !== config.commandChannels.lootLeague && !observer.checkPermissions([PermissionsBitField.Flags.ManageMessages], interaction.channel))
       //return await observer.abort(Abort.CommandRestrictedChannel)
 
-    //try {
+    try {
       let userData: DatabaseInstanceInterface = await Database.discord.users.fetch(user)
 
       if (observer.isOnCooldown('claim')) {
@@ -65,9 +65,9 @@ const Claim: CommandInterface = {
           }]
         })
       }
-    //} catch (err) {
-      //await observer.panic(err, this.name)
-    //}
+    } catch (err) {
+      await observer.panic(err, this.name)
+    }
   },
   test(): boolean {
     return true

@@ -1,8 +1,8 @@
 // Modified from: https://github.com/mattdesl/gifenc/tree/master
 // plan on improving later.
-import { Format } from 'types/enum.js'
+import { Format } from '../types/enum.js'
 import RGBPacker from './rgb-packing.js'
-import Color from 'canvas/color.js'
+import Color from '../canvas/color.js'
 
 const Palettize = {
   applyPalette(rgba: Uint8ClampedArray, palette: Array<PaletteValue>, format: typeof Format[keyof typeof Format] = Format.RGB565): Uint8Array {

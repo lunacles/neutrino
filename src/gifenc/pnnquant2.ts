@@ -6,8 +6,8 @@ Copyright (C) 2004-2019 Mark Tyler and Dmitry Groshev
 Copyright (c) 2018-2021 Miller Cy Chan
 * error measure; time used is proportional to number of bins squared - WJ */
 
-import { Format } from 'types/enum.js'
-import * as util from 'utilities/util.js'
+import { Format } from '../types/enum.js'
+import * as util from '../utilities/util.js'
 
 interface Bin {
   ac: number

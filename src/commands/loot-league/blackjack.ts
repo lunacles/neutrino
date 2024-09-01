@@ -10,21 +10,21 @@ import {
   Collection,
   CollectedInteraction,
   User,
-  PermissionsBitField,
   Message,
 } from 'discord.js'
 import InteractionObserver from '../interactionobserver.js'
 import config from '../../config.js'
 import * as util from '../../utilities/util.js'
-import Random from 'utilities/random.js'
-import { Background, Card, Circle, Clip, Media, RoundRect, Text } from 'canvas/elements.js'
-import Colors from 'canvas/palette.js'
-import NodeCanvas from 'canvas/canvas.js'
-import Interpolator from 'canvas/interpolator.js'
+import Random from '../../utilities/random.js'
+import { Background, Card, Circle, Clip, Media, RoundRect, Text } from '../../canvas/elements.js'
+import Colors from '../../canvas/palette.js'
+import NodeCanvas from '../../canvas/canvas.js'
+import Interpolator from '../../canvas/interpolator.js'
 import { loadImage } from 'canvas'
-import { GIFEncoder, pnnQuant, Palettize } from 'gifenc/index.js'
-import { Abort, Ease, FaceCard, Suits } from 'types/enum.d.js'
-import Database from 'db/database.js'
+import { GIFEncoder, pnnQuant, Palettize } from '../../gifenc/index.js'
+import { Ease, FaceCard, Suits } from '../../types/enum.js'
+import Database from '../../db/database.js'
+import bot from '../../index.js'
 
 const Game = class implements GameInterface {
   public static activeMatches = new Map<string, TableInterface>()

@@ -492,26 +492,25 @@ interface DiscordUserData {
 
   xp_data: XPData
   loot_league: LootLeague
-  role_persist: {
-    [key: string]: string
-  }
+  role_persist: Array<string>
 
   db_timestamp: number
-
   prng: Quaple<number>
 }
 
 interface DatabaseActions {
-  user: User
-  fetch(): Promise<DiscordUserData> | DiscordUserData
-  updateField(field: Keys<DiscordUserData>, data: unknown): Promise<void> | void
-  updateFieldValue(field: Keys<DiscordUserData>, key: Keys<DiscordUserData>, data: unknown): Promise<void> | void
-  setField(field: Keys<DiscordUserData>, data: unknown): Promise<void> | void
-  setFieldValue(field: Keys<DiscordUserData>, key: string, data: unknown): Promise<void> | void
-  removeFieldValue(field: Keys<DiscordUserData>, name: string): Promise<void> | void
+  instance: User | Guild
+  id: string
+  updateField(field: DataKeys, data: unknown): Promise<void> | void
+  updateFieldValue(field: DataKeys, key: DataKeys, data: unknown): Promise<void> | void
+  setField(field: DataKeys, data: unknown): Promise<void> | void
+  setFieldValue(field: DataKeys, key: string, data: unknown): Promise<void> | void
+  union(field: DataKeys, elements: Array<unknown>): Promise<void>
+  remove(field: DataKeys, elements: Array<unknown>): Promise<void>
+  removeFieldValue(field: DataKeys, name: string): Promise<void> | void
 }
 
-interface DatabaseInstanceInterface {
+interface DatabaseUserInstance extends FirebaseInstanceInterface {
   ran: RandomInterface
   data: DiscordUserData
   xp: number
@@ -519,36 +518,58 @@ interface DatabaseInstanceInterface {
   cooldown: number
   score: number
   shieldEnd: number
-  rolePersist: {
-    [key: string]: string
-  }
+  rolePersist: Set<string>
   neutrinoId: string
-  random(n: number = 1.0): Promise<number>
-  randomInt(n: number = 1.0): Promise<number>
-  fromRange(min: number, max: number, type: 'Integer' | 'Float' = 'Integer'): Promise<number>
-
-  getData(): Promise<void>
   setShield(state: number): Promise<void>
   setScore(amount: number): Promise<void>
   setXP(amount: number): Promise<void>
   xpCooldown(length: number): Promise<void>
   setLevel(level: number): Promise<void>
   passiveXP(): Promise<void>
-  addRolePersistence(roleId: string, serverId: string): Promise<void>
-  removeRolePersistence(roleId: string): Promise<void>
+  applyRolePersist(role: string): Promise<void>
+  removeRolePersist(role: string): Promise<void>
+}
+
+interface DiscordGuildData {
+  leaderboard: Array<string>
+  neutrino_guild_id: string
+  owner_id: string
+  icon: string
+  creation_date: number
+  id: string
+  role_persist: Array<string>
+  db_timestamp: number
+  prng: Quaple<number>
+}
+
+interface DatabaseGuildInstance extends FirebaseInstanceInterface {
+  leaderboard: BinaryHeapInterface<string>
+  data: DiscordGuildData
+  ran: RandomInterface
+  rolePersist: Set<string>
+  id: string
+  db_timestamp: number
+  neutrinoGuildId: string
+  refreshLeaderboard(): Promise<void>
+  addRolePersist(role: string): Promise<void>
+  removeRolePersist(role: string): Promise<void>
 }
 
 interface FirebaseInstanceInterface extends DatabaseActions {
-  db: FirebaseDatabaseInterface
-  ref: DocumentReference
+  fetch(): Promise<void>
   create(): Promise<DocumentReference>
-  writeBatch(batch?: Array<OperationInterface>): Promise<this>
+  random(n: number = 1.0): Promise<number>
+  randomInt(n: number = 1.0): Promise<number>
+  fromRange(min: number, max: number, type: 'Integer' | 'Float' = 'Integer'): Promise<number>
 }
 
 interface JSONDatabase {
   readonly version: number
   readonly users: {
     [key: string]: DiscordUserData
+  }
+  readonly guilds: {
+    [key: string]: DiscordGuildData
   }
   leaderboard: Array<string>
   members: Array<string>
@@ -560,7 +581,13 @@ interface JSONDatabaseInterface {
   get version(): number
 }
 
-interface JSONDBInstanceInterface extends DatabaseActions {}
+interface JSONDBInstanceInterface extends DatabaseActions {
+  fetch(): void
+  create(): DiscordUserData | DiscordGuildData
+  random(n: number = 1.0): number
+  randomInt(n: number = 1.0): number
+  fromRange(min: number, max: number, type: 'Integer' | 'Float' = 'Integer'): number
+}
 
 interface BinaryHeapInterface<T> {
   heap: Array<T>
@@ -570,8 +597,9 @@ interface BinaryHeapInterface<T> {
   pop(): T
   insert(value: T): void
   push(value: T): number
+  has(value: T): boolean
   updateValue(oldValue: T, newValue: T): void
   build(data: Array<T>): this
-  refresh(): void
+  refresh(): Array<T>
   belongs(value: T): boolean
 }

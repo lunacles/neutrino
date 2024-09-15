@@ -30,40 +30,6 @@ db.settings({
   ignoreUndefinedProperties: true
 })
 export const FirebaseDatabase = class implements FirebaseDatabaseInterface {
-  public static readonly cache = new Map<string, any>()
-  public static async fetchLeaderboard(): Promise<Array<string>> {
-    const lbdb: FirebaseDatabaseInterface = new FirebaseDatabase()
-    let leaderboardDoc: DocumentReference = lbdb.getdoc('leaderboard')
-
-    let doc: DocumentSnapshot = await leaderboardDoc.get()
-    if (!doc.exists) {
-      Log.error('Unable to locate leaderboard document. Creating a new instance...')
-      doc = await (await lbdb.mkdir('leaderboard', {
-        members: Array(10).fill(null),
-      })).get()
-    } else {
-      Log.info('Fetching leaderboard data...')
-    }
-
-    return doc.data().members
-  }
-  public static async fetchMembers(): Promise<Array<string>> {
-    const membersdb: FirebaseDatabaseInterface = new FirebaseDatabase()
-    let membersDoc: DocumentReference = membersdb.getdoc('members')
-
-    let doc: DocumentSnapshot = await membersDoc.get()
-    if (!doc.exists) {
-      Log.error('Unable to locate members document. Creating a new instance...')
-      doc = await (await membersdb.mkdir('members', {
-        map: [],
-      })).get()
-    } else {
-      Log.info('Fetching members data...')
-    }
-
-    return doc.data().map
-  }
-
   static batchWrite(operations: any): Promise<Array<WriteResult>> {
     let batch: WriteBatch = db.batch()
 

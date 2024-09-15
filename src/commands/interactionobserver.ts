@@ -138,6 +138,14 @@ const Observer = class implements ObserverInterface {
       [type]: Date.now()
     })
   }
+  public async applyScore(user: DatabaseUserInstance, guild: DatabaseGuildInstance, score: number): Promise<void> {
+    await user.setScore(score)
+
+    if (!guild.leaderboard.has(user.id)) {
+      guild.leaderboard.insert(user.id)
+      await guild.refreshLeaderboard()
+    }
+  }
 }
 
 export default Observer

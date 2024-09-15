@@ -51,7 +51,7 @@ export const FirebaseDatabase = class implements FirebaseDatabaseInterface {
 
     return batch.commit()
   }
-  static structureData(data: any): any {
+  static structureData(data: unknown): any {
     // direct return for non-object/non-array data types
     if (typeof data !== 'object' || data === null) return data
     // special handling for Timestamps

@@ -36,6 +36,9 @@ const BinaryHeap = class<T> implements BinaryHeapInterface<T> {
   public push(value: T): number {
     return this.heap.push(value)
   }
+  public has(value: T): boolean {
+    return this.indexMap.has(value)
+  }
   private childIndices(index: number): Pair<number> {
     return [index * 2 + 1, index * 2 + 2]
   }

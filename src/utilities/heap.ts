@@ -14,6 +14,10 @@ const BinaryHeap = class<T> implements BinaryHeapInterface<T> {
   get size(): number {
     return this.heap.length
   }
+  set first(value: T) {
+    if (!this.heap[0]) return
+    this.heap[0] = value
+  }
   get first(): T {
     return this.size === 0 ? null : this.heap[0]
   }
@@ -21,10 +25,10 @@ const BinaryHeap = class<T> implements BinaryHeapInterface<T> {
     return this.size === 0 ? null : this.heap[this.heap.length - 1]
   }
   public pop(): T {
-    let max = this.heap[0]
+    let max = this.first
     let last = this.heap.pop()
     if (this.size > 0) {
-      this.heap[0] = last
+      this.first = last
       this.down(0)
     }
     return max
@@ -43,9 +47,9 @@ const BinaryHeap = class<T> implements BinaryHeapInterface<T> {
       this.push(value)
       this.indexMap.set(value, this.size - 1)
       this.up(this.size - 1)
-    } else if (this.size > 0 && this.condition(value, this.heap[0])) {
-      this.indexMap.delete(this.heap[0])
-      this.heap[0] = value
+    } else if (this.size > 0 && this.condition(value, this.first)) {
+      this.indexMap.delete(this.first)
+      this.first = value
       this.indexMap.set(value, 0)
       this.down(0)
     }

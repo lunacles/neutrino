@@ -117,7 +117,7 @@ const BinaryHeap = class<T> implements BinaryHeapInterface<T> {
     return this
   }
   // use sparingly to avoid excessive resource consumption
-  public refresh(): void {
+  public refresh(): Array<T> {
     // rebuild the heap to restore the heap property
     for (let i = this.size >> 1 - 1; i >= 0; i--)
       this.down(i)
@@ -126,6 +126,8 @@ const BinaryHeap = class<T> implements BinaryHeapInterface<T> {
     this.indexMap.clear()
     for (let [index, value] of this.heap.entries())
       this.indexMap.set(value, index)
+
+    return this.heap
   }
   public belongs(value: T): boolean {
     if (this.size < this.maxSize)

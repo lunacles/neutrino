@@ -46,3 +46,5 @@ type PaletteValue = RGBTuple | RGBAQuaple
 // db
 type CachedInstance = FirebaseInstanceInterface | JSONDBInstanceInterface
 type DatabaseType = 'firebase' | 'json'
+type Data = DiscordUserData | DiscordGuildData
+type DataKeys = Keys<DiscordUserData> | Keys<DiscordGuildData>

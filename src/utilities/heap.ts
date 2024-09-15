@@ -131,7 +131,7 @@ const BinaryHeap = class<T> implements BinaryHeapInterface<T> {
   }
   public belongs(value: T): boolean {
     if (this.size < this.maxSize)
-      // The heap is not full, so the value belongs.
+      // the heap is not full, so the value belongs.
       return true
 
     return this.condition(value, this.first)

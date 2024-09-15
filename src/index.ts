@@ -18,10 +18,6 @@ import {
 } from './commands.js'
 import Build from './utilities/repo.js'
 import EventObservers from './observer/observers.js'
-import { FirebaseDatabase } from './db/firebase/database.js'
-import JSONDatabase from './db/json/database.js'
-import BinaryHeap from './utilities/heap.js'
-import AutoComplete from './commands/autocomplete.js'
 import Database from './db/database.js'
 
 const Bot = class {
@@ -35,12 +31,10 @@ const Bot = class {
     this.cacheRequests = new Map<string, number>()
   }
   public async init(): Promise<void> {
-    console.log('a')
     // login
     await this.client.login(config.env.BOT_TOKEN)
 
     this.client.on(Events.ClientReady, async (): Promise<void> => {
-      console.log('b')
       if (!this.client || !this.client.user) throw new Error('User not found')
       Log.info(`Client initialized as ${this.client.user.tag}`)
 
@@ -51,9 +45,6 @@ const Bot = class {
       // get the build info
       Log.info('Getting build information...')
       await Build.load()
-
-      Log.info('Initializing Database...')
-      await this.startDatabase()
 
       // await interactions
       Log.info(`${this.client.user.tag} is now accepting interactions`)
@@ -72,32 +63,6 @@ const Bot = class {
     await this.rest.put(Routes.applicationCommands(config.env.BOT_CLIENT_ID), {
       body: commands,
     })
-  }
-  private async startDatabase() {
-    let leaderboard = config.databaseType === 'json' ? JSONDatabase.data.leaderboard : await FirebaseDatabase.fetchLeaderboard()
-
-    // add all the users on the leaderboard to the cache
-    Database.discord.leaderboard = new BinaryHeap<string>((a: string, b: string): boolean => {
-      // because of the databaseinstance structure the entries we check will always be in the cache
-      let adi = Database.discord.users.cache.get(a)?.score ?? 0
-      let bdi = Database.discord.users.cache.get(b)?.score ?? 0
-
-      return adi > bdi
-    }, 10).build(leaderboard)
-
-    Database.discord.members = new Map(Object.entries(config.databaseType === 'json' ?
-      JSONDatabase.data.members :
-      await FirebaseDatabase.fetchMembers()
-    ))
-
-    const init = setInterval(async () => {
-      if (bot) {
-        await Promise.all(leaderboard.map(entry => Database.discord.users.fetch(entry)))
-        clearInterval(init)
-      }
-    }, 3e3)
-
-    AutoComplete.lsh.hashData(Array.from(Database.discord.members.keys()))
   }
   private awaitInteractions(): void {
     this.client.on(Events.InteractionCreate, async (interaction: Interaction): Promise<void> => {

@@ -404,11 +404,11 @@ const Blackjack: CommandInterface = {
     const observer = await new InteractionObserver(interaction).defer()
     const amount: number = interaction.options.getInteger('amount', true)
     const user: User = await bot.fetchUser(interaction.user.id)
-
+    const guildData: DatabaseGuildInstance = await Database.discord.guilds.fetch(interaction.guild)
     //if (interaction.channel.id !== config.commandChannels.lootLeague && !observer.checkPermissions([PermissionsBitField.Flags.ManageMessages], interaction.channel))
       //return await observer.abort(Abort.CommandRestrictedChannel)
 
-    let userData: DatabaseInstanceInterface = await Database.discord.users.fetch(user)
+    let userData: DatabaseUserInstance = await Database.discord.users.fetch(user)
     let neutrinoData: any = await Database.discord.users.fetch(config.botId)
 
     try {
@@ -445,12 +445,12 @@ const Blackjack: CommandInterface = {
           })
 
           let updateScores = async (state: number, amount: number): Promise<void> => {
-            await neutrinoData.setScore(neutrinoData.score + (
+            await observer.applyScore(neutrinoData, guildData, neutrinoData.score + (
               state ? -amount : // lose
               state == null ? amount * 0.5 : // tie
               amount // win
             ))
-            await userData.setScore(userData.score + (
+            await observer.applyScore(userData, guildData, userData.score + (
               state ? amount : // win
               state == null ? amount * -0.5 : // tie
               -amount // lose

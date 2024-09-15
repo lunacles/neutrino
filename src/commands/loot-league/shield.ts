@@ -36,12 +36,12 @@ const Shield: CommandInterface = {
   async execute(interaction: ChatInputCommandInteraction<CacheType>): Promise<void> {
     const observer = await new InteractionObserver(interaction).defer()
     const user: User = await bot.fetchUser(interaction.user.id)
-
+    const guildData: DatabaseGuildInstance = await Database.discord.guilds.fetch(interaction.guild)
     //if (interaction.guild.id !== config.testServerId) return await observer.abort(Abort.CommandUnavailableInServer)
     //if (interaction.channel.id !== config.commandChannels.lootLeague && !observer.checkPermissions([PermissionsBitField.Flags.ManageMessages], interaction.channel))
       //return await observer.abort(Abort.CommandRestrictedChannel)
 
-    let userData: DatabaseInstanceInterface = await Database.discord.users.fetch(user.id)
+    let userData: DatabaseUserInstance = await Database.discord.users.fetch(user.id)
 
     if (userData.shieldEnd > Date.now()) {
       await interaction.editReply(`You cannot create a shield while one is active!\nRemaining shield time: **${util.formatSeconds(Math.floor((userData.shieldEnd - Date.now()) / 1e3), true)}!**`)
@@ -114,7 +114,8 @@ const Shield: CommandInterface = {
             components: []
           })
 
-          await userData.setScore(Math.floor(userData.score * 0.8))
+
+          await observer.applyScore(userData, guildData, Math.floor(userData.score * 0.8))
           await userData.setShield(Date.now() + config.shieldDuration * 1e3)
           observer.resetCooldown('shield')
 

@@ -19,13 +19,13 @@ const Claim: CommandInterface = {
   async execute(interaction: ChatInputCommandInteraction<CacheType>): Promise<void> {
     const observer = await new InteractionObserver(interaction).defer()
     const user: User = await bot.fetchUser(interaction.user.id)
-
+    const guildData: DatabaseGuildInstance = await Database.discord.guilds.fetch(interaction.guild)
     //if (interaction.guild.id !== config.testServerId) return await observer.abort(Abort.CommandUnavailableInServer)
     //if (interaction.channel.id !== config.commandChannels.lootLeague && !observer.checkPermissions([PermissionsBitField.Flags.ManageMessages], interaction.channel))
       //return await observer.abort(Abort.CommandRestrictedChannel)
 
     try {
-      let userData: DatabaseInstanceInterface = await Database.discord.users.fetch(user)
+      let userData: DatabaseUserInstance = await Database.discord.users.fetch(user)
 
       if (observer.isOnCooldown('claim')) {
         await interaction.editReply(`This command is on cooldown for **${util.formatSeconds(observer.getCooldown('claim'), true)}!**`)
@@ -45,7 +45,7 @@ const Claim: CommandInterface = {
         } else {
           icon = Icon.OpenTreasureChest
         }
-        await userData.setScore(userData.score + claimedScore)
+        observer.applyScore(userData, guildData, userData.score + claimedScore)
         observer.resetCooldown('claim')
 
         const embed = new EmbedBuilder()

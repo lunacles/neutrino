@@ -40,15 +40,15 @@ const Steal: CommandInterface = {
     const observer = await new InteractionObserver(interaction).defer()
     const user: User = await bot.fetchUser(interaction.user.id)
     const targetUserOption = interaction.options.getUser('user', true)
-
+    const guildData: DatabaseGuildInstance = await Database.discord.guilds.fetch(interaction.guild)
     //if (interaction.guild.id !== config.testServerId) return await observer.abort(Abort.CommandUnavailableInServer)
     //if (interaction.channel.id !== config.commandChannels.lootLeague && !observer.checkPermissions([PermissionsBitField.Flags.ManageMessages], interaction.channel))
       //return await observer.abort(Abort.CommandRestrictedChannel)
 
     if (targetUserOption.id === user.id) return await observer.abort(Abort.SelfTargetNotAllowed)
 
-    let userData: DatabaseInstanceInterface = await Database.discord.users.fetch(user.id)
-    let targetData: DatabaseInstanceInterface = await Database.discord.users.fetch(targetUserOption.id)
+    let userData: DatabaseUserInstance = await Database.discord.users.fetch(user.id)
+    let targetData: DatabaseUserInstance = await Database.discord.users.fetch(targetUserOption.id)
 
     if (userData.shieldEnd > Date.now()) {
       await interaction.editReply('You cannot steal from someone while you have a shield active!')
@@ -69,22 +69,31 @@ const Steal: CommandInterface = {
       return
     } else {
       const factor: number = 1.65
+      const maxChance: number = 0.65
+      const clamp: { [key: string]: number } = {
+        minGain: 0.05,
+        maxGain: 0.3,
+
+        minLoss: 0.125,
+        maxLoss: 0.35,
+      }
+
       let chance: number = userData.score / targetData.score * Math.sqrt(factor)
       // pentalize players stealing from players with a lower score than theirs
       if (targetData.score <= userData.score)
         chance = targetData.score / userData.score / Math.sqrt(factor)
 
       // cap the chance at at 65%
-      let succeed: boolean = await userData.random() < Math.min(chance, 0.65)
+      let succeed: boolean = await userData.random() < Math.min(chance, maxChance)
 
       let stolenScore: number = succeed ?
         // steal at least 5% of target score, at most 30% of target score,
-        await userData.fromRange(targetData.score * 0.05, targetData.score * 0.3, 'Integer') :
+        await userData.fromRange(targetData.score * clamp.minGain, targetData.score * clamp.maxGain, 'Integer') :
         // lose at least 12.5% of own score, at most 35% of own score,
-        -(await userData.fromRange(userData.score * 0.125, userData.score * 0.35, 'Integer'))
+        -(await userData.fromRange(userData.score * clamp.minLoss, userData.score * clamp.maxLoss, 'Integer'))
 
-      await userData.setScore(userData.score + stolenScore)
-      await targetData.setScore(targetData.score - stolenScore)
+      await observer.applyScore(userData, guildData, userData.score + stolenScore)
+      await observer.applyScore(targetData, guildData, targetData.score - stolenScore)
 
       let icon = succeed ? Icon.Robber : Icon.Amputation
 

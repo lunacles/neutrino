@@ -51,7 +51,7 @@ const RolePersist: CommandInterface = {
       return await observer.abort(Abort.TargetNotGiven)
     }
 
-    let userData: DatabaseInstanceInterface = await Database.discord.users.fetch(user)
+    let userData: DatabaseUserInstance = await Database.discord.users.fetch(user)
 
     if (userData.rolePersist[role.id]) {
       return await observer.abort(Abort.AlreadyPersistent)
@@ -60,14 +60,14 @@ const RolePersist: CommandInterface = {
     }
 
     if (remove) {
-      await userData.removeRolePersistence(role.id)
+      await userData.removeRolePersist(role.id)
       interaction.editReply(`Removed ${role.name} from role persistance.`)
     } else {
       let serverRoles = Object.values(userData.rolePersist).filter((serverId: string): boolean => serverId === interaction.guildId).length
       if (serverRoles >= config.rolePersistCap)
         observer.abort(Abort.MaxPersistence)
 
-      await userData.addRolePersistence(role.id, interaction.guildId)
+      await userData.applyRolePersist(role.id)
       interaction.editReply(`Add ${role.name} to role persistance.`)
     }
   },

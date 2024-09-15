@@ -39,12 +39,12 @@ const Gamble: CommandInterface = {
     const observer = await new InteractionObserver(interaction).defer()
     const amount = interaction.options.getInteger('amount', true)
     const user: User = await bot.fetchUser(interaction.user.id)
-
+    const guildData: DatabaseGuildInstance = await Database.discord.guilds.fetch(interaction.guild)
     //if (interaction.guild.id !== config.testServerId) return await observer.abort(Abort.server423)
     //if (interaction.channel.id !== config.commandChannels.lootLeague && !observer.checkPermissions([PermissionsBitField.Flags.ManageMessages], interaction.channel))
       //return await observer.abort(Abort.CommandRestrictedChannel)
 
-    let userData: DatabaseInstanceInterface = await Database.discord.users.fetch(user)
+    let userData: DatabaseUserInstance = await Database.discord.users.fetch(user)
 
     if (userData.shieldEnd > Date.now()) {
       interaction.editReply('You cannot gamble while you have a shield active!')
@@ -97,7 +97,7 @@ const Gamble: CommandInterface = {
           `lost **${Math.floor(Math.abs(netResult)).toLocaleString()}**!`
         let roll: string = icon.match(/dice-(\w+)\.png/)[1]
 
-        userData.setScore(Math.floor(userData.score - amount + result))
+        await observer.applyScore(userData, guildData, Math.floor(userData.score - amount + result))
 
         const embed = new EmbedBuilder()
           .setColor(user.accentColor)

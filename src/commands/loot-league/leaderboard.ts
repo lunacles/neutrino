@@ -20,24 +20,24 @@ const Leaderboard: CommandInterface = {
   async execute(interaction: ChatInputCommandInteraction<CacheType>): Promise<void> {
     const observer = await new InteractionObserver(interaction).defer()
     const user: User = await bot.fetchUser(interaction.user.id)
+    const guildData: DatabaseGuildInstance = await Database.discord.guilds.fetch(interaction.guild)
+    await Database.discord.users.fetch(user.id)
 
     //if (interaction.guild.id !== config.testServerId) return await observer.abort(Abort.CommandUnavailableInServer)
     //if (interaction.channel.id !== config.commandChannels.lootLeague && !observer.checkPermissions([PermissionsBitField.Flags.ManageMessages], interaction.channel))
       //return await observer.abort(Abort.CommandRestrictedChannel)
 
-    Database.discord.refreshLeaderboard()
-    if (Database.discord.leaderboard.heap.length <= 0)
+    if (guildData.leaderboard.heap.length <= 0)
       return await observer.abort(Abort.EmptyLeaderboard)
 
+    await guildData.refreshLeaderboard()
 
     let top: Array<string> = []
-    for (let [index, user] of await Promise.all(Database.discord.leaderboard.heap.map((user: string): DatabaseInstanceInterface => {
+    for (let [index, user] of await Promise.all(guildData.leaderboard.heap.map((user: string): DatabaseUserInstance => {
       let cache = Database.discord.users.cache.get(user)
       return cache
     }).entries())) {
-      let inGuild: boolean = await interaction.guild.members.fetch(user.data.id).then(() => true).catch(() => false)
-      let id = inGuild ? `<@${user.data.id}>` : `\`${user.neutrinoId}\``
-      top.push(`**${index + 1}:** ${id} - **${user.score.toLocaleString()}**`)
+      top.push(`**${index + 1}:** <@${user.data.id}> - **${user.score.toLocaleString()}**`)
     }
 
     if (observer.isOnCooldown('leaderboard')) {

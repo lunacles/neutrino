@@ -122,7 +122,7 @@ const BinaryHeap = class<T> implements BinaryHeapInterface<T> {
   // use sparingly to avoid excessive resource consumption
   public refresh(): Array<T> {
     // rebuild the heap to restore the heap property
-    for (let i = this.size >> 1 - 1; i >= 0; i--)
+    for (let i = (this.size >> 1) - 1; i >= 0; i--)
       this.down(i)
 
     // update the indexMap

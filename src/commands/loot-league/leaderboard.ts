@@ -16,7 +16,7 @@ import bot from '../../index.js'
 const Leaderboard: CommandInterface = {
   name: 'leaderboard',
   description: `Shows the top 10 users. ${util.formatSeconds(config.cooldown.score)} cooldown.`,
-  data: new SlashCommandBuilder(),
+  data: new SlashCommandBuilder().setDMPermission(false),
   async execute(interaction: ChatInputCommandInteraction<CacheType>): Promise<void> {
     const observer = await new InteractionObserver(interaction).defer()
     const user: User = await bot.fetchUser(interaction.user.id)

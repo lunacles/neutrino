@@ -51,7 +51,7 @@ const QuantizedNoiseMaze: CommandInterface = {
       .setDescription('The cutoff value for noise values. Default is 0.1.')
       .setMinValue(Min.Threshold)
       .setMaxValue(Max.Threshold)
-    ),
+    ).setDMPermission(false),
   async execute(interaction: ChatInputCommandInteraction<CacheType>): Promise<void> {
     const observer = await new InteractionObserver(interaction).defer()
     const seed: string = interaction.options.getString('seed') ?? ''

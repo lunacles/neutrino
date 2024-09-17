@@ -72,7 +72,7 @@ const MultiScaleNoiseMaze: CommandInterface = {
       .setDescription('The frequency multiplier applied across 3 scales. Default is 2.')
       .setMinValue(Min.FrequencyMultiplier)
       .setMaxValue(Max.FrequencyMultiplier)
-    ),
+    ).setDMPermission(false),
   async execute(interaction: ChatInputCommandInteraction<CacheType>): Promise<void> {
     const observer = await new InteractionObserver(interaction).defer()
     const seed: string = interaction.options.getString('seed') ?? ''

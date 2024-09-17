@@ -15,7 +15,7 @@ import bot from '../../index.js'
 const Claim: CommandInterface = {
   name: 'claim',
   description: `Claim some points! ${util.formatSeconds(config.cooldown.claim)} cooldown.`,
-  data: new SlashCommandBuilder(),
+  data: new SlashCommandBuilder().setDMPermission(false),
   async execute(interaction: ChatInputCommandInteraction<CacheType>): Promise<void> {
     const observer = await new InteractionObserver(interaction).defer()
     const user: User = await bot.fetchUser(interaction.user.id)

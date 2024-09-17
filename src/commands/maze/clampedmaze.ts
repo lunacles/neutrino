@@ -56,7 +56,7 @@ const ClampedNoiseMaze: CommandInterface = {
       .setDescription('Only noise values lower than this maximum will be considered valid. Default is 0.085')
       .setMinValue(Min.Clamp)
       .setMaxValue(Max.Clamp)
-    ),
+    ).setDMPermission(false),
   async execute(interaction: ChatInputCommandInteraction<CacheType>): Promise<void> {
     const observer = await new InteractionObserver(interaction).defer()
     const seed: string = interaction.options.getString('seed') ?? ''

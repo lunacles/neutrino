@@ -19,7 +19,7 @@ const { version: packageVersion } = (await import('../../../package.json', {
 const Info: CommandInterface = {
   name: 'info',
   description: 'Bot info.',
-  data: new SlashCommandBuilder(),
+  data: new SlashCommandBuilder().setDMPermission(false),
   async execute(interaction: ChatInputCommandInteraction<CacheType>): Promise<void> {
     const observer = await new InteractionObserver(interaction).defer()
 

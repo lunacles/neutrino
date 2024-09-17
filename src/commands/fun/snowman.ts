@@ -22,7 +22,7 @@ import { Abort } from '../../types/enum.js'
 const Snowman: CommandInterface = {
   name: 'snowman',
   description: 'Sends a snowman.',
-  data: new SlashCommandBuilder(),
+  data: new SlashCommandBuilder().setDMPermission(false),
   async execute(interaction: ChatInputCommandInteraction<CacheType>): Promise<void> {
     const observer = await new InteractionObserver(interaction).defer()
 

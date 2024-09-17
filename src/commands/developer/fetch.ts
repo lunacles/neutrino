@@ -25,7 +25,7 @@ const FetchUserData: CommandInterface = {
     ).addBooleanOption((option: SlashCommandBooleanOption): SlashCommandBooleanOption => option
       .setName('redact')
       .setDescription('Redact sensitive info. True by default.')
-    ),
+    ).setDMPermission(false),
   async execute(interaction: ChatInputCommandInteraction<CacheType>): Promise<void> {
     const observer = await new InteractionObserver(interaction).defer()
     const targetUserOption: User = interaction.options.getUser('user', false)

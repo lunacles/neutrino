@@ -31,7 +31,7 @@ const PinArchive: CommandInterface = {
       .setName('target')
       .setDescription('The channel to archive pinned messages from.')
       .setRequired(true)
-    ),
+    ).setDMPermission(false),
   async execute(interaction: ChatInputCommandInteraction<CacheType>): Promise<void> {
     const observer = await new InteractionObserver(interaction).defer()
     const targetChannel: TextChannel = interaction.options.getChannel('target')

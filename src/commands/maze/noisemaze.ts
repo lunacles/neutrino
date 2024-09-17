@@ -44,7 +44,7 @@ const NoiseMaze: CommandInterface = {
       .setDescription('The zoom into the noise algorithm. Default is 4.')
       .setMinValue(Min.Zoom)
       .setMaxValue(Max.Zoom)
-    ),
+    ).setDMPermission(false),
   async execute(interaction: ChatInputCommandInteraction<CacheType>): Promise<void> {
     const observer = await new InteractionObserver(interaction).defer()
     const seed: string = interaction.options.getString('seed') ?? ''

@@ -51,7 +51,7 @@ const DomainWarpedNoiseMaze: CommandInterface = {
       .setDescription('The x, y, and z coordinates are warped by a given noise generated value. Default is 50.')
       .setMinValue(Min.Warp)
       .setMaxValue(Max.Warp)
-    ),
+    ).setDMPermission(false),
   async execute(interaction: ChatInputCommandInteraction<CacheType>): Promise<void> {
     const observer = await new InteractionObserver(interaction).defer()
     const seed: string = interaction.options.getString('seed') ?? ''

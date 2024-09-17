@@ -11,7 +11,7 @@ import { Abort } from '../../types/enum.js'
 const PingCommand: CommandInterface = {
   name: 'ping',
   description: 'Replies with Pong!',
-  data: new SlashCommandBuilder(),
+  data: new SlashCommandBuilder().setDMPermission(false),
   async execute(interaction: ChatInputCommandInteraction<CacheType>): Promise<void> {
     const observer = await new InteractionObserver(interaction).defer()
 

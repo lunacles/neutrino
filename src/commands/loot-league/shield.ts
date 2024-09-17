@@ -32,7 +32,7 @@ type Component = InteractionCollector<CollectedInteraction<CacheType>>
 const Shield: CommandInterface = {
   name: 'shield',
   description: `Shield yourself from thieves for ${util.formatSeconds(config.shieldDuration)}! ${util.formatSeconds(config.cooldown.shield)} cooldown.`,
-  data: new SlashCommandBuilder(),
+  data: new SlashCommandBuilder().setDMPermission(false),
   async execute(interaction: ChatInputCommandInteraction<CacheType>): Promise<void> {
     const observer = await new InteractionObserver(interaction).defer()
     const user: User = await bot.fetchUser(interaction.user.id)

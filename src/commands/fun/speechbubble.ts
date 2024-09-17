@@ -73,7 +73,7 @@ const SpeechBubble: CommandInterface = {
     .setName('flip')
     .setDescription('The side the speechbubble arrow will point from. True = right, false = left.')
     .setRequired(true)
-  ),
+  ).setDMPermission(false),
   async execute(interaction: ChatInputCommandInteraction<CacheType>): Promise<void> {
     const observer = await new InteractionObserver(interaction).defer()
     const image: Attachment = interaction.options.getAttachment('image')

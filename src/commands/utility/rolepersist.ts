@@ -32,7 +32,7 @@ const RolePersist: CommandInterface = {
   ).addBooleanOption((option: SlashCommandBooleanOption): SlashCommandBooleanOption => option
     .setName('remove')
     .setDescription('Will remove the selected role from the role persistance.')
-  ),
+  ).setDMPermission(false),
   async execute(interaction: ChatInputCommandInteraction<CacheType>): Promise<void> {
     const observer = await new InteractionObserver(interaction).defer()
     const targetUser: User = interaction.options.getUser('user')

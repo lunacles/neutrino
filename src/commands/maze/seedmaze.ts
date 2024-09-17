@@ -38,91 +38,76 @@ const SeedMaze: CommandInterface = {
     .addStringOption((option: SlashCommandStringOption): SlashCommandStringOption => option
       .setName('seed')
       .setDescription('The maze seed. Can be used to recreate the same maze twice.')
-    )
-    .addBooleanOption((option: SlashCommandBooleanOption): SlashCommandBooleanOption => option
+    ).addBooleanOption((option: SlashCommandBooleanOption): SlashCommandBooleanOption => option
       .setName('placement-type')
       .setDescription('What the walker places. True for empty, false for walls.')
-    )
-    .addNumberOption((option: SlashCommandNumberOption): SlashCommandNumberOption => option
+    ).addNumberOption((option: SlashCommandNumberOption): SlashCommandNumberOption => option
       .setName('width')
       .setDescription('The width of the maze. Default is 32.')
       .setMinValue(Min.Dimensions)
       .setMaxValue(Max.Dimensions)
-    )
-    .addNumberOption((option: SlashCommandNumberOption): SlashCommandNumberOption => option
+    ).addNumberOption((option: SlashCommandNumberOption): SlashCommandNumberOption => option
       .setName('height')
       .setDescription('The height of the maze. Default is 32.')
       .setMinValue(Min.Dimensions)
       .setMaxValue(Max.Dimensions)
-    )
-    .addNumberOption((option: SlashCommandNumberOption): SlashCommandNumberOption => option
+    ).addNumberOption((option: SlashCommandNumberOption): SlashCommandNumberOption => option
       .setName('seed-amount')
       .setDescription('The amount of walker seeds. Default is 75.')
       .setMinValue(Min.Seeds)
       .setMaxValue(Max.Seeds)
-    )
-    .addNumberOption((option: SlashCommandNumberOption): SlashCommandNumberOption => option
+    ).addNumberOption((option: SlashCommandNumberOption): SlashCommandNumberOption => option
       .setName('straight-chance')
       .setDescription('The chance for a walker to move forward in the direction it\'s facing. Default its 0.6.')
       .setMinValue(Min.Chance)
       .setMaxValue(Max.Chance)
-    )
-    .addNumberOption((option: SlashCommandNumberOption): SlashCommandNumberOption => option
+    ).addNumberOption((option: SlashCommandNumberOption): SlashCommandNumberOption => option
       .setName('turn-chance')
       .setDescription('The chance for a walker to turn to a new direction. Runs if straight chance fails. Default is 0.4.')
       .setMinValue(Min.Chance)
       .setMaxValue(Max.Chance)
-    )
-    .addNumberOption((option: SlashCommandNumberOption): SlashCommandNumberOption => option
+    ).addNumberOption((option: SlashCommandNumberOption): SlashCommandNumberOption => option
       .setName('branch-chance')
       .setDescription('The chance for a walker to branch a new walker. Runs if straight & turn chance fails. Default is 0.')
       .setMinValue(Min.Chance)
       .setMaxValue(Max.Chance)
-    )
-    .addNumberOption((option: SlashCommandNumberOption): SlashCommandNumberOption => option
+    ).addNumberOption((option: SlashCommandNumberOption): SlashCommandNumberOption => option
       .setName('min-length')
       .setDescription('The minimum length a walker can be. Default is 0.')
       .setMinValue(Min.Length)
       .setMaxValue(Max.Length)
-    )
-    .addNumberOption((option: SlashCommandNumberOption): SlashCommandNumberOption => option
+    ).addNumberOption((option: SlashCommandNumberOption): SlashCommandNumberOption => option
       .setName('min-turns')
       .setDescription('The minimum turns a walker can make. Default is 0.')
       .setMinValue(Min.Turns)
       .setMaxValue(Max.Turns)
-    )
-    .addNumberOption((option: SlashCommandNumberOption): SlashCommandNumberOption => option
+    ).addNumberOption((option: SlashCommandNumberOption): SlashCommandNumberOption => option
       .setName('min-branches')
       .setDescription('The minimum branches a walker can create. Default is 0.')
       .setMinValue(Min.Branches)
       .setMaxValue(Max.Branches)
-    )
-    .addNumberOption((option: SlashCommandNumberOption): SlashCommandNumberOption => option
+    ).addNumberOption((option: SlashCommandNumberOption): SlashCommandNumberOption => option
       .setName('max-length')
       .setDescription('The maximum length a walker can be. Default is 50.')
       .setMinValue(Min.Length)
       .setMaxValue(Max.Length)
-    )
-    .addNumberOption((option: SlashCommandNumberOption): SlashCommandNumberOption => option
+    ).addNumberOption((option: SlashCommandNumberOption): SlashCommandNumberOption => option
       .setName('max-turns')
       .setDescription('The maximum turns a walker can make. Default is 50.')
       .setMinValue(Min.Turns)
       .setMaxValue(Max.Turns)
-    )
-    .addNumberOption((option: SlashCommandNumberOption): SlashCommandNumberOption => option
+    ).addNumberOption((option: SlashCommandNumberOption): SlashCommandNumberOption => option
       .setName('max-branches')
       .setDescription('The maximum branches a walker can create. Default is 0.')
       .setMinValue(Min.Branches)
       .setMaxValue(Max.Branches)
-    )
-    .addBooleanOption((option: SlashCommandBooleanOption): SlashCommandBooleanOption => option
+    ).addBooleanOption((option: SlashCommandBooleanOption): SlashCommandBooleanOption => option
       .setName('border-wrapping')
       .setDescription('If a walker moves outside of the map boundary, make it wrap to the other side. Default is false.')
-    )
-    .addBooleanOption((option: SlashCommandBooleanOption): SlashCommandBooleanOption => option
+    ).addBooleanOption((option: SlashCommandBooleanOption): SlashCommandBooleanOption => option
       .setName('terminate-on-contact')
       .setDescription('If a walker runs into another walker, terminate it. Default is false.')
-    ),
+    ).setDMPermission(false),
   async execute(interaction: ChatInputCommandInteraction<CacheType>): Promise<void> {
     const observer = await new InteractionObserver(interaction).defer()
     const seed: string = interaction.options.getString('seed') ?? ''

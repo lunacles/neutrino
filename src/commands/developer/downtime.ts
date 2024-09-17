@@ -60,14 +60,13 @@ const DownTime: CommandInterface = {
       .setName('channel')
       .setDescription('The channel to send the downtime notification in.')
       .setRequired(true)
-    )
-    .addIntegerOption((option: SlashCommandIntegerOption): SlashCommandIntegerOption => option
+    ).addIntegerOption((option: SlashCommandIntegerOption): SlashCommandIntegerOption => option
       .setName('duration')
       .setDescription('The estimated duration of the downtime in seconds. Default is "Unkown duration".')
     ).addStringOption((option: SlashCommandStringOption): SlashCommandStringOption => option
       .setName('reason')
       .setDescription('The reason behind the downtime. Default is "Unspecified".')
-    ),
+    ).setDMPermission(false),
   async execute(interaction: ChatInputCommandInteraction<CacheType>): Promise<void> {
     const observer = await new InteractionObserver(interaction).defer()
     const duration: number = interaction.options.getInteger('duration')

@@ -16,15 +16,13 @@ const Sudo: CommandInterface = {
     .addChannelOption((option: SlashCommandChannelOption ): SlashCommandChannelOption => option
       .setName('channel')
       .setDescription('The channel to sudo into.')
-    )
-    .addStringOption((option: SlashCommandStringOption): SlashCommandStringOption => option
+    ).addStringOption((option: SlashCommandStringOption): SlashCommandStringOption => option
       .setName('channel-id')
       .setDescription('The channel id to sudo the message into.')
-    )
-    .addStringOption((option: SlashCommandStringOption): SlashCommandStringOption => option
-    .setName('message')
-    .setDescription('The message to sudo.')
-  ),
+    ).addStringOption((option: SlashCommandStringOption): SlashCommandStringOption => option
+      .setName('message')
+      .setDescription('The message to sudo.')
+    ).setDMPermission(false),
   async execute(interaction: ChatInputCommandInteraction<CacheType>): Promise<void> {
     const observer = await new InteractionObserver(interaction).defer()
     const targetChannelOption = interaction.options.getChannel('channel', false)

@@ -45,7 +45,7 @@ const FirebaseGuildInstance = class extends FirebaseAction implements FirebaseIn
       let bdi = Database.discord.users.cache.get(b)?.score ?? 0
 
       return adi > bdi
-    }, 10)
+    }, 15)
     this.ignoredChannels = new Set(this.data.ignored_channels)
     this.neutrinoGuildId = this.data.neutrino_guild_id
   }

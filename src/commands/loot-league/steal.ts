@@ -38,7 +38,7 @@ const Steal: CommandInterface = {
       //return await observer.abort(Abort.CommandRestrictedChannel)
 
     if (targetUserOption.id === user.id) return await observer.abort(Abort.SelfTargetNotAllowed)
-
+    if (targetUserOption.id === config.botId) return await observer.abort(Abort.NeutrinoNotAllowed)
     let userData: DatabaseUserInstance = await Database.discord.users.fetch(user.id)
     let targetData: DatabaseUserInstance = await Database.discord.users.fetch(targetUserOption.id)
 

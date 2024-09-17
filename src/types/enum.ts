@@ -53,5 +53,6 @@ export enum Abort {
   ChannelNotFound = 'No target user found',
   ChannelNotGiven = 'No target user provided',
   MaxPersistence = 'Maximum number of persistence',
-  EmptyLeaderboard = 'The leaderboard is empty! Something really bad must\'ve happened!'
+  EmptyLeaderboard = 'The leaderboard is empty! Something really bad must\'ve happened!',
+  NeutrinoNotAllowed = 'You cannot steal from Neutrino!'
 }

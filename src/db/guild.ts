@@ -11,6 +11,7 @@ const GuildInstance = class extends Type implements DatabaseGuildInstance {
   public data: DiscordGuildData
   public ran: RandomInterface
   public rolePersist: Set<string>
+  public ignoredChannels: Set<string>
   public db_timestamp: number
   public neutrinoGuildId: string
   constructor(guild: Guild) {
@@ -26,6 +27,14 @@ const GuildInstance = class extends Type implements DatabaseGuildInstance {
   public async removeRolePersist(role: string): Promise<void> {
     await this.remove('role_persist', [role])
     this.rolePersist.delete(role)
+  }
+  public async addIgnoredChannel(channel: string): Promise<void> {
+    await this.union('ignored_channels', [channel])
+    this.ignoredChannels.add(channel)
+  }
+  public async removeIgnoredChannel(channel: string): Promise<void> {
+    await this.remove('ignored_channels', [channel])
+    this.ignoredChannels.delete(channel)
   }
 }
 

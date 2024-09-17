@@ -72,7 +72,6 @@ const Bot = class {
       const guildData: DatabaseGuildInstance = await Database.discord.guilds.fetch(interaction.guildId)
 
       // ignore the interaction if it's part of the ignored channels
-      console.log(guildData.ignoredChannels)
       if (guildData.ignoredChannels.has(interaction.channelId)) return
 
       try {

@@ -196,7 +196,6 @@ interface CommandInterface {
   readonly description: string
   readonly data: any,
 
-  autocomplete?: (interaction: AutocompleteInteraction<CacheType>) => Promise<void>
   execute(interaction: ChatInputCommandInteraction<CacheType>): Promise<void>
   test(): boolean
 }

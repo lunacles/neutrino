@@ -27,7 +27,7 @@ const Bot = class {
   private cacheRequests: Map<string, number>
   constructor(client: Client) {
     this.client = client
-    this.commands = new Collection()
+    this.commands = new Collection<string, CommandInterface>()
     this.cacheRequests = new Map<string, number>()
   }
   public async init(): Promise<void> {

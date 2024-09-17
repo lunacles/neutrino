@@ -48,6 +48,10 @@ export enum Abort {
   NotPersistent = 'This role is not persistent',
   TargetNotFound = 'No target user found',
   TargetNotGiven = 'No target user provided',
+  AlreadyIgnored = 'This channel is already ignored',
+  NotIgnored = 'This channel is not ignored',
+  ChannelNotFound = 'No target user found',
+  ChannelNotGiven = 'No target user provided',
   MaxPersistence = 'Maximum number of persistence',
   EmptyLeaderboard = 'The leaderboard is empty! Something really bad must\'ve happened!'
 }

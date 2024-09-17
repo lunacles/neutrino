@@ -23,7 +23,7 @@ import Database from './db/database.js'
 const Bot = class {
   public client: Client
   private rest: REST
-  public commands: Collection<any, any>
+  public commands: Collection<string, CommandInterface>
   private cacheRequests: Map<string, number>
   constructor(client: Client) {
     this.client = client

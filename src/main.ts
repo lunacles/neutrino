@@ -32,7 +32,7 @@ manager.on('shardCreate', async (shard: Shard): Promise<void> => {
       } break
     }
   })
-  Log.info(`Shard with id "${shard.id} initialized`)
+  Log.info(`Shard with id "${shard.id}" initialized`)
 })
 
 await manager.spawn({

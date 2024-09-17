@@ -13,6 +13,7 @@ import {
   WriteBatch,
   WriteResult,
   Timestamp,
+  FieldValue,
 } from 'firebase-admin/firestore'
 import serviceAccount from './serviceaccount.js'
 import {
@@ -55,11 +56,16 @@ export const FirebaseDatabase = class implements FirebaseDatabaseInterface {
   static structureData(data: unknown): any {
     // direct return for non-object/non-array data types
     if (typeof data !== 'object' || data === null) return data
-    // special handling for Timestamps
+
+    // preserve firestore FieldValue instances
+    if (data instanceof FieldValue) return data
+    // preserve Timestamps
     if (data instanceof Timestamp) return data
+
     // handling for Arrays
     if (Array.isArray(data)) return data.map(item => FirebaseDatabase.structureData(item))
     // handling for Maps and Objects
+
     let entries: Array<[string, unknown]> = data instanceof Map || data instanceof Collection ? Array.from(data.entries()) : Object.entries(data)
     let result: object = Object.fromEntries(entries.map(([key, value]) => [key, FirebaseDatabase.structureData(value)]))
     return result

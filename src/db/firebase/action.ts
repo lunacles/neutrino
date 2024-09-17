@@ -74,9 +74,9 @@ const FirebaseAction = class implements DatabaseActions {
     await this.pushOperation({
       type: OperationType.Update,
       ref: this.ref,
-      data: FirebaseDatabase.structureData({
+      data: {
         [field]: FieldValue.arrayUnion(...elements)
-      })
+      }
     })
   }
   public async remove(field: DataKeys, elements: Array<unknown>): Promise<void> {

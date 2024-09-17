@@ -68,26 +68,14 @@ const Bot = class {
     this.client.on(Events.InteractionCreate, async (interaction: Interaction): Promise<void> => {
       if (!interaction.isChatInputCommand()) return
       let name = interaction.commandName
-      const command = this.commands.get(name)
+      const command: CommandInterface = this.commands.get(name)
+      const guildData: DatabaseGuildInstance = await Database.discord.guilds.fetch(interaction.guildId)
+
+      // ignore the interaction if it's part of the ignored channels
+      console.log(guildData.ignoredChannels)
+      if (guildData.ignoredChannels.has(interaction.channelId)) return
 
       try {
-        if (interaction.guildId !== '1198061774512078879') {
-          await interaction.reply('no you cant use this here rn or something idk im making sure it no brakey')
-          return
-        }
-        if (interaction.isAutocomplete()) {
-          if (!command) {
-            Log.error(`No command matching ${name} was found.`)
-            return
-          }
-
-          try {
-            await command.autocomplete(interaction)
-          } catch (err) {
-            Log.error('Failed to perform autocomplete: ', err)
-          }
-        }
-
         await command.execute(interaction)
       } catch (err) {
         Log.error(`Command execution ${interaction.commandName} failed`, err)

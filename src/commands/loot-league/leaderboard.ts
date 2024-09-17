@@ -30,6 +30,7 @@ const Leaderboard: CommandInterface = {
     if (guildData.leaderboard.heap.length <= 0)
       return await observer.abort(Abort.EmptyLeaderboard)
 
+    guildData.leaderboard.refresh()
     await guildData.refreshLeaderboard()
 
     let top: Array<string> = []

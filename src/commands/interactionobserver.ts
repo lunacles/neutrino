@@ -142,7 +142,12 @@ const Observer = class implements ObserverInterface {
     await user.setScore(score)
 
     if (!guild.leaderboard.has(user.id)) {
-      guild.leaderboard.insert(user.id)
+      if (guild.leaderboard.belongs(user.id)) {
+        guild.leaderboard.insert(user.id)
+        await guild.refreshLeaderboard()
+      }
+    } else if (guild.leaderboard.belongs(user.id)) {
+      guild.leaderboard.refresh()
       await guild.refreshLeaderboard()
     }
   }

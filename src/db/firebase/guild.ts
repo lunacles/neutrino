@@ -20,6 +20,7 @@ const FirebaseGuildInstance = class extends FirebaseAction implements FirebaseIn
   public ran: RandomInterface
   public leaderboard: BinaryHeapInterface<string>
   public rolePersist: Set<string>
+  public ignoredChannels: Set<string>
   public neutrinoGuildId: string
   constructor(instance: Guild) {
     super(instance)
@@ -45,6 +46,7 @@ const FirebaseGuildInstance = class extends FirebaseAction implements FirebaseIn
 
       return adi > bdi
     }, 10)
+    this.ignoredChannels = new Set(this.data.ignored_channels)
     this.neutrinoGuildId = this.data.neutrino_guild_id
   }
   public async create(): Promise<DocumentReference> {
@@ -67,7 +69,8 @@ const FirebaseGuildInstance = class extends FirebaseAction implements FirebaseIn
           seeds.push(parseInt(hash.substring(i * 8, (i + 1) * 8), 16) >>> 0)
 
         return seeds as Quaple<number>
-      })()
+      })(),
+      ignored_channels: []
     } satisfies DiscordGuildData)
   }
   public async random(n: number = 1.0): Promise<number> {

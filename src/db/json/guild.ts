@@ -17,6 +17,7 @@ const JSONGuildInstance = class extends JSONAction implements JSONDBInstanceInte
   public ran: RandomInterface
   public leaderboard: BinaryHeapInterface<string>
   public rolePersist: Set<string>
+  public ignoredChannels: Set<string>
   public neutrinoGuildId: string
    constructor(instance: Guild) {
     super(instance)
@@ -44,6 +45,7 @@ const JSONGuildInstance = class extends JSONAction implements JSONDBInstanceInte
 
       return adi > bdi
     }, 10).build(this.data.leaderboard)
+    this.ignoredChannels = new Set(this.data.ignored_channels)
     this.neutrinoGuildId = this.data.neutrino_guild_id
   }
   public create(): DiscordGuildData {
@@ -64,7 +66,8 @@ const JSONGuildInstance = class extends JSONAction implements JSONDBInstanceInte
           seeds.push(parseInt(hash.substring(i * 8, (i + 1) * 8), 16) >>> 0)
 
         return seeds as Quaple<number>
-      })()
+      })(),
+      ignored_channels: [],
     } satisfies DiscordGuildData
 
     return JSONDatabase.data.guilds[this.id]

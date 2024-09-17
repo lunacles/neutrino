@@ -5,7 +5,6 @@ import {
   SlashCommandUserOption,
   EmbedBuilder,
   User,
-  AutocompleteInteraction,
   SlashCommandStringOption,
 } from 'discord.js'
 //import GuildCollection from '../../user-manager/guildcollection.js'
@@ -15,7 +14,6 @@ import * as util from '../../utilities/util.js'
 import Icon from '../../utilities/icon.js'
 import Database from '../../db/database.js'
 import { Abort } from '../../types/enum.js'
-import AutoComplete from '../autocomplete.js'
 import bot from '../../index.js'
 
 const Steal: CommandInterface = {
@@ -29,13 +27,7 @@ const Steal: CommandInterface = {
   ).addStringOption((option: SlashCommandStringOption): SlashCommandStringOption => option
     .setName('neutrino-id')
     .setDescription('The neutrino id to fetch.')
-    .setAutocomplete(true)
-  ),
-  async autocomplete(interaction: AutocompleteInteraction<CacheType>) {
-    let focused: string = interaction.options.getFocused()
-    let filter = AutoComplete.fetch(focused)
-    await interaction.respond(filter.map(choice => ({ name: choice, value: choice })))
-  },
+  ).setDMPermission(false),
   async execute(interaction: ChatInputCommandInteraction<CacheType>): Promise<void> {
     const observer = await new InteractionObserver(interaction).defer()
     const user: User = await bot.fetchUser(interaction.user.id)

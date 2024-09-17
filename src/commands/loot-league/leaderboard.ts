@@ -33,7 +33,7 @@ const Leaderboard: CommandInterface = {
     await guildData.refreshLeaderboard()
 
     let top: Array<string> = []
-    for (let [index, user] of await Promise.all(guildData.leaderboard.heap.map((user: string): DatabaseUserInstance => {
+    for (let [index, user] of await Promise.all(guildData.leaderboard.heap.slice(0, 10).map((user: string): DatabaseUserInstance => {
       let cache = Database.discord.users.cache.get(user)
       return cache
     }).entries())) {

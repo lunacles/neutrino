@@ -540,6 +540,7 @@ interface DiscordGuildData {
   role_persist: Array<string>
   db_timestamp: number
   prng: Quaple<number>
+  ignored_channels: Array<string>
 }
 
 interface DatabaseGuildInstance extends FirebaseInstanceInterface {
@@ -547,12 +548,15 @@ interface DatabaseGuildInstance extends FirebaseInstanceInterface {
   data: DiscordGuildData
   ran: RandomInterface
   rolePersist: Set<string>
+  ignoredChannels: Set<string>
   id: string
   db_timestamp: number
   neutrinoGuildId: string
   refreshLeaderboard(): Promise<void>
   addRolePersist(role: string): Promise<void>
   removeRolePersist(role: string): Promise<void>
+  addIgnoredChannel(channel: string): Promise<void>
+  removeIgnoredChannel(channel: string): Promise<void>
 }
 
 interface FirebaseInstanceInterface extends DatabaseActions {

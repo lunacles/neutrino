@@ -17,7 +17,7 @@ const GuildInstance = class extends Type implements DatabaseGuildInstance {
     super(guild)
   }
   public async refreshLeaderboard(): Promise<void> {
-    await this.setField('leaderboard', this.leaderboard.heap)
+    await this.updateField('leaderboard', this.leaderboard.heap)
   }
   public async addRolePersist(role: string): Promise<void> {
     await this.union('role_persist', [role])

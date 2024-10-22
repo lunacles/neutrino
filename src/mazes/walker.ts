@@ -1,4 +1,4 @@
-import config from '../config.js'
+import Maze from './maze.js'
 
 export const Walker = class implements WalkerInterface {
   public readonly chances: WalkerChances
@@ -63,13 +63,13 @@ export const Walker = class implements WalkerInterface {
     let x = 0
     let y = 0
 
-    if (direction & config.direction.left)
+    if (direction & Maze.direction.left)
       x -= 1
-    if (direction & config.direction.right)
+    if (direction & Maze.direction.right)
       x += 1
-    if (direction & config.direction.up)
+    if (direction & Maze.direction.up)
       y -= 1
-    if (direction & config.direction.down)
+    if (direction & Maze.direction.down)
       y += 1
 
     return [x, y]

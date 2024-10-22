@@ -1,4 +1,14 @@
 // config
+interface DevConfig {
+  readonly ownerId: string
+  readonly botId: string
+  readonly testServerId: string
+  readonly errorTraceChannel: string
+  readonly prefix: string
+  readonly build: any
+  readonly heartbeatInterval: number
+}
+
 interface CommandCooldownInterface {
   readonly score: number
   readonly claim: number
@@ -8,30 +18,18 @@ interface CommandCooldownInterface {
   readonly leaderboard: number
   readonly blackjack: number
 }
-interface Direction {
-  none: number
-  left: number
-  right: number
-  up: number
-  down: number
+
+interface LootLeagueConfig {
+  readonly cooldown: CommandCooldownInterface
+  readonly shieldDuration: number
 }
-interface DiagonalDirection {
-  readonly upLeft: number
-  readonly downLeft: number
-  readonly upRight: number
-  readonly downRight: number
+
+interface DBConfig {
+  readonly databaseType: DatabaseType
+  readonly batchTick: number
+  readonly rolePersistCap: number
 }
-interface MovementOptions {
-  all: Array<number> | number,
-  diagonal: Array<number> | number,
-  vertical: Array<number> | number,
-  horizontal: Array<number> | number,
-}
-interface CommandChannels {
-  readonly lootLeague: string
-  readonly mazeGeneration: string
-  readonly misc: string
-}
+
 interface ENV {
   readonly FIREBASE_API_KEY: string
   readonly FIREBASE_AUTH_DOMAIN: string
@@ -45,25 +43,8 @@ interface ENV {
   readonly NODE_ENV: string
 }
 
-interface ConfigInterface {
-  readonly build: any
-  readonly ownerId: string
-  readonly testServerId: string
-  readonly cooldown: CommandCooldownInterface
-  cooldowns: Map<string, CommandCooldownInterface>
-  readonly shieldDuration: number
-  direction: Direction
-  diagonalDirection: DiagonalDirection
-  movementOptions: MovementOptions
-  readonly batchTick: number
-  readonly errorTraceChannel: string
-  readonly commandChannels: CommandChannels
-  readonly env: ENV
-  readonly botId: string
-  readonly databaseType: DatabaseType
-  readonly rolePersistCap: number
-  readonly prefix: string
-  readonly heartbeatInterval: number
+interface ConfigInterface extends DevConfig, LootLeagueConfig, DBConfig {
+  env: ENV
 }
 
 // utilities
@@ -222,6 +203,25 @@ interface ObserverInterface {
 
 
 // mazes
+interface Direction {
+  none: number
+  left: number
+  right: number
+  up: number
+  down: number
+}
+interface DiagonalDirection {
+  readonly upLeft: number
+  readonly downLeft: number
+  readonly upRight: number
+  readonly downRight: number
+}
+interface MovementOptions {
+  all: Array<number> | number,
+  diagonal: Array<number> | number,
+  vertical: Array<number> | number,
+  horizontal: Array<number> | number,
+}
 interface MazeInterface extends Dimensions {
   type: number
   array: Array<any>

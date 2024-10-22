@@ -11,7 +11,6 @@ import {
   Collection,
   CollectedInteraction,
   Attachment,
-  PermissionsBitField,
 } from 'discord.js'
 import InteractionObserver from '../interactionobserver.js'
 import NodeCanvas from '../../canvas/canvas.js'
@@ -24,8 +23,6 @@ import {
   Text,
 } from '../../canvas/elements.js'
 import { GIFEncoder, pnnQuant, Palettize } from '../../gifenc/index.js'
-import { Abort } from '../../types/enum.js'
-import config from '../../config.js'
 
 let encodeGif = (c: NodeCanvasInterface): Buffer => {
   const encoder = new GIFEncoder()
@@ -78,9 +75,6 @@ const SpeechBubble: CommandInterface = {
     const observer = await new InteractionObserver(interaction).defer()
     const image: Attachment = interaction.options.getAttachment('image')
     const side: boolean = interaction.options.getBoolean('flip') ?? false
-
-    if (interaction.channel.id !== config.commandChannels.misc && !observer.checkPermissions([PermissionsBitField.Flags.ManageMessages], interaction.channel))
-      return await observer.abort(Abort.CommandRestrictedChannel)
 
     try {
       let buttonWidth: number = image.width / 5

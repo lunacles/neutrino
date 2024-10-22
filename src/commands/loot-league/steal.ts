@@ -33,9 +33,6 @@ const Steal: CommandInterface = {
     const user: User = await bot.fetchUser(interaction.user.id)
     const targetUserOption = interaction.options.getUser('user', true)
     const guildData: DatabaseGuildInstance = await Database.discord.guilds.fetch(interaction.guild)
-    //if (interaction.guild.id !== config.testServerId) return await observer.abort(Abort.CommandUnavailableInServer)
-    //if (interaction.channel.id !== config.commandChannels.lootLeague && !observer.checkPermissions([PermissionsBitField.Flags.ManageMessages], interaction.channel))
-      //return await observer.abort(Abort.CommandRestrictedChannel)
 
     if (targetUserOption.id === user.id) return await observer.abort(Abort.SelfTargetNotAllowed)
     if (targetUserOption.id === config.botId) return await observer.abort(Abort.NeutrinoNotAllowed)

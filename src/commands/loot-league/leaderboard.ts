@@ -23,10 +23,6 @@ const Leaderboard: CommandInterface = {
     const guildData: DatabaseGuildInstance = await Database.discord.guilds.fetch(interaction.guild)
     await Database.discord.users.fetch(user.id)
 
-    //if (interaction.guild.id !== config.testServerId) return await observer.abort(Abort.CommandUnavailableInServer)
-    //if (interaction.channel.id !== config.commandChannels.lootLeague && !observer.checkPermissions([PermissionsBitField.Flags.ManageMessages], interaction.channel))
-      //return await observer.abort(Abort.CommandRestrictedChannel)
-
     if (guildData.leaderboard.heap.length <= 0)
       return await observer.abort(Abort.EmptyLeaderboard)
 

@@ -3,7 +3,6 @@ import {
   CacheType,
   SlashCommandBuilder,
   AttachmentBuilder,
-  PermissionsBitField,
 } from 'discord.js'
 import NodeCanvas from '../../canvas/canvas.js'
 import Colors from '../../canvas/palette.js'
@@ -15,20 +14,12 @@ import {
   Rect,
 } from '../../canvas/elements.js'
 import Color from '../../canvas/color.js'
-import InteractionObserver from '../interactionobserver.js'
-import config from '../../config.js'
-import { Abort } from '../../types/enum.js'
 
 const Snowman: CommandInterface = {
   name: 'snowman',
   description: 'Sends a snowman.',
   data: new SlashCommandBuilder().setDMPermission(false),
   async execute(interaction: ChatInputCommandInteraction<CacheType>): Promise<void> {
-    const observer = await new InteractionObserver(interaction).defer()
-
-    if (interaction.channel.id !== config.commandChannels.misc && !observer.checkPermissions([PermissionsBitField.Flags.ManageMessages], interaction.channel))
-      return await observer.abort(Abort.CommandRestrictedChannel)
-
     let size: number = 256
     let radii: number = size * 0.5
     let c: NodeCanvasInterface = new NodeCanvas(size, size)

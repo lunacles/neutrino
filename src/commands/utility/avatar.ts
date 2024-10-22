@@ -11,13 +11,9 @@ import {
   AttachmentBuilder,
   ALLOWED_SIZES,
   ImageURLOptions,
-  PermissionsBitField,
 } from 'discord.js'
 import Colors from '../../canvas/palette.js'
 import fetch, { Response } from 'node-fetch'
-import InteractionObserver from '../interactionobserver.js'
-import config from '../../config.js'
-import { Abort } from '../../types/enum.js'
 
 type ImageSize = (typeof ALLOWED_SIZES)[number]
 interface Choice {
@@ -47,13 +43,9 @@ const Avatar: CommandInterface = {
     }))
   ).setDMPermission(false),
   async execute(interaction: ChatInputCommandInteraction<CacheType>): Promise<void> {
-    const observer = await new InteractionObserver(interaction).defer()
     const user: User = interaction.options.getUser('user') ?? interaction.user
     const guildAvatar: boolean = interaction.options.getBoolean('guild-avatar') ?? false
     const size: number = interaction.options.getInteger('size') ?? 512
-
-    if (interaction.channel.id !== config.commandChannels.misc && !observer.checkPermissions([PermissionsBitField.Flags.ManageMessages], interaction.channel))
-      return await observer.abort(Abort.CommandRestrictedChannel)
 
     let options: ImageURLOptions = { size: size as ImageSize, extension: 'png' }
     let hyperlink: Pair<string> = [`${guildAvatar ? 'Global' : 'Guild'} Avatar URL`, guildAvatar ? user.displayAvatarURL(options) : user.avatarURL(options)]

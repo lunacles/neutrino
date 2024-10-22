@@ -2,15 +2,11 @@ import {
   ChatInputCommandInteraction,
   CacheType,
   SlashCommandBuilder,
-  PermissionsBitField,
   SlashCommandStringOption,
   SlashCommandNumberOption,
 } from 'discord.js'
-import InteractionObserver from '../interactionobserver.js'
 import { Noise } from '../../mazes/algorithms/noise.js'
 import generateMaze from '../maze.js'
-import config from '../../config.js'
-import { Abort } from '../../types/enum.js'
 
 enum Min {
   Dimensions = 16,
@@ -74,7 +70,6 @@ const MultiScaleNoiseMaze: CommandInterface = {
       .setMaxValue(Max.FrequencyMultiplier)
     ).setDMPermission(false),
   async execute(interaction: ChatInputCommandInteraction<CacheType>): Promise<void> {
-    const observer = await new InteractionObserver(interaction).defer()
     const seed: string = interaction.options.getString('seed') ?? ''
     const width: number = interaction.options.getNumber('width') ?? 32
     const height: number = interaction.options.getNumber('height') ?? 32
@@ -84,10 +79,6 @@ const MultiScaleNoiseMaze: CommandInterface = {
     const amplitudeMultiplier: number = interaction.options.getNumber('amplitude-multiplier') ?? 0.5
     const frequencyMultiplier: number = interaction.options.getNumber('frequency-multiplier') ?? 2
 
-    if (interaction.channel.id !== config.commandChannels.mazeGeneration && !observer.checkPermissions([PermissionsBitField.Flags.ManageMessages], interaction.channel))
-      return await observer.abort(Abort.CommandRestrictedChannel)
-
-    //if (!observer.checkPermissions([PermissionsBitField.Flags.ManageMessages], interaction.channel)) return await observer.abort(Abort.InsufficientPermissions)
     const algorithm = new Noise()
       .setType('multiScale')
       .setZoom(zoom)

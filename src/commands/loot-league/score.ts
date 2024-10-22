@@ -32,9 +32,6 @@ const Score: CommandInterface = {
     const targetUserOption = interaction.options.getUser('user', false) ?? interaction.options.getString('neutrino-id', false) ?? user
     interaction.guild.members.cache
     await Database.discord.guilds.fetch(interaction.guild)
-    //if (interaction.guild.id !== config.testServerId) return await observer.abort(Abort.CommandUnavailableInServer)
-    //if (interaction.channel.id !== config.commandChannels.lootLeague && !observer.checkPermissions([PermissionsBitField.Flags.ManageMessages], interaction.channel))
-      //return await observer.abort(Abort.CommandRestrictedChannel)
 
     let targetData: DatabaseUserInstance = await Database.discord.users.fetch(typeof targetUserOption === 'string' ? targetUserOption : targetUserOption.id)
 

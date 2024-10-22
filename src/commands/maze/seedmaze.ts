@@ -3,15 +3,12 @@ import {
   CacheType,
   SlashCommandBuilder,
   SlashCommandBooleanOption,
-  PermissionsBitField,
   SlashCommandStringOption,
   SlashCommandNumberOption,
 } from 'discord.js'
-import InteractionObserver from '../interactionobserver.js'
 import { RandomWalker } from '../../mazes/algorithms/randomwalker.js'
-import config from '../../config.js'
 import generateMaze from '../maze.js'
-import { Abort } from '../../types/enum.js'
+import Maze from '../../mazes/maze.js'
 
 enum Min {
   Dimensions = 16,
@@ -109,7 +106,6 @@ const SeedMaze: CommandInterface = {
       .setDescription('If a walker runs into another walker, terminate it. Default is false.')
     ).setDMPermission(false),
   async execute(interaction: ChatInputCommandInteraction<CacheType>): Promise<void> {
-    const observer = await new InteractionObserver(interaction).defer()
     const seed: string = interaction.options.getString('seed') ?? ''
     const width: number = interaction.options.getNumber('width') ?? 32
     const height: number = interaction.options.getNumber('height') ?? 32
@@ -128,10 +124,6 @@ const SeedMaze: CommandInterface = {
     const minBranches: number = interaction.options.getNumber('min-branches') ?? 0
     const maxBranches: number = interaction.options.getNumber('max-branches') ?? 0
 
-    if (interaction.channel.id !== config.commandChannels.mazeGeneration && !observer.checkPermissions([PermissionsBitField.Flags.ManageMessages], interaction.channel))
-      return await observer.abort(Abort.CommandRestrictedChannel)
-
-    //if (!observer.checkPermissions([PermissionsBitField.Flags.ManageMessages], interaction.channel)) return await observer.abort(Abort.InsufficientPermissions)
     const algorithm = new RandomWalker()
       .setSeedAmount(seedAmount)
       .setPlacementType(+!placementType)
@@ -147,8 +139,8 @@ const SeedMaze: CommandInterface = {
       .setMinBranches(minBranches)
       .setMaxBranches(maxBranches)
       .setWalkerInstructions([
-        ...config.movementOptions.horizontal as Array<number>,
-        ...config.movementOptions.vertical as Array<number>,
+        ...Maze.movementOptions.horizontal as Array<number>,
+        ...Maze.movementOptions.vertical as Array<number>,
       ])
 
     const [attachment, mazeSeed] = generateMaze(algorithm, seed, width, height)

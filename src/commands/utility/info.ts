@@ -4,14 +4,11 @@ import {
   SlashCommandBuilder,
   EmbedBuilder,
   ColorResolvable,
-  PermissionsBitField,
 } from 'discord.js'
 import { version } from 'discord.js'
-import InteractionObserver from '../interactionobserver.js'
 import config from '../../config.js'
 import Colors from '../../canvas/palette.js'
 import Log from '../../utilities/log.js'
-import { Abort } from '../../types/enum.js'
 const { version: packageVersion } = (await import('../../../package.json', {
   assert: { type: 'json' }
 })).default
@@ -21,11 +18,6 @@ const Info: CommandInterface = {
   description: 'Bot info.',
   data: new SlashCommandBuilder().setDMPermission(false),
   async execute(interaction: ChatInputCommandInteraction<CacheType>): Promise<void> {
-    const observer = await new InteractionObserver(interaction).defer()
-
-    if (interaction.channel.id !== config.commandChannels.misc && !observer.checkPermissions([PermissionsBitField.Flags.ManageMessages], interaction.channel))
-      return await observer.abort(Abort.CommandRestrictedChannel)
-
     const embed = new EmbedBuilder()
       .setAuthor({
         name: 'Neurino',

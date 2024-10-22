@@ -23,7 +23,7 @@ export const Commands: CommandsInterface = {
       ...(await this.locate('fun')),
       ...(await this.locate('utility')),
       ...(await this.locate('loot-league')),
-      //...(await this.locate('maze')),
+      ...(await this.locate('maze')),
     ]
     for (let file of files) {
       if (file === 'interface.ts' || file === 'interactionobserver.ts' || file === 'maze.ts') continue

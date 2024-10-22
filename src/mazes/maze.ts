@@ -2,9 +2,41 @@ import Random from '../utilities/random.js'
 import PRNG from '../utilities/prng.js'
 import Log from './../utilities/log.js'
 import Hash from '../utilities/secret.js'
-import { PlacementType } from 'types/enum.js'
+import { PlacementType } from '../types/enum.js'
 
 const Maze = class Maze implements MazeInterface {
+  public static direction = {
+    none: 0,  // 0000
+    left: 1,  // 0001
+    right: 2, // 0010
+    up: 4,    // 0100
+    down: 8,  // 1000
+  }
+  public static diagonalDirections = {
+    upLeft: this.direction.left | this.direction.up,
+    downLeft: this.direction.left | this.direction.down,
+    upRight: this.direction.right | this.direction.up,
+    downRight: this.direction.right | this.direction.down
+  }
+  public static movementOptions = {
+    all: [
+      this.direction.left, this.direction.right,
+      this.direction.up, this.direction.down,
+      this.diagonalDirections.upLeft, this.diagonalDirections.upRight,
+      this.diagonalDirections.downLeft, this.diagonalDirections.downRight,
+    ],
+    diagonal: [
+      this.diagonalDirections.upLeft, this.diagonalDirections.upRight,
+      this.diagonalDirections.downLeft, this.diagonalDirections.downRight,
+    ],
+    vertical: [
+     this.direction.up,this.direction.down
+    ],
+    horizontal: [
+     this.direction.left,this.direction.right
+    ],
+  }
+
   public width: number
   public height: number
   public type: number

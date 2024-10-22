@@ -34,7 +34,9 @@ const BinaryHeap = class<T> implements BinaryHeapInterface<T> {
     return max
   }
   public push(value: T): number {
-    return this.heap.push(value)
+    this.heap.push(value)
+    this.indexMap.set(value, this.size - 1)
+    return this.size
   }
   public has(value: T): boolean {
     return this.indexMap.has(value)
@@ -48,7 +50,6 @@ const BinaryHeap = class<T> implements BinaryHeapInterface<T> {
   public insert(value: T): void {
     if (this.size < this.maxSize) {
       this.push(value)
-      this.indexMap.set(value, this.size - 1)
       this.up(this.size - 1)
     } else if (this.size > 0 && this.condition(value, this.first)) {
       this.indexMap.delete(this.first)

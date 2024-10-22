@@ -18,6 +18,8 @@ import Icon from '../utilities/icon.js'
 import { Abort } from '../types/enum.js'
 
 const Observer = class implements ObserverInterface {
+  public static readonly cooldowns = new Map<string, CommandCooldownInterface>()
+
   public readonly interaction: CommandInteraction
   public filter: Collection<string, GuildBasedChannel>
   public constructor(interaction: CommandInteraction) {
@@ -110,7 +112,7 @@ const Observer = class implements ObserverInterface {
     })
   }
   private createUserCooldown(): void {
-    config.cooldowns.set(this.interaction.user.id, {
+    Observer.cooldowns.set(this.interaction.user.id, {
       score: 0,
       claim: 0,
       steal: 0,
@@ -121,20 +123,20 @@ const Observer = class implements ObserverInterface {
     })
   }
   public isOnCooldown(type: Cooldowns): boolean {
-    if (!config.cooldowns.has(this.interaction.user.id))
+    if (!Observer.cooldowns.has(this.interaction.user.id))
       this.createUserCooldown()
 
-    return Math.floor((Date.now() - config.cooldowns.get(this.interaction.user.id)[type]) / 1e3) < config.cooldown[type] && this.interaction.user.id !== config.ownerId
+    return Math.floor((Date.now() - Observer.cooldowns.get(this.interaction.user.id)[type]) / 1e3) < config.cooldown[type] && this.interaction.user.id !== config.ownerId
   }
   public getCooldown(type: Cooldowns): number {
-    return config.cooldown[type] - Math.floor((Date.now() - config.cooldowns.get(this.interaction.user.id)[type]) / 1e3)
+    return config.cooldown[type] - Math.floor((Date.now() - Observer.cooldowns.get(this.interaction.user.id)[type]) / 1e3)
   }
   public resetCooldown(type: Cooldowns): void {
-    if (!config.cooldowns.has(this.interaction.user.id))
+    if (!Observer.cooldowns.has(this.interaction.user.id))
       this.createUserCooldown()
 
-    config.cooldowns.set(this.interaction.user.id, {
-      ...config.cooldowns.get(this.interaction.user.id),
+    Observer.cooldowns.set(this.interaction.user.id, {
+      ...Observer.cooldowns.get(this.interaction.user.id),
       [type]: Date.now()
     })
   }

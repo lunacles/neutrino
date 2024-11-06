@@ -89,12 +89,24 @@ interface PRNGInterface {
   simple(a: number): () => number
 }
 interface SecretInterface {
-  readonly secret: string
+  readonly stackSecret: string
+  readonly privateSecret: string
+
   readonly key: Buffer
   cyrb53(str: string, seed?: number): number
   hash(str: string): string
   encrypt(str: string): string
   decrypt(str: string): string
+  id(hash: string, prefix?: string): string
+}
+interface KeyManagerInterface {
+  readonly suite: CipherSuite
+  readonly id: string
+  private: CryptoKey
+  public: CryptoKey
+
+  encrypt(message: string): Promise<ArrayBuffer>
+  decrypt(ct: ArrayBuffer): Promise<void>
 }
 
 // canvas

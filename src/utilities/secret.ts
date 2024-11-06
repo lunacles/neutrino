@@ -1,13 +1,4 @@
 import crypto from 'crypto'
-import {
-  AeadId,
-  CipherSuite,
-  KdfId,
-  KemId,
-  SenderContext
-} from 'hpke-js'
-import path from 'path'
-import { fileURLToPath } from 'url'
 
 const Secret: SecretInterface = {
   stackSecret: process.env.STACK_SECRET,
@@ -55,46 +46,4 @@ const Secret: SecretInterface = {
   },
 }
 
-const KeyManager = class implements KeyManagerInterface {
-  public static path: string = path.join(path.dirname(fileURLToPath(import.meta.url)), '../photon/keys/')
-  public static async get(id: string): Promise<KeyManagerInterface> {
-    const suite = new CipherSuite({
-      kem: KemId.DhkemX25519HkdfSha256,
-      kdf: KdfId.HkdfSha256,
-      aead: AeadId.Chacha20Poly1305,
-    })
-    let key = new TextEncoder().encode(`${Secret.privateSecret}::${id}`)
-    const derivedKeyPair = await suite.kem.deriveKeyPair(key)
-
-    return new KeyManager(suite, id, derivedKeyPair)
-  }
-
-  public readonly suite: CipherSuite
-  public readonly id: string
-  public private: CryptoKey
-  public public: CryptoKey
-  private sender: SenderContext
-  constructor(suite: CipherSuite, id: string, keyPair?: CryptoKeyPair) {
-    this.suite = suite
-    this.id = id
-
-    this.private = keyPair.privateKey
-    this.public = keyPair.publicKey
-  }
-  public async encrypt(message: string): Promise<ArrayBuffer> {
-    this.sender = await this.suite.createSenderContext({
-      recipientPublicKey: this.public,
-    })
-    return await this.sender.seal(new TextEncoder().encode(message))
-  }
-  public async decrypt(ct: ArrayBuffer): Promise<void> {
-    const recipient = await this.suite.createRecipientContext({
-      recipientKey: this.private,
-      enc: this.sender.enc,
-    });
-    const pt = await recipient.open(ct);
-    console.log("decrypted: ", new TextDecoder().decode(pt));
-  }
-}
-
-export default { Secret, KeyManager }
+export default Secret

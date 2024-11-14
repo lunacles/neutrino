@@ -43,6 +43,8 @@ const Avatar: CommandInterface = {
     }))
   ).setDMPermission(false),
   async execute(interaction: ChatInputCommandInteraction<CacheType>): Promise<void> {
+    await interaction.deferReply()
+
     const user: User = interaction.options.getUser('user') ?? interaction.user
     const guildAvatar: boolean = interaction.options.getBoolean('guild-avatar') ?? false
     const size: number = interaction.options.getInteger('size') ?? 512

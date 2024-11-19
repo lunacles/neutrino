@@ -56,6 +56,6 @@ const Database: DatabaseInterface = {
         return cached
       },
     },
-  }
+  },
 }
 export default Database

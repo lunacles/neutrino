@@ -8,6 +8,11 @@ package-lock.json
 prod-serviceaccount.json
 dev-serviceaccount.json
 items.md
-tcg
 legacy
 db.json
+photon
+gifs
+dev-mail-credentials.json
+prod-mail-credentials.json
+tokens
+gifsave.ts

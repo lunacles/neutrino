@@ -64,8 +64,8 @@ export const FirebaseDatabase = class implements FirebaseDatabaseInterface {
 
     // handling for Arrays
     if (Array.isArray(data)) return data.map(item => FirebaseDatabase.structureData(item))
-    // handling for Maps and Objects
 
+    // handling for Maps and Objects
     let entries: Array<[string, unknown]> = data instanceof Map || data instanceof Collection ? Array.from(data.entries()) : Object.entries(data)
     let result: object = Object.fromEntries(entries.map(([key, value]) => [key, FirebaseDatabase.structureData(value)]))
     return result

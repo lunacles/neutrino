@@ -4,7 +4,6 @@ import Build from './utilities/repo.js'
 
 const envVar = (key: string): string => process.env[`${process.env.NODE_ENV}_${key}`]
 
-
 const devConfig: DevConfig = Object.freeze({
   ownerId: '342038795757027329',
   botId: '1195601709909692486',

@@ -48,7 +48,7 @@ const JSONUserInstance = class extends JSONAction implements JSONDBInstanceInter
   }
   public create(): DiscordUserData {
     JSONDatabase.data.users[this.id] = {
-      neutrino_id: `anon${Secret.hash('neutrino::' + this.id).slice(0, 8)}`,
+      neutrino_id: Secret.id(`neutrino::${this.user.id}`, 'anon'),
 
       avatar: this.user.avatarURL() ?? this.user.defaultAvatarURL,
       avatar_decoration: this.user.avatarDecorationURL(),

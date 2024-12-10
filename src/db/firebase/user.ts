@@ -49,9 +49,8 @@ const FirebaseUserInstance = class extends FirebaseAction implements FirebaseIns
     this.neutrinoUserId = this.data.neutrino_id
   }
   public async create(): Promise<DocumentReference> {
-    let neutrinoId = `user-${Secret.hash('neutrino::' + this.user.id).slice(0, 8)}`
     return await this.db.cd('~/').mkdir(this.user.id, {
-      neutrino_id: neutrinoId,
+      neutrino_id: Secret.id(`neutrino::${this.user.id}`, 'user'),
 
       avatar: this.user.avatarURL(),
       avatar_decoration: this.user.avatarDecoration,

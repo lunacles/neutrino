@@ -296,6 +296,9 @@ const DropCalc: CommandInterface = {
 
     await interaction.editReply(`The bomb should be dropped from (roughly) ${Math.round(dropTarget)}m.`)
   },
+  test(): boolean {
+    return true
+  }
 }
 
 export default DropCalc

@@ -24,14 +24,14 @@ const Random = class implements RandomInterface {
   public chance(probability: number = 1): boolean {
     return this.prng() < probability
   }
-  public fromArray(array: Array<any> = []): any {
+  public fromArray<T>(array: Array<T> = []): T {
     return array[this.integer(array.length)]
   }
-  public fromObject(object: object = {}): number {
+  public fromObject<T>(object: object = {}): T {
     let values = Object.values(object)
     return this.fromArray(values)
   }
-  public index(probabilities: Array<any> = []): number {
+  public index(probabilities: Array<number> = []): number {
     let totalProbability = probabilities.reduce((a, b) => a + b, 0)
     let chance = this.float(totalProbability)
     for (let [i, probability] of probabilities.entries()) {
@@ -39,7 +39,7 @@ const Random = class implements RandomInterface {
       chance -= probability
     }
   }
-  public shuffleArray(array: Array<any>): Array<any> {
+  public shuffleArray<T>(array: Array<T>): Array<T> {
     return array.slice().sort(() => 0.5 - this.float())
   }
 }

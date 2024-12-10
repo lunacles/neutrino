@@ -1,21 +1,28 @@
 import Log from './log.js'
 
-export const formatSeconds = (seconds: number, s: boolean = false): string => {
-  let minutes: number = Math.floor(seconds / 60)
-  let remainder: number = seconds % 60
-  let result: string = ''
-
-  if (minutes > 0)
-    result += `${minutes} minute${s ? minutes > 1 ? 's' : '' : ''}`
-
-  if (remainder > 0) {
-    if (result.length > 0)
-      result += ', '
-
-    result += `${remainder} second${s ? remainder > 1 ? 's' : '' : ''}`
+export const formatSeconds = (seconds: number, s?: boolean, truncate: NumberRange<0, 7> = 7): string => {
+  let units: {
+    [key: string]: number
+  } = {
+    'year': 365 * 24 * 60 * 60,
+    'month': 30.5 * 24 * 60 * 60,
+    'week': 7 * 24 * 60 * 60,
+    'day': 24 * 60 * 60,
+    'hour': 60 * 60,
+    'minute': 60,
+    'second': 1,
   }
+  let result: Array<string> = []
 
-  return result || '0 seconds'
+  for (let [unit, time] of Object.entries(units)) {
+    let count = Math.floor(seconds / time)
+    if (count > 0) {
+      result.push(`${count} ${unit}${s ? 's' : count > 1 ? 's' : ''}`)
+      seconds %= time
+    }
+  }
+  result.splice(truncate)
+  return result.join(', ') || '0 seconds'
 }
 
 export const averageArray = (array: Array<number>): number => array.length ? array.reduce((a: number, b: number) => a + b) / array.length : 0

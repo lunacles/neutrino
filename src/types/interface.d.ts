@@ -74,7 +74,7 @@ interface RandomInterface {
   asFloat(): number
   fromRange(min: number, max: number): this
   float(n?: number): number
-  integer(i?: number): number
+  integer(i: number): number
   chance(probability: number): boolean
   fromArray(array: Array<any>): any
   fromObject(object: object ): number

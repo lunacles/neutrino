@@ -58,8 +58,7 @@ export const formatDate = (string: string): string => {
 
 export const capitalize = (string: string): string => string.split(' ').map((r: string): string => `${r[0].toUpperCase()}${r.slice(1)}`).join(' ')
 
-export const remove = (array: Array<unknown>, elementOrIndex: unknown | number): void => {
-  let index: number = typeof elementOrIndex === 'number' ? elementOrIndex : array.indexOf(elementOrIndex)
+export const remove = (array: Array<unknown>, index: number): void => {
   if (index === -1) return
 
   let last: unknown = array.pop()

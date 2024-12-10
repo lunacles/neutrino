@@ -1,12 +1,13 @@
 {
   "name": "neutrino",
-  "version": "0.1.5",
-  "description": "",
+  "version": "0.1.6",
+  "description": "Multi-purpose bot, tailored for utility, fun, and personal use.",
   "main": "main.js",
   "type": "module",
   "scripts": {
     "dev": "NODE_ENV=DEV node --no-warnings=ExperimentalWarning --loader ts-node/esm src/main.ts",
     "prod": "NODE_ENV=PROD node --no-warnings=ExperimentalWarning --loader ts-node/esm src/main.ts --minify --format esm,cjs --dts",
+    "test": "jest",
     "inspect": "NODE_ENV=DEV tsx watch --inspect src/main.ts",
     "start": "node dist/main.js",
     "build": "tsup src/main.ts --format esm,cjs --dts"
@@ -15,22 +16,31 @@
   "author": "",
   "license": "ISC",
   "devDependencies": {
+    "@jest/globals": "^29.7.0",
+    "@types/jest": "^29.5.14",
+    "@types/node": "^22.9.0",
     "@types/stream-json": "^1.7.7",
+    "ts-jest": "^29.2.5",
     "ts-node": "^10.9.2",
     "tsup": "^8.0.2",
     "tsx": "^4.16.2",
-    "typescript": "^5.5.4"
+    "typescript": "^5.7.2"
   },
   "dependencies": {
+    "@google-cloud/local-auth": "^2.1.0",
+    "@hpke/core": "^1.5.0",
     "@tensorflow-models/mobilenet": "^2.1.1",
     "@tensorflow/tfjs": "^4.19.0",
     "@tensorflow/tfjs-node": "^4.19.0",
-    "@types/node": "^20.11.25",
+    "axios": "^1.7.7",
     "canvas": "^2.11.2",
     "discord.js": "^14.12.1",
     "dotenv": "^16.4.5",
     "firebase": "^10.9.0",
     "firebase-admin": "^12.0.0",
-    "gifenc": "^1.0.3"
+    "gifenc": "^1.0.3",
+    "googleapis": "^105.0.0",
+    "hpke-js": "^1.6.1",
+    "node-fetch": "^3.3.2"
   }
 }

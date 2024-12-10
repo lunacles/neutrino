@@ -25,13 +25,7 @@ const BinaryHeap = class<T> implements BinaryHeapInterface<T> {
     return this.size === 0 ? null : this.heap[this.heap.length - 1]
   }
   public pop(): T {
-    let max = this.first
-    let last = this.heap.pop()
-    if (this.size > 0) {
-      this.first = last
-      this.down(0)
-    }
-    return max
+    return this.heap.pop()
   }
   public push(value: T): number {
     this.heap.push(value)
@@ -112,7 +106,7 @@ const BinaryHeap = class<T> implements BinaryHeapInterface<T> {
     for (let [index, value] of this.heap.entries())
       this.indexMap.set(value, index)
 
-    for (let i = this.size >> 1 - 1; i >= 0; i--)
+    for (let i = (this.size >> 1) - 1; i >= 0; i--)
       this.down(i)
 
     for (let i = this.maxSize; i < data.length; i++)

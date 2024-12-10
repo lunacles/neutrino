@@ -18,6 +18,7 @@
         "removeComments": true,
         "forceConsistentCasingInFileNames": true,
         "skipLibCheck": true,
+        "types": ["jest"],
         "baseUrl": "./",
         "paths": {
           "*": ["src/*"]

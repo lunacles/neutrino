@@ -27,6 +27,7 @@ const JSONUserInstance = class extends JSONAction implements JSONDBInstanceInter
 
     this.data = null
   }
+  // Fetch a user field
   public fetch(): void {
     this.data = JSONDatabase.data.users[this.user.id]
     if (!this.data) {
@@ -35,6 +36,9 @@ const JSONUserInstance = class extends JSONAction implements JSONDBInstanceInter
     } else {
       Log.info(`Fetching document data of user with id "${this.id}"`)
     }
+
+    // Recommended PRNG is PRNG.crypto()
+    // Much harder to exploit than Math.random()
     this.prng = PRNG.crypto()//.sfc32(...this.data.prng)
     this.ran = new Random(this.prng)
 
@@ -43,9 +47,11 @@ const JSONUserInstance = class extends JSONAction implements JSONDBInstanceInter
     this.cooldown = this.data.xp_data.cooldown
     this.score = this.data.loot_league.score
     this.shieldEnd = this.data.loot_league.shield_end
+    // TODO: Redo how role persist is structured
     this.rolePersist = new Set(this.data.role_persist)
     this.neutrinoUserId = this.data.neutrino_id
   }
+  // Create a user field
   public create(): DiscordUserData {
     JSONDatabase.data.users[this.id] = {
       neutrino_id: Secret.id(`neutrino::${this.user.id}`, 'anon'),
@@ -68,12 +74,12 @@ const JSONUserInstance = class extends JSONAction implements JSONDBInstanceInter
       },
       role_persist: [],
       db_timestamp: Math.floor(Date.now()),
-
+      // TODO: Redo this shit this is like only here for using SFC32
       prng: ((): Quaple<number> => {
         let hash = Secret.hash(this.id)
         let seeds = []
         for (let i = 0; i < 4; i++)
-          // treated it as unsigned 32-bit integer
+          // Treated it as unsigned 32-bit integer
           seeds.push(parseInt(hash.substring(i * 8, (i + 1) * 8), 16) >>> 0)
 
         return seeds as Quaple<number>
@@ -82,16 +88,22 @@ const JSONUserInstance = class extends JSONAction implements JSONDBInstanceInter
 
     return JSONDatabase.data.users[this.id]
   }
+  // TODO: I can just not repeat this in every guild/user file
+  // I'll come back to it and make it mroe global like action.ts
+
+  // Get a random float
   public random(n: number = 1.0): number {
     let rng = this.ran.float(n)
     this.updateField('prng', this.prng(true))
     return rng
   }
+  // Get a random integer
   public randomInt(n: number = 1.0): number {
     let rng = this.ran.integer(n)
     this.updateField('prng', this.prng(true))
     return rng
   }
+  // Get a random float or integer from a provided range
   public fromRange(min: number, max: number, type: 'Integer' | 'Float' = 'Integer'): number {
     let n = this.ran.fromRange(min, max)[`as${type}`]()
     this.updateField('prng', this.prng(true))

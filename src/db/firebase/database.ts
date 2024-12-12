@@ -14,6 +14,8 @@ import {
   WriteResult,
   Timestamp,
   FieldValue,
+  QuerySnapshot,
+  DocumentData,
 } from 'firebase-admin/firestore'
 import serviceAccount from './serviceaccount.js'
 import {
@@ -22,16 +24,23 @@ import {
 import Log from '../../utilities/log.js'
 import { Collection } from 'discord.js'
 
+// Initialize the app with our credentials
 const app: App = initializeApp({
   credential: cert(serviceAccount as ServiceAccount),
   storageBucket: `${serviceAccount.project_id}.appspot.com`
 })
+// Export our bucket
+// TODO: Is this even necessary?
 export const bucket = getStorage().bucket()
+// Get the db
 const db: Firestore = getFirestore(app)
+// Apply our settings
 db.settings({
   ignoreUndefinedProperties: true
 })
+
 export const FirebaseDatabase = class implements FirebaseDatabaseInterface {
+  // Write a batch to the database
   static batchWrite(operations: any): Promise<Array<WriteResult>> {
     let batch: WriteBatch = db.batch()
 
@@ -53,24 +62,27 @@ export const FirebaseDatabase = class implements FirebaseDatabaseInterface {
 
     return batch.commit()
   }
+  // Structure our data for the database
   static structureData(data: unknown): any {
-    // direct return for non-object/non-array data types
+    // Direct return for non-object/non-array data types
     if (typeof data !== 'object' || data === null) return data
 
-    // preserve firestore FieldValue instances
+    // Preserve firestore FieldValue instances
     if (data instanceof FieldValue) return data
-    // preserve Timestamps
+    // Preserve Timestamps
     if (data instanceof Timestamp) return data
 
-    // handling for Arrays
+    // Handling for arrays
     if (Array.isArray(data)) return data.map(item => FirebaseDatabase.structureData(item))
 
-    // handling for Maps and Objects
+    // Handling for Maps and Objects
+    // Like I get why this is necessary for classes like Maps and Sets
+    // But like why tf do you have to make the user do it
     let entries: Array<[string, unknown]> = data instanceof Map || data instanceof Collection ? Array.from(data.entries()) : Object.entries(data)
     let result: object = Object.fromEntries(entries.map(([key, value]) => [key, FirebaseDatabase.structureData(value)]))
     return result
   }
-  public collection: CollectionReference
+  public collection: CollectionReference<FirebaseFirestore.DocumentData, FirebaseFirestore.DocumentData>
   public doc: DocumentReference
   private path: string
   private homeDir: string
@@ -82,6 +94,7 @@ export const FirebaseDatabase = class implements FirebaseDatabaseInterface {
 
     this.cd('~/')
   }
+  // Normalize the given path
   private normalizePath(path: string): string {
     let parts: Array<string> = path.split('/').reduce((acc: Array<string>, cur: string) => {
       if (cur === '..') {
@@ -93,6 +106,7 @@ export const FirebaseDatabase = class implements FirebaseDatabaseInterface {
     }, [] as Array<string>)
     return parts.join('/')
   }
+  // Change the current directory
   public cd(dir: string): this {
     if (dir.startsWith('/')) {
       this.path = this.normalizePath(dir)
@@ -105,6 +119,7 @@ export const FirebaseDatabase = class implements FirebaseDatabaseInterface {
 
     return this
   }
+  // Make a new directory
   public async mkdir(name: string, data: object = {}): Promise<DocumentReference> {
     try {
       if (!this.collection) throw new Error('Collection has not been set.')
@@ -117,6 +132,7 @@ export const FirebaseDatabase = class implements FirebaseDatabaseInterface {
       Log.error(`Failed to make new directory "${name}" at path "${this.path}"`, err)
     }
   }
+  // Concatenate a file for reading and writing purposes
   public async cat(name?: string): Promise<DocumentSnapshot | DocumentReference> {
     try {
       if (!this.collection) throw new Error('Collection has not been set.')
@@ -131,6 +147,7 @@ export const FirebaseDatabase = class implements FirebaseDatabaseInterface {
       return null
     }
   }
+  // Get a doc
   public getdoc(name: string): DocumentReference {
     try {
       if (!this.collection) throw new Error('Collection has not been set.')
@@ -143,6 +160,9 @@ export const FirebaseDatabase = class implements FirebaseDatabaseInterface {
       return null
     }
   }
+  // Write to a doc
+  // Wait, is this even necessary?
+  // nvm we might need to directly write instead of use a batch
   public async write(data: object): Promise<this> {
     try {
       if (!this.doc) throw new Error('Doc has not been concatenated.')
@@ -153,6 +173,7 @@ export const FirebaseDatabase = class implements FirebaseDatabaseInterface {
     }
     return this
   }
+  // Remove a doc
   public async rm(name?: string): Promise<this> {
     try {
       if (!this.doc) throw new Error('No doc found.')

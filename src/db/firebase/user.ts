@@ -27,7 +27,9 @@ const FirebaseUserInstance = class extends FirebaseAction implements FirebaseIns
     super(instance)
     this.user = instance as User
   }
+  // Fetch the user doc
   public async fetch(): Promise<void> {
+    // Ref it
     let doc: DocumentSnapshot = await this.ref.get()
     if (!doc.exists) {
       Log.info(`Creating document for user with id "${this.user.id}"`)
@@ -37,6 +39,8 @@ const FirebaseUserInstance = class extends FirebaseAction implements FirebaseIns
     }
     this.data = doc.data() as DiscordUserData
 
+    // Recommended PRNG is PRNG.crypto()
+    // Much harder to exploit than Math.random()
     this.prng = PRNG.crypto()//.sfc32(...this.data.prng)
     this.ran = new Random(this.prng)
 
@@ -45,9 +49,11 @@ const FirebaseUserInstance = class extends FirebaseAction implements FirebaseIns
     this.cooldown = this.data.xp_data.cooldown
     this.score = this.data.loot_league.score
     this.shieldEnd = this.data.loot_league.shield_end
+    // TODO: Change how role persist is stored
     this.rolePersist = new Set(this.data.role_persist)
     this.neutrinoUserId = this.data.neutrino_id
   }
+  // Create a user doc
   public async create(): Promise<DocumentReference> {
     return await this.db.cd('~/').mkdir(this.user.id, {
       neutrino_id: Secret.id(`neutrino::${this.user.id}`, 'user'),
@@ -70,27 +76,34 @@ const FirebaseUserInstance = class extends FirebaseAction implements FirebaseIns
       },
       role_persist: [],
       db_timestamp: Date.now(),
+      // TODO: Redo this shit this is like only here for using SFC32
       prng: ((): Quaple<number> => {
         let hash = Secret.hash(this.user.id)
         let seeds = []
         for (let i = 0; i < 4; i++)
-          // treated it as unsigned 32-bit integer
+          // Treated it as unsigned 32-bit integer
           seeds.push(parseInt(hash.substring(i * 8, (i + 1) * 8), 16) >>> 0)
 
         return seeds as Quaple<number>
       })()
     } satisfies DiscordUserData)
   }
+  // TODO: I can just not repeat this in every guild/user file
+  // I'll come back to it and make it mroe global like action.ts
+
+  // Get a random float
   public async random(n: number = 1.0): Promise<number> {
     let rng = this.ran.float(n)
     //await this.updateField('prng', this.prng(true))
     return rng
   }
+  // Get a random integer
   public async randomInt(n: number = 1.0): Promise<number> {
     let rng = this.ran.integer(n)
     //await this.updateField('prng', this.prng(true))
     return rng
   }
+  // Get a random float or integer from a provided range
   public async fromRange(min: number, max: number, type: 'Integer' | 'Float' = 'Integer'): Promise<number> {
     let n = this.ran.fromRange(min, max)[`as${type}`]()
     //await this.updateField('prng', this.prng(true))

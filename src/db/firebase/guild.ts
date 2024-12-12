@@ -26,7 +26,9 @@ const FirebaseGuildInstance = class extends FirebaseAction implements FirebaseIn
     super(instance)
     this.guild = instance as Guild
   }
+  // Fetch a guild doc
   public async fetch(): Promise<void> {
+    // Ref it
     let doc: DocumentSnapshot = await this.ref.get()
     if (!doc.exists) {
       Log.info(`Creating document for guild with id "${this.id}"`)
@@ -36,11 +38,15 @@ const FirebaseGuildInstance = class extends FirebaseAction implements FirebaseIn
     }
     this.data = doc.data() as DiscordGuildData
 
+    // Recommended PRNG is PRNG.crypto()
+    // Much harder to exploit than Math.random()
     this.prng = PRNG.crypto()//.sfc32(...this.data.prng)
     this.ran = new Random(this.prng)
+    // TODO: Store role persistence in a better way idk
     this.rolePersist = new Set(this.data.role_persist)
+    // TODO: Redo how leaderboards are managed
     this.leaderboard = new BinaryHeap<string>((a: string, b: string): boolean => {
-      // because of the database instance structure the entries we check will always be in the cache
+      // Because of the database instance structure the entries we check will always be in the cache
       let adi = Database.discord.users.cache.get(a)?.score ?? 0
       let bdi = Database.discord.users.cache.get(b)?.score ?? 0
 
@@ -49,9 +55,13 @@ const FirebaseGuildInstance = class extends FirebaseAction implements FirebaseIn
     this.ignoredChannels = new Set(this.data.ignored_channels)
     this.neutrinoGuildId = this.data.neutrino_guild_id
   }
+  // Create a guild doc
   public async create(): Promise<DocumentReference> {
+    // Tbh idk why I added neutrino IDs
+    // Maybe it'll be useful later idk
     let neutrinoGuildId = `guild-${Secret.hash('neutrino::' + this.guild.id).slice(0, 8)}`
 
+    // Publish it to the database
     return await this.db.cd('~/').mkdir(this.id, {
       leaderboard: [],
       neutrino_guild_id: neutrinoGuildId,
@@ -61,11 +71,12 @@ const FirebaseGuildInstance = class extends FirebaseAction implements FirebaseIn
       id: this.guild.id,
       role_persist: [],
       db_timestamp: Date.now(),
+      // TODO: Redo this shit this is like only here for using SFC32
       prng: ((): Quaple<number> => {
         let hash = Secret.hash(this.guild.id)
         let seeds = []
         for (let i = 0; i < 4; i++)
-          // treated it as unsigned 32-bit integer
+          // Treated it as unsigned 32-bit integer
           seeds.push(parseInt(hash.substring(i * 8, (i + 1) * 8), 16) >>> 0)
 
         return seeds as Quaple<number>
@@ -73,16 +84,22 @@ const FirebaseGuildInstance = class extends FirebaseAction implements FirebaseIn
       ignored_channels: []
     } satisfies DiscordGuildData)
   }
+  // TODO: I can just not repeat this in every guild/user file
+  // I'll come back to it and make it mroe global like action.ts
+
+  // Get a random float
   public async random(n: number = 1.0): Promise<number> {
     let rng = this.ran.float(n)
     //await this.updateField('prng', this.prng(true))
     return rng
   }
+  // Get a random integer
   public async randomInt(n: number = 1.0): Promise<number> {
     let rng = this.ran.integer(n)
     //await this.updateField('prng', this.prng(true))
     return rng
   }
+  // Get a random integer or float from a provided range
   public async fromRange(min: number, max: number, type: 'Integer' | 'Float' = 'Integer'): Promise<number> {
     let n = this.ran.fromRange(min, max)[`as${type}`]()
     //await this.updateField('prng', this.prng(true))

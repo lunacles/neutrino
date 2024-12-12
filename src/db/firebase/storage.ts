@@ -21,6 +21,7 @@ const FireStorage = class FireStorageInterface {
     this.path = ''
     this.homeDir = 'users'
   }
+  // Normalize a path
   private normalizePath(path: string): string {
     let parts: Array<string> = path.split('/').reduce((acc: Array<string>, cur: string) => {
       if (cur === '..') {
@@ -32,6 +33,7 @@ const FireStorage = class FireStorageInterface {
     }, [] satisfies Array<string>)
     return parts.join('/')
   }
+  // Change the current directory
   public cd(dir: string): this {
     if (dir.startsWith('/')) {
       this.path = this.normalizePath(dir)
@@ -42,6 +44,7 @@ const FireStorage = class FireStorageInterface {
     }
     return this
   }
+  // Fetch a stored file
   private fetch(url: string): Promise<Buffer> {
     return new Promise((resolve, reject) => {
       https.get(url, (res) => {
@@ -57,6 +60,7 @@ const FireStorage = class FireStorageInterface {
       })
     })
   }
+  // Save a file to the storage
   private saveFile(file: File, buffer: Buffer): Promise<File> {
     return new Promise((resolve, reject) => {
       file.save(buffer, (err: Error) => {
@@ -68,6 +72,7 @@ const FireStorage = class FireStorageInterface {
       })
     })
   }
+  // Upload a file to the storage
   public async upload(url: string, fileName?: string): Promise<string> {
     try {
       let buffer: Buffer = await this.fetch(url)
@@ -81,6 +86,7 @@ const FireStorage = class FireStorageInterface {
       return ''
     }
   }
+  // Remove a file from the storage
   public async rm(name?: string): Promise<this> {
     try {
       let file: File = this.storage.file(`${this.path}/${name}`)

@@ -56,6 +56,7 @@ interface LogInterface {
   startTime: number
   get uptime(): string
   get time(): string
+  get colorSupport(): ColorInfo
   error(reason: string, err?: Error | object): void
   warn(reason: string): void
   info(info: string): void

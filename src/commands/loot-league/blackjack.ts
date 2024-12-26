@@ -403,44 +403,39 @@ const Blackjack: CommandInterface = {
   async execute(interaction: ChatInputCommandInteraction<CacheType>): Promise<void> {
     const observer = await new InteractionObserver(interaction).defer()
     const amount: number = interaction.options.getInteger('amount', true)
-    const user: User = await bot.fetchUser(interaction.user.id)
-    const guildData: DatabaseGuildInstance = await Database.discord.guilds.fetch(interaction.guild)
+    const [ userData, neutrinoData] = await Promise.all([observer.getUserData(), observer.getUserData(config.botId)])
 
-    let userData: DatabaseUserInstance = await Database.discord.users.fetch(user)
-    let neutrinoData: any = await Database.discord.users.fetch(config.botId)
-
-    try {
-      if (userData.shieldEnd > Date.now()) {
-        interaction.editReply('You cannot play blackjack while you have a shield active!')
-        return
-      } else if (observer.isOnCooldown('blackjack')) {
-        interaction.editReply(`This command is on cooldown for **${util.formatSeconds(observer.getCooldown('blackjack'), true)}!**`)
-        return
+    if (userData.shieldEnd > Date.now()) {
+      interaction.editReply('You cannot play blackjack while you have a shield active!')
+      return
+    } else if (observer.isOnCooldown('blackjack')) {
+      interaction.editReply(`This command is on cooldown for **${util.formatSeconds(observer.getCooldown('blackjack'), true)}!**`)
+      return
+    } else {
+      if (amount > userData.score) {
+        await interaction.editReply('You cannot gamble more points than what you currently have!')
       } else {
-        if (amount > userData.score) {
-          await interaction.editReply('You cannot gamble more points than what you currently have!')
-        } else {
-          Game.activeMatches.set(interaction.user.id, new Table(amount))
-          observer.resetCooldown('blackjack')
+        Game.activeMatches.set(interaction.user.id, new Table(amount))
+        observer.resetCooldown('blackjack')
 
-          const row = new ActionRowBuilder<ButtonBuilder>()
-          .addComponents(
-            new ButtonBuilder()
-              .setCustomId('hit')
-              .setLabel('Hit')
-              .setStyle(ButtonStyle.Danger), // 99% of gamblers quit before they hit it big
-            new ButtonBuilder()
-              .setCustomId('stay')
-              .setLabel('Stay')
-              .setStyle(ButtonStyle.Success) // refuse gambling (they are part of the 99%)
-          )
+        const row = new ActionRowBuilder<ButtonBuilder>()
+        .addComponents(
+          new ButtonBuilder()
+            .setCustomId('hit')
+            .setLabel('Hit')
+            .setStyle(ButtonStyle.Danger), // 99% of gamblers quit before they hit it big
+          new ButtonBuilder()
+            .setCustomId('stay')
+            .setLabel('Stay')
+            .setStyle(ButtonStyle.Success) // refuse gambling (they are part of the 99%)
+        )
 
-          let response: Message = await interaction.editReply({
-            files: [new AttachmentBuilder(await Game.activeMatches.get(interaction.user.id).initialAnimation(interaction.user), {
-              name: 'table.gif'
-            })],
-            components: [row],
-          })
+        let response: Message = await interaction.editReply({
+          files: [new AttachmentBuilder(await Game.activeMatches.get(interaction.user.id).initialAnimation(interaction.user), {
+            name: 'table.gif'
+          })],
+          components: [row],
+        })
 
           let updateScores = async (state: number, amount: number): Promise<void> => {
             await observer.applyScore(neutrinoData, guildData, neutrinoData.score + (
@@ -457,136 +452,129 @@ const Blackjack: CommandInterface = {
             await neutrinoData.writeBatch()
           }
 
-          const collector: Component = response.createMessageComponentCollector({
-            filter: observer.componentsFilter(['hit', 'stay']),
-            time: 30e3,
-          })
+        const collector: Component = response.createMessageComponentCollector({
+          filter: observer.componentsFilter(['hit', 'stay']),
+          time: 30e3,
+        })
 
-          collector.on('collect', async (action: Action): Promise<void> => {
-            const table: TableInterface = Game.activeMatches.get(action.user.id)
-            enum EndState {
-              PlayerWin = 1,
-              HouseWin = 0,
-              Tie = null,
+        collector.on('collect', async (action: Action): Promise<void> => {
+          const table: TableInterface = Game.activeMatches.get(action.user.id)
+          enum EndState {
+            PlayerWin = 1,
+            HouseWin = 0,
+            Tie = null,
+          }
+          enum EndMessage {
+            HouseBust = '# House busted. <@player> won **1x**!',
+            HouseLose = '# House loses. <@player> won **1x**!',
+            PlayerBust = '# Player busted. <@player> lost **1x**!',
+            PlayerLose = '# Player loses. <@player> lost **1x**!',
+            Tie = '# Tie.\n<@player> lost **0.5x**!\n<@bot> won **0.5x**!',
+          }
+
+          let endGame = async (state: number, message: string, attachment: AttachmentBuilder): Promise<void> => {
+            await updateScores(state, table.amount)
+            await action.editReply({
+              content: message
+                .replace('player', action.user.id)
+                .replace('bot', config.botId)
+                .replace('1x', table.amount.toLocaleString())
+                .replace('0.5x', Math.floor(table.amount * 0.5).toLocaleString()),
+              files: [attachment],
+              components: [],
+            })
+
+            Game.activeMatches.delete(action.user.id)
+          }
+
+          let runDealer = async (): Promise<void> => {
+            let attachment = new AttachmentBuilder(await table.hitAnimation(action.user, 'dealer'), {
+              name: 'table.gif'
+            })
+            let dealerTotal: number = table.game.sumCards(table.game.dealerCards)
+            let playerTotal: number = table.game.sumCards(table.game.playerCards)
+
+            if (table.game.busted(dealerTotal)) {
+              await endGame(
+                EndState.PlayerWin,
+                EndMessage.HouseBust,
+                attachment,
+              )
+            } else if (dealerTotal < playerTotal) {
+              await endGame(
+                EndState.PlayerWin,
+                EndMessage.HouseLose,
+                attachment,
+              )
+            } else if (dealerTotal === playerTotal) {
+              await endGame(
+                EndState.Tie,
+                EndMessage.Tie,
+                attachment,
+              )
+            } else {
+              await endGame(
+                EndState.HouseWin,
+                EndMessage.PlayerLose,
+                attachment,
+              )
             }
-            enum EndMessage {
-              HouseBust = '# House busted. <@player> won **1x**!',
-              HouseLose = '# House loses. <@player> won **1x**!',
-              PlayerBust = '# Player busted. <@player> lost **1x**!',
-              PlayerLose = '# Player loses. <@player> lost **1x**!',
-              Tie = '# Tie.\n<@player> lost **0.5x**!\n<@bot> won **0.5x**!',
-            }
+          }
 
-            try {
-              let endGame = async (state: number, message: string, attachment: AttachmentBuilder): Promise<void> => {
-                await updateScores(state, table.amount)
-                await action.editReply({
-                  content: message
-                    .replace('player', action.user.id)
-                    .replace('bot', config.botId)
-                    .replace('1x', table.amount.toLocaleString())
-                    .replace('0.5x', Math.floor(table.amount * 0.5).toLocaleString()),
-                  files: [attachment],
-                  components: [],
-                })
-
-                Game.activeMatches.delete(action.user.id)
-              }
-
-              let runDealer = async (): Promise<void> => {
-                let attachment = new AttachmentBuilder(await table.hitAnimation(action.user, 'dealer'), {
-                  name: 'table.gif'
-                })
-                let dealerTotal: number = table.game.sumCards(table.game.dealerCards)
-                let playerTotal: number = table.game.sumCards(table.game.playerCards)
-
-                if (table.game.busted(dealerTotal)) {
-                  await endGame(
-                    EndState.PlayerWin,
-                    EndMessage.HouseBust,
-                    attachment,
-                  )
-                } else if (dealerTotal < playerTotal) {
-                  await endGame(
-                    EndState.PlayerWin,
-                    EndMessage.HouseLose,
-                    attachment,
-                  )
-                } else if (dealerTotal === playerTotal) {
-                  await endGame(
-                    EndState.Tie,
-                    EndMessage.Tie,
-                    attachment,
-                  )
-                } else {
-                  await endGame(
-                    EndState.HouseWin,
-                    EndMessage.PlayerLose,
-                    attachment,
-                  )
-                }
-              }
-
-              if (action.customId === 'hit') {
-                let attachment = new AttachmentBuilder(await table.hitAnimation(action.user, 'player'), {
-                  name: 'table.gif'
-                })
-                let newSum: number = table.game.sumCards(table.game.playerCards)
-                if (!table.game.busted(newSum)) {
-                  if (table.game.playerCards.length === 5) {
-                    await endGame(
-                      EndState.PlayerWin,
-                      EndMessage.HouseLose,
-                      attachment,
-                    )
-                  } else if (newSum === 21) {
-                    await runDealer()
-                  } else {
-                    await action.editReply({
-                      files: [attachment],
-                      components: [new ActionRowBuilder<ButtonBuilder>()
-                        .addComponents(
-                          new ButtonBuilder()
-                            .setCustomId('hit')
-                            .setLabel('Hit')
-                            .setStyle(ButtonStyle.Danger), // 99% of gamblers quit before they hit it big
-                          new ButtonBuilder()
-                            .setCustomId('stay')
-                            .setLabel('Stay')
-                            .setStyle(ButtonStyle.Success) // refuse gambling (they are part of the 99%)
-                        )]
-                    })
-                  }
-                } else {
-                  await endGame(
-                    EndState.HouseWin,
-                    EndMessage.PlayerBust,
-                    attachment,
-                  )
-                }
-
-              } else if (action.customId === 'stay') {
+          if (action.customId === 'hit') {
+            let attachment = new AttachmentBuilder(await table.hitAnimation(action.user, 'player'), {
+              name: 'table.gif'
+            })
+            let newSum: number = table.game.sumCards(table.game.playerCards)
+            if (!table.game.busted(newSum)) {
+              if (table.game.playerCards.length === 5) {
+                await endGame(
+                  EndState.PlayerWin,
+                  EndMessage.HouseLose,
+                  attachment,
+                )
+              } else if (newSum === 21) {
                 await runDealer()
+              } else {
+                await action.editReply({
+                  files: [attachment],
+                  components: [new ActionRowBuilder<ButtonBuilder>()
+                    .addComponents(
+                      new ButtonBuilder()
+                        .setCustomId('hit')
+                        .setLabel('Hit')
+                        .setStyle(ButtonStyle.Danger), // 99% of gamblers quit before they hit it big
+                      new ButtonBuilder()
+                        .setCustomId('stay')
+                        .setLabel('Stay')
+                        .setStyle(ButtonStyle.Success) // refuse gambling (they are part of the 99%)
+                    )]
+                })
               }
-            } catch (err) {
-              await observer.panic(err, this.name)
+            } else {
+              await endGame(
+                EndState.HouseWin,
+                EndMessage.PlayerBust,
+                attachment,
+              )
             }
-          })
 
-          collector.on('end', async (collected: Collection<string, CollectedInteraction<CacheType>>): Promise<void> => {
-            if (collected.size === 0) {
-              await updateScores(0, amount)
-              await interaction.editReply({
-                content: 'No response received, blackjack timed out.\nYou have 30 seconds to make a decision before the interaction expires.',
-                components: []
-              })
-              Game.activeMatches.delete(interaction.user.id)
-            }
-          })
-        }
+          } else if (action.customId === 'stay') {
+            await runDealer()
+          }
+        })
+
+        collector.on('end', async (collected: Collection<string, CollectedInteraction<CacheType>>): Promise<void> => {
+          if (collected.size === 0) {
+            await updateScores(0, amount)
+            await interaction.editReply({
+              content: 'No response received, blackjack timed out.\nYou have 30 seconds to make a decision before the interaction expires.',
+              components: []
+            })
+            Game.activeMatches.delete(interaction.user.id)
+          }
+        })
       }
-    } catch (err) {
-      await observer.panic(err, this.name)
     }
   },
   test(): boolean {

@@ -11,6 +11,12 @@ import {
   Guild,
   User,
   GuildMember,
+  Message,
+  ChatInputCommandInteraction,
+  CacheType,
+  TextChannel,
+  EmbedBuilder,
+  ColorResolvable,
 } from 'discord.js'
 import Log from './utilities/log.js'
 import {
@@ -62,6 +68,30 @@ const Bot = class {
 
     await this.rest.put(Routes.applicationCommands(config.env.BOT_CLIENT_ID), {
       body: commands,
+    })
+  }
+  private async handleError(interaction: ChatInputCommandInteraction<CacheType>, error: Error) {
+    let message: Message<boolean> = await interaction.editReply({
+      content: 'Oopsie! Something went wrong. The bot creator has been notified!',
+      components: [],
+    })
+
+    let errorTrace = await interaction.client.channels.fetch(config.errorTraceChannel) as TextChannel
+    await errorTrace.send({
+      content: `<@${config.ownerId}>`,
+      embeds: [new EmbedBuilder()
+        .setColor(Colors.error.hex as ColorResolvable)
+        .setThumbnail(`attachment://${Icon.HazardSign}`)
+        .setDescription([
+          `# ${error.name}`,
+          `**Server ID**: ${message.guildId}`,
+          `**Channel ID**: ${message.channelId}`,
+          `**Link**: ${message.url}`,
+          `**User**: <@${interaction.user.id}> (${interaction.user.id})`,
+          `**Command**: ${interaction.commandName}`,
+          `**Stack Trace**: \`\`\`${error.stack}\`\`\``
+        ].join('\n'))
+      ]
     })
   }
   private awaitInteractions(): void {

@@ -69,37 +69,6 @@ const Observer = class implements ObserverInterface {
   public async abort(info: typeof Abort[keyof typeof Abort]): Promise<void> {
     await this.interaction.editReply(`${info} (Error code ${Object.keys(Abort).find(key => Abort[key] === info)})`)
   }
-  public async panic(error: Error, command: string): Promise<void> {
-    /*
-    const embed = new EmbedBuilder()
-      .setThumbnail(`attachment://${Icon.HazardSign}`)
-      .setColor(Colors.error.hex as ColorResolvable)
-      .setDescription(`\`${Secret.encrypt(error.stack)}\``)
-    */
-    let message: Message<boolean> = await this.interaction.editReply({
-      content: 'Oopsie! Something went wrong. The bot creator has been notified!',
-      components: [],
-      //embeds: [embed],
-    })
-
-    let errorTrace = await this.interaction.client.channels.fetch(config.errorTraceChannel) as TextChannel
-    await errorTrace.send({
-      content: `<@${config.ownerId}>`,
-      embeds: [new EmbedBuilder()
-        .setColor(Colors.error.hex as ColorResolvable)
-        .setThumbnail(`attachment://${Icon.HazardSign}`)
-        .setDescription([
-          `# ${error.name}`,
-          `**Server ID**: ${message.guildId}`,
-          `**Channel ID**: ${message.channelId}`,
-          `**Link**: ${message.url}`,
-          `**User**: <@${this.interaction.user.id}> (${this.interaction.user.id})`,
-          `**Command**: ${command}`,
-          `**Stack Trace**: \`\`\`${error.stack}\`\`\``
-        ].join('\n'))
-      ]
-    })
-  }
   public async defer(ephemeral?: boolean): Promise<this> {
     await this.interaction.deferReply({ ephemeral: ephemeral })
     return this

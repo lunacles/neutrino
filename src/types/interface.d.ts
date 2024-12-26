@@ -206,7 +206,6 @@ interface ObserverInterface {
   componentsFilter(components: Array<string>): (component: Action) => Promise<boolean>
   checkPermissions(permissions: Array<bigint>, channel: GuildChannel): boolean
   abort(code: typeof Abort[keyof typeof Abort]): Promise<void>
-  panic(error: Error, command: string): Promise<void>
   defer(ephemeral: boolean): Promise<this>
   fetchAbort(): Promise<void>
   isOnCooldown(type: keyof Cooldown): boolean

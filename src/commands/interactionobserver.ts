@@ -6,15 +6,10 @@ import {
   PermissionsBitField,
   GuildChannel,
   GuildTextBasedChannel,
-  EmbedBuilder,
-  ColorResolvable,
-  TextChannel,
-  Message,
+  GuildMember,
 } from 'discord.js'
 //import Secret from 'utilities/secret.js'
-import Colors from '../canvas/palette.js'
 import config from '../config.js'
-import Icon from '../utilities/icon.js'
 import { Abort } from '../types/enum.js'
 
 const Observer = class implements ObserverInterface {

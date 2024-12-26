@@ -11,12 +11,13 @@ import {
   Guild,
   User,
   GuildMember,
-  Message,
   ChatInputCommandInteraction,
   CacheType,
   TextChannel,
   EmbedBuilder,
   ColorResolvable,
+  MessageFlags,
+  InteractionResponse,
 } from 'discord.js'
 import Log from './utilities/log.js'
 import {
@@ -25,6 +26,8 @@ import {
 import Build from './utilities/repo.js'
 import EventObservers from './observer/observers.js'
 import Database from './db/database.js'
+import Icon from './utilities/icon.js'
+import Colors from './canvas/palette.js'
 
 const Bot = class {
   public client: Client
@@ -71,9 +74,10 @@ const Bot = class {
     })
   }
   private async handleError(interaction: ChatInputCommandInteraction<CacheType>, error: Error) {
-    let message: Message<boolean> = await interaction.editReply({
+    let message: InteractionResponse<boolean> = await interaction.reply({
       content: 'Oopsie! Something went wrong. The bot creator has been notified!',
       components: [],
+      flags: MessageFlags.Ephemeral,
     })
 
     let errorTrace = await interaction.client.channels.fetch(config.errorTraceChannel) as TextChannel
@@ -107,7 +111,8 @@ const Bot = class {
       try {
         await command.execute(interaction)
       } catch (err) {
-        Log.error(`Command execution ${interaction.commandName} failed`, err)
+        await this.handleError(interaction, err)
+        Log.error(`Command execution ${interaction.commandName} failed`,)
       }
     })
   }

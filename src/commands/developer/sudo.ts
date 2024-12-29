@@ -9,6 +9,7 @@ import {
 import InteractionObserver from '../interactionobserver.js'
 import config from '../../config.js'
 import { Abort } from '../../types/enum.js'
+
 const Sudo: CommandInterface = {
   name: 'sudo',
   description: 'Sudo\'s the bot.',

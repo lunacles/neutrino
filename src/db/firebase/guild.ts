@@ -31,10 +31,10 @@ const FirebaseGuildInstance = class extends FirebaseAction implements FirebaseIn
     // Ref it
     let doc: DocumentSnapshot = await this.ref.get()
     if (!doc.exists) {
-      Log.info(`Creating document for guild with id "${this.id}"`)
+      Log.db(`Creating document for guild with id "${this.id}"`)
       doc = await (await this.create()).get()
     } else {
-      Log.info(`Fetching document data of guild with id "${this.id}"`)
+      Log.db(`Fetching document data of guild with id "${this.id}"`)
     }
     this.data = doc.data() as DiscordGuildData
 

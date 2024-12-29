@@ -1,10 +1,10 @@
 import * as util from './util.js'
 import chalk from 'chalk'
-import supportsColor from 'supports-color'
+import supportsColor, { ColorInfo } from 'supports-color'
 
 const Log: LogInterface = {
   startTime: Date.now(),
-  get colorSupport() {
+  get colorSupport(): ColorInfo {
     return supportsColor.stdout
   },
   get uptime(): string {
@@ -30,6 +30,11 @@ const Log: LogInterface = {
       console.info(Log.time, chalk.bold.green('INFO:'), chalk.italic.white(info)) :
       console.info(Log.time, 'INFO:', info)
   },
+  db(info: string): void {
+    this.colorSupport ?
+      console.info(Log.time, chalk.bold.blue('DB:'), chalk.italic.white(info)) :
+      console.info(Log.time, 'DATABASE:', info)
+  }
 }
 
 export default Log

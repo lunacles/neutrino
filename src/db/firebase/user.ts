@@ -32,10 +32,10 @@ const FirebaseUserInstance = class extends FirebaseAction implements FirebaseIns
     // Ref it
     let doc: DocumentSnapshot = await this.ref.get()
     if (!doc.exists) {
-      Log.info(`Creating document for user with id "${this.user.id}"`)
+      Log.db(`Creating document for user with id "${this.user.id}"`)
       doc = await (await this.create()).get()
     } else {
-      Log.info(`Fetching document data of user with id "${this.user.id}"`)
+      Log.db(`Fetching document data of user with id "${this.user.id}"`)
     }
     this.data = doc.data() as DiscordUserData
 

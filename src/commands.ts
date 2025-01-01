@@ -4,14 +4,13 @@ import Log from './utilities/log.js'
 import { fileURLToPath } from 'url'
 import bot from './index.js'
 
-type File = [string, string]
 interface CommandsInterface {
-  locate(folder: string): Promise<Array<File>>
+  locate(folder: string): Promise<Array<[string, string]>>
   compile(): Promise<Array<CommandInterface>>
 }
 
 export const Commands: CommandsInterface = {
-  async locate(folder: string): Promise<Array<File>> {
+  async locate(folder: string): Promise<Array<[string, string]>> {
     let directory = path.join(path.dirname(fileURLToPath(import.meta.url)), `commands/${folder}`)
     return (await fs.readdir(directory)).map(f => [directory, f])
   },

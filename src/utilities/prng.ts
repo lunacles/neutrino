@@ -1,3 +1,5 @@
+import crypto from 'crypto'
+
 const PRNG: PRNGInterface = {
   // Why not include this lol
   MathRandom(): () => number {

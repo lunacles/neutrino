@@ -1,3 +1,12 @@
+interface BotInterface {
+  client: Client
+  commands: Collection<string, CommandInterface>
+  init(): Promise<void>
+  fetchGuild(id: string): Promise<Guild>
+  fetchUser(id: string): Promise<User>
+  fetchGuildMember(id: string, guild: Guild): Promise<GuildMember>
+}
+
 // config
 interface DevConfig {
   readonly ownerId: string
@@ -25,7 +34,6 @@ interface LootLeagueConfig {
 }
 
 interface DBConfig {
-  readonly databaseType: DatabaseType
   readonly batchTick: number
   readonly rolePersistCap: number
 }
@@ -60,6 +68,7 @@ interface LogInterface {
   error(reason: string, err?: Error | object): void
   warn(reason: string): void
   info(info: string): void
+  db(info: string): void
 }
 interface BuildInterface {
   id: string
@@ -211,6 +220,8 @@ interface ObserverInterface {
   isOnCooldown(type: keyof Cooldown): boolean
   resetCooldown(type: keyof Cooldown): void
   getCooldown(type: keyof Cooldown): number
+  getGuildData(): Promise<DatabaseGuildInstance>
+  getGuildUserData(user?: string | GuildMember): Promise<DatabaseGuildMemberInstance>
 }
 
 
@@ -348,16 +359,52 @@ interface RandomWalkerInterface {
 }
 
 // firebase
+interface DatabaseInterface {
+  readonly version: number
+  discord: {
+    users: {
+      cache: Collection<string, DatabaseUserInstance>
+      fetch(user: string | User): Promise<DatabaseUserInstance>
+    },
+    guilds: {
+      cache: Collection<string, DatabaseGuildInstance>
+      fetch(guild: string | Guild): Promise<DatabaseGuildInstance>
+    },
+    bans: {
+      activeManager: FirebaseDatabaseInterface
+      expiredManager: FirebaseDatabaseInterface
+      cache: Collection<string, BanInfo>
+      append(ban: BanInfo): Promise<void>
+      addToCache(data: BanInfo): Promise<void>
+      archive(ban: BanInfo): Promise<void>
+      collect(startAfter?: number): Promise<void>
+    }
+  },
+}
+
+interface QueryInterface {
+  field: string
+  orderBy?: FirebaseFirestore.OrderByDirection
+  limit?: number
+  startAt?: number
+  startAfter?: number
+  endAt?: number
+  endBefore?: number
+  comparator?: FirebaseFirestore.WhereFilterOp
+  operand?: any
+}
+
 interface FirebaseDatabaseInterface {
   readonly collection: CollectionReference
   readonly doc: DocumentReference
 
   cd(dir: string): this
-  mkdir(name: string, data?: object): Promise<DocumentReference>
+  touch(name: string, data?: object): Promise<DocumentReference>
   cat(name?: string): Promise<DocumentSnapshot | DocumentReference>
   getdoc(name: string): DocumentReference
   write(data: object): Promise<this>
   rm(name?: string): Promise<this>
+  query(data: QueryInterface): Promise<QuerySnapshot<DocumentData, DocumentData>>
 }
 
 interface OperationInterface {
@@ -367,16 +414,16 @@ interface OperationInterface {
 }
 
 // events
-interface Observer {
+interface EventObserver {
   readonly id: Events
   readonly active: boolean
-  readonly react: Function
+  readonly react: (bot: BotInterface, ...args: any, db: DatabaseInterface) => Promise<void>
 }
-interface EventObserversInterface {
-  create: Observer
-  add: Observer
-  remove: Observer
+
+interface EventGroup {
+  [key: string]: EventObserver
 }
+
 interface FireStorageInterface {
   cd(dir: string): this
   rm(name?: string): Promise<this>
@@ -481,18 +528,18 @@ interface ColorInterface {
   rotateValue(value: number): this
 }
 
-interface XPData {
-  level: number
-  xp: number
-  cooldown: number
+interface BanInfo {
+  neutrino_id: string
+  guild_id: string
+  user_id: string
+  reason: string
+  expires_at: number
+  duration: string
+  timestamp: number
 }
-interface LootLeague {
-  score: number
-  shield_end: number
-}
+
 interface DiscordUserData {
   neutrino_id: string
-
   avatar: string
   avatar_decoration: string
   banner: string
@@ -500,79 +547,165 @@ interface DiscordUserData {
   display_name: string
   id: string
   username: string
+  db_timestamp: number
+  bans: Array<BanInfo>
+}
 
+interface XPData {
+  level: number
+  xp: number
+  cooldown: number
+}
+
+interface LootLeague {
+  score: number
+  shield_end: number
+}
+
+interface Warns {
+  reason: string
+  timestamp: number
+}
+
+interface Mutes extends Warns {
+  duration: number
+}
+
+interface Bans extends Mutes {}
+
+interface DiscordGuildMemberData {
+  id: string
+  neutrino_id: string
+  guild_avatar: string
+  join_date: number
+  left_date: number
+  db_timestamp: number
+  nickname: string
+  role_persist: Array<string>
   xp_data: XPData
   loot_league: LootLeague
-  role_persist: Array<string>
-
-  db_timestamp: number
-  prng: Quaple<number>
+  warns: { [key: string]: Warns }
+  mutes: { [key: string]: Mutes }
+  bans: { [key: string]: Bans }
 }
 
 interface DatabaseActions {
-  instance: User | Guild
-  id: string
-  updateField(field: DataKeys, data: unknown): Promise<void> | void
-  updateFieldValue(field: DataKeys, key: DataKeys, data: unknown): Promise<void> | void
-  setField(field: DataKeys, data: unknown): Promise<void> | void
-  setFieldValue(field: DataKeys, key: string, data: unknown): Promise<void> | void
-  union(field: DataKeys, elements: Array<unknown>): Promise<void>
-  remove(field: DataKeys, elements: Array<unknown>): Promise<void>
-  removeFieldValue(field: DataKeys, name: string): Promise<void> | void
+  ref: DocumentReference
 }
 
 interface DatabaseUserInstance extends FirebaseInstanceInterface {
-  ran: RandomInterface
   data: DiscordUserData
+  id: string
+  neutrinoUserId: string
+  bans: Array<BanInfo>
+  appendBan(info: BanInfo): Promise<void>
+}
+
+interface LogOptions {
+  // bans, kicks, warns, mutes
+  moderation: string
+  // invite creates/uses
+  invite: string
+  // reactions
+  reactions: string
+  // message deletes/edits
+  messages: string
+  // emoji, sticker
+  content: string
+  // poll
+  poll: string
+  // thread/channels
+  channels: string
+  // roles
+  roles: string
+  // voice channels/stage
+  voice_channels: string
+  // webhooks
+  webhooks: string
+  // members
+  members: string
+}
+
+interface DiscordGuildOptions {
+  apply_persistence: boolean
+  logs: LogOptions
+}
+
+interface GuildPriority {
+  next_task_due: number
+  pending_tasks: number
+  activity: number // message per minute
+}
+
+interface DiscordGuildData {
+  neutrino_guild_id: string
+  owner_id: string
+  icon: string
+  creation_date: number
+  id: string
+  db_timestamp: number
+  ignored_channels: Array<string>
+  options: DiscordGuildOptions
+  priority: GuildPriority
+}
+
+interface DatabaseGuildMemberInstance extends FirebaseAction, FirebaseInstanceInterface {
+  guild: Guild
+  guildMember: GuildMember
+  data: DiscordGuildMemberData
+  neutrinoId: string
+  rolePersist: Set<string>
   xp: number
   level: number
   cooldown: number
   score: number
   shieldEnd: number
-  rolePersist: Set<string>
-  neutrinoId: string
+  fetch(): Promise<void>
+  init(doc: DocumentSnapshot): void
+  addRolePersist(role: string): Promise<void>
+  removeRolePersist(role: string): Promise<void>
   setShield(state: number): Promise<void>
   setScore(amount: number): Promise<void>
   setXP(amount: number): Promise<void>
   xpCooldown(length: number): Promise<void>
   setLevel(level: number): Promise<void>
   passiveXP(): Promise<void>
-  applyRolePersist(role: string): Promise<void>
-  removeRolePersist(role: string): Promise<void>
 }
 
-interface DiscordGuildData {
-  leaderboard: Array<string>
-  neutrino_guild_id: string
-  owner_id: string
-  icon: string
-  creation_date: number
-  id: string
-  role_persist: Array<string>
-  db_timestamp: number
-  prng: Quaple<number>
-  ignored_channels: Array<string>
+interface LeaderboardInterface extends DatabaseGuildInstance {
+  top(): Promise<Map<number, DatabaseGuildMemberInstance>>
+  getPosition(member: string | GuildMember): Promise<Map<number, DatabaseGuildMemberInstance>>
 }
 
 interface DatabaseGuildInstance extends FirebaseInstanceInterface {
-  leaderboard: BinaryHeapInterface<string>
+  guild: Guild
   data: DiscordGuildData
-  ran: RandomInterface
-  rolePersist: Set<string>
   ignoredChannels: Set<string>
+  options: DiscordGuildOptions
+  priority: GuildPriority
+  activity: Array<number>
   id: string
-  db_timestamp: number
   neutrinoGuildId: string
-  refreshLeaderboard(): Promise<void>
-  addRolePersist(role: string): Promise<void>
-  removeRolePersist(role: string): Promise<void>
+  leaderboard: LeaderboardInterface
+
   addIgnoredChannel(channel: string): Promise<void>
+  queryMembers({
+    field,
+    orderBy = null,
+    limit = null,
+    startAt = null,
+    startAfter = null,
+    endAt = null,
+    endBefore = null,
+    comparator = null,
+    operand = null,
+  }: QueryInterface): Promise<QuerySnapshot<DocumentData, DocumentData>>
   removeIgnoredChannel(channel: string): Promise<void>
+  fetchMember(member: string | GuildMember): Promise<DatabaseGuildMemberInstance>
 }
 
 interface FirebaseInstanceInterface extends DatabaseActions {
   fetch(): Promise<void>
-  create(): Promise<DocumentReference>
   random(n: number = 1.0): Promise<number>
   randomInt(n: number = 1.0): Promise<number>
   fromRange(min: number, max: number, type: 'Integer' | 'Float' = 'Integer'): Promise<number>

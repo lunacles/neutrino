@@ -176,10 +176,11 @@ export const FirebaseDatabase = class implements FirebaseDatabaseInterface {
   // Remove a doc
   public async rm(name?: string): Promise<this> {
     try {
+      this.doc ??= this.collection.doc(name)
       if (!this.doc) throw new Error('No doc found.')
 
-      let doc: DocumentReference = this.collection.doc(name)
-      await doc.delete()
+      await this.doc.delete()
+      this.doc = null
     } catch (err) {
       Log.error(`Filed to delete document "${this.doc}" at path "${this.path}"`, err)
     }

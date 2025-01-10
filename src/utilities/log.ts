@@ -16,9 +16,12 @@ const Log: LogInterface = {
       `[${new Date().toISOString()}] [${((Date.now() - Log.startTime) * 0.001).toFixed(3)}]`
   },
   error(reason: string, err?: Error | object): void {
+    let stack: string = err instanceof Error ? err.stack : new Error().stack
     this.colorSupport ?
-      console.error(Log.time, chalk.bold.red('ERROR:'), chalk.italic.white(reason), '\n' + err) :
-      console.error(Log.time, 'ERROR:', reason, '\n' + err)
+      console.error(
+        Log.time, chalk.bold.red('ERROR:'), chalk.italic.white(reason), '\n' + chalk.gray(stack)
+      ) :
+      console.error(Log.time, 'ERROR:', reason, '\n' + stack)
   },
   warn(reason: string): void {
     this.colorSupport ?

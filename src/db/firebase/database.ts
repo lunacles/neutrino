@@ -129,7 +129,7 @@ export const FirebaseDatabase = class implements FirebaseDatabaseInterface {
       this.doc = doc
       return doc
     } catch (err) {
-      Log.error(`Failed to make new directory "${name}" at path "${this.path}"`, err)
+      Log.error(`Failed to make new file "${name}" at path "${this.path}"`, err)
     }
   }
   // Concatenate a file for reading and writing purposes

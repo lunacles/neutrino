@@ -10,8 +10,8 @@ type CanvasColor = string | CanvasGradient | CanvasPattern
 type ColorValue = typeof Color | Array<number> | CanvasColor | object
 
 // command
-type Suit = typeof Suits[keyof typeof Suits]
-type Face = typeof FaceCard[keyof typeof FaceCard]
+type Suit = Enumeral<Suits>
+type Face = Enumeral<FaceCard>
 type PlayingCard = NumberRange<1, 10> | Face
 type Cooldowns = 'score' | 'leaderboard' | 'claim' | 'steal' | 'gamble' | 'shield' | 'blackjack'
 
@@ -22,6 +22,7 @@ type Quaple<T> = [T, T, T, T]
 type NumberRange<Min extends number, Max extends number> = Exclude<Partial<unknown[]>, { length: Min }>['length'] & Exclude<Partial<unknown[]>, { length: Max }['length']>[number]
 type Mutation = RandomInterface | number
 type Keys<T> = T extends Record<infer U extends string, any> ? keyof T | Flatten<T[U]> : never
+type Enumeral<T> = typeof T[keyof typeof T]
 type FixedArray<T, N extends number> = [T, ...T[]] & { length: N }
 
 // maze

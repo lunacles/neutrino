@@ -214,7 +214,7 @@ interface ObserverInterface {
   finishFilter(): Collection<string, GuildBasedChannel>
   componentsFilter(components: Array<string>): (component: Action) => Promise<boolean>
   checkPermissions(permissions: Array<bigint>, channel: GuildChannel): boolean
-  abort(code: typeof Abort[keyof typeof Abort]): Promise<void>
+  abort(code: Enumeral<Abort>): Promise<void>
   defer(ephemeral: boolean): Promise<this>
   fetchAbort(): Promise<void>
   isOnCooldown(type: keyof Cooldown): boolean
@@ -432,10 +432,10 @@ interface FireStorageInterface {
 
 interface Interpolation {
   readonly frameDuration: number
-  readonly type: typeof Ease[keyof typeof Ease]
+  readonly type: Enumeral<Ease>
 }
 interface InterpolatorInterface extends Interpolation {
-  readonly type: typeof Ease[keyof typeof Ease]
+  readonly type: Enumeral<Ease>
   readonly frameDuration: number
   get(frame: number): NumberRange<0, 1>
 }

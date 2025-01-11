@@ -37,10 +37,10 @@ const Interpolator = class {
   public static create({ frameDuration = 1, type = Ease.Linear  }: Interpolation) {
     return new Interpolator(type, frameDuration)
   }
-  type: typeof Ease[keyof typeof Ease]
+  type: Enumeral<Ease>
   frameDuration: number
   display: number
-  constructor(type: typeof Ease[keyof typeof Ease], frameDuration: number = 1) {
+  constructor(type: Enumeral<Ease>, frameDuration: number = 1) {
     this.frameDuration = frameDuration
     this.type = type
   }

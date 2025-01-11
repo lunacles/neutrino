@@ -24,7 +24,7 @@ interface Bin {
 }
 
 interface QuantizeOptions {
-  format?: typeof Format[keyof typeof Format]
+  format?: Enumeral<Format>
   clearAlpha?: boolean
   clearAlphaColor?: number
   clearAlphaThreshold?: number
@@ -90,7 +90,7 @@ const pnnQuant = {
       err: 0,
     }
   },
-  createBinList(data: Uint32Array, format: typeof Format[keyof typeof Format]): Array<Bin> {
+  createBinList(data: Uint32Array, format: Enumeral<Format>): Array<Bin> {
     let bins: Array<Bin> = new Array(format === Format.RGB444 ? 4096 : 65536)
     let size: number = data.length
 

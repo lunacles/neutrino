@@ -5,7 +5,7 @@ import RGBPacker from './rgb-packing.js'
 import Color from '../canvas/color.js'
 
 const Palettize = {
-  applyPalette(rgba: Uint8ClampedArray, palette: Array<PaletteValue>, format: typeof Format[keyof typeof Format] = Format.RGB565): Uint8Array {
+  applyPalette(rgba: Uint8ClampedArray, palette: Array<PaletteValue>, format: Enumeral<Format> = Format.RGB565): Uint8Array {
     if (palette.length > 256)
       throw new Error('applyPalette() only works with 256 colors or less')
 
@@ -201,7 +201,7 @@ const Palettize = {
       data[i] = (a << 24) | (b << 16) | (g << 8) | (r << 0)
     }
   },
-  applyPalette(rgba: Uint8ClampedArray, palette: Array<PaletteValue>, format: typeof Format[keyof typeof Format] = Format.RGB565): Uint8Array {
+  applyPalette(rgba: Uint8ClampedArray, palette: Array<PaletteValue>, format: Enumeral<Format> = Format.RGB565): Uint8Array {
     if (!rgba || !rgba.buffer) throw new Error('quantize() expected RGBA Uint8Array data')
     if (!(rgba instanceof Uint8Array) && !(rgba instanceof Uint8ClampedArray)) throw new Error('quantize() expected RGBA Uint8Array data')
 

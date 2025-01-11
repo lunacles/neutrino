@@ -61,7 +61,7 @@ const Observer = class implements ObserverInterface {
 
     return true
   }
-  public async abort(info: typeof Abort[keyof typeof Abort]): Promise<void> {
+  public async abort(info: Enumeral<Abort>): Promise<void> {
     await this.interaction.editReply(`${info} (Error code ${Object.keys(Abort).find(key => Abort[key] === info)})`)
   }
   public async defer(ephemeral?: boolean): Promise<this> {

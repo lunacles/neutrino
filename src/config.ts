@@ -28,7 +28,6 @@ const lootLeagueConfig: LootLeagueConfig = Object.freeze({
 })
 
 const dbConfig: DBConfig = Object.freeze({
-  databaseType: 'firebase',
   batchTick: 60e3,
   rolePersistCap: 10,
 })

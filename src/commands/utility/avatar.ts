@@ -14,6 +14,7 @@ import {
 } from 'discord.js'
 import Colors from '../../canvas/palette.js'
 import fetch, { Response } from 'node-fetch'
+import Log from '../../utilities/log.js'
 
 type ImageSize = (typeof ALLOWED_SIZES)[number]
 interface Choice {
@@ -60,7 +61,7 @@ const Avatar: CommandInterface = {
       let arrayBuffer: ArrayBuffer = await response.arrayBuffer()
       buffer = Buffer.from(arrayBuffer)
     } catch (err) {
-      console.error('Fetch failed:', err)
+      Log.error('Fetch failed:', err)
       throw err
     }
 

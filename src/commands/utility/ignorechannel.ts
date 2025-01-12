@@ -24,22 +24,29 @@ const IgnoreChannel: CommandInterface = {
     .setDescription('Allow Neutrino to see interactions the selected channel again.')
   ),
   async execute(interaction: ChatInputCommandInteraction<CacheType>): Promise<void> {
-    const observer = await new InteractionObserver(interaction).defer()
+    const observer = new InteractionObserver(interaction)
     const channel: TextChannel = interaction.options.getChannel('channel')
     const remove: boolean = interaction.options.getBoolean('remove') ?? false
 
-    if (!observer.checkPermissions([PermissionsBitField.Flags.ManageChannels], interaction.channel))
-      return await observer.abort(Abort.InsufficientPermissions)
+    if (!observer.checkPermissions([PermissionsBitField.Flags.ManageChannels], interaction.channel)) {
+      await observer.killInteraction(Abort.InsufficientPermissions)
+      return
+    }
 
-    if (!channel)
-      return await observer.abort(Abort.ChannelNotGiven)
+    if (!channel) {
+      await observer.killInteraction(Abort.ChannelNotGiven)
+      return
+    }
 
-    let guildData: DatabaseGuildInstance = await Database.discord.guilds.fetch(interaction.guildId)
+    // defer it
+    await observer.defer(true)
 
     if (guildData.ignoredChannels.has(channel.id)) {
-      return await observer.abort(Abort.AlreadyIgnored)
+      await observer.killInteraction(Abort.AlreadyIgnored)
+      return
     } else if (remove) {
-      return await observer.abort(Abort.NotIgnored)
+      await observer.killInteraction(Abort.NotIgnored)
+      return
     }
 
     if (remove) {

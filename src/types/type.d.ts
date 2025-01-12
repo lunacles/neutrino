@@ -24,6 +24,7 @@ type Mutation = RandomInterface | number
 type Keys<T> = T extends Record<infer U extends string, any> ? keyof T | Flatten<T[U]> : never
 type Enumeral<T> = typeof T[keyof typeof T]
 type FixedArray<T, N extends number> = [T, ...T[]] & { length: N }
+type File = [string, string]
 
 // maze
 type Seed = string | number

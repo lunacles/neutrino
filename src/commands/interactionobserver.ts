@@ -7,10 +7,11 @@ import {
   GuildChannel,
   GuildTextBasedChannel,
   GuildMember,
+  User,
 } from 'discord.js'
 //import Secret from 'utilities/secret.js'
 import config from '../config.js'
-import { Abort } from '../types/enum.js'
+import Database from '../db/database.js'
 
 const Observer = class implements ObserverInterface {
   public static readonly cooldowns = new Map<string, CommandCooldownInterface>()
@@ -63,18 +64,22 @@ const Observer = class implements ObserverInterface {
 
     return true
   }
-  public async abort(info: Enumeral<Abort>): Promise<void> {
-    await this.interaction.editReply(`${info} (Error code ${Object.keys(Abort).find(key => Abort[key] === info)})`)
-  }
   public async defer(ephemeral?: boolean): Promise<this> {
     await this.interaction.deferReply({ ephemeral: ephemeral })
     return this
   }
-  public async fetchAbort(): Promise<void> {
-    await this.interaction.deleteReply()
-    await this.interaction.followUp({
+  public async killInteraction(reason: string): Promise<void> {
+    let reject: Function
+    if (this.interaction.deferred) {
+      await this.interaction.deleteReply()
+      reject = this.interaction.followUp
+    } else {
+      reject = this.interaction.reply
+    }
+    await reject({
+      content: reason,
       ephemeral: true,
-      content: 'It seems the bot has not fetched this server\'s data yet (probably due to a recent restart)!\nPlease wait a few seconds for it to fetch it.',
+      components: [],
     })
   }
   private createUserCooldown(): void {

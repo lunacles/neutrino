@@ -42,16 +42,7 @@ const FirebaseGuildInstance = class extends FirebaseAction implements FirebaseIn
     // Much harder to exploit than Math.random()
     this.prng = PRNG.crypto()
     this.ran = new Random(this.prng)
-    // TODO: Store role persistence in a better way idk
-    this.rolePersist = new Set(this.data.role_persist)
-    // TODO: Redo how leaderboards are managed
-    this.leaderboard = new BinaryHeap<string>((a: string, b: string): boolean => {
-      // Because of the database instance structure the entries we check will always be in the cache
-      let adi = Database.discord.users.cache.get(a)?.score ?? 0
-      let bdi = Database.discord.users.cache.get(b)?.score ?? 0
 
-      return adi > bdi
-    }, 15)
     this.ignoredChannels = new Set(this.data.ignored_channels)
     this.neutrinoGuildId = this.data.neutrino_guild_id
   }

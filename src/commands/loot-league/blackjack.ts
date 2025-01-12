@@ -32,7 +32,9 @@ const Game = class implements GameInterface {
   public dealerCards: Array<CardData>
   private readonly ran: RandomInterface
   public deck: Array<CardData>
-  constructor() {
+  public userData: DatabaseGuildMemberInstance
+  public neutrinoData: DatabaseGuildMemberInstance
+  constructor(userData: DatabaseGuildMemberInstance, neutrinoData: DatabaseGuildMemberInstance) {
     this.playerCards = []
     this.dealerCards = []
 
@@ -50,6 +52,9 @@ const Game = class implements GameInterface {
       interpolation: null,
       facing: 0,
     })))
+
+    this.userData = userData
+    this.neutrinoData = neutrinoData
   }
   public shuffleDeck(): void {
     this.deck = this.ran.shuffleArray(this.deck)
@@ -87,23 +92,20 @@ const Game = class implements GameInterface {
   public busted(sum: number): boolean {
     return sum > 21
   }
+  public async updateScores(state: number, amount: number): Promise<void> {
+    // Update the user and neutrino's score accordingly
+    await this.neutrinoData.setScore(this.neutrinoData.score + (
+      state ? -amount : // lose
+      state == null ? amount * 0.5 : // tie
+      amount // win
+    ))
+    await this.userData.setScore(this.userData.score + (
+      state ? amount : // win
+      state == null ? amount * -0.5 : // tie
+      -amount // lose
+    ))
+  }
 }
-
-/*
-const colors = Array(9 ** 3).fill(null).map((_: unknown, i: number): RGBTuple => {
-  return [(i % 9) << 5, Math.floor((i / 9) % 9) << 5, Math.floor(i / 9 ** 2) << 5]
-})
-let uint8: Uint8ClampedArray = new Uint8ClampedArray(colors.length * 4)
-for (let [i, [r, g, b]] of colors.entries()) {
-  let index: number = i * 4
-  uint8[index] = r
-  uint8[index + 1] = g
-  uint8[index + 2] = b
-}
-const blackJackPalette = new pnnQuant(uint8, 256, {
-  //format: Format.RGBA4444
-}).quantizeLSH()
-*/
 
 const Table = class implements TableInterface {
   public static neutrinoIcon = null
@@ -119,9 +121,9 @@ const Table = class implements TableInterface {
   private deckX: number
   private deckY: number
   private userIcon: any
-  constructor(amount: number) {
+  constructor(amount: number, userData: DatabaseGuildMemberInstance, neutrinoData: DatabaseGuildMemberInstance) {
     this.amount = amount
-    this.game = new Game()
+    this.game = new Game(userData, neutrinoData)
     this.bgBorder = 24
     this.spacing = 8
     this.cardSize = 128
@@ -413,8 +415,8 @@ const Blackjack: CommandInterface = {
       return
     } else {
       if (amount > userData.score) {
-        await interaction.editReply('You cannot gamble more points than what you currently have!')
-      } else {
+    // Create a new active match
+    Game.activeMatches.set(interaction.user.id, new Table(amount, userData, neutrinoData))
         Game.activeMatches.set(interaction.user.id, new Table(amount))
         observer.resetCooldown('blackjack')
 
@@ -437,21 +439,7 @@ const Blackjack: CommandInterface = {
           components: [row],
         })
 
-          let updateScores = async (state: number, amount: number): Promise<void> => {
-            await observer.applyScore(neutrinoData, guildData, neutrinoData.score + (
-              state ? -amount : // lose
-              state == null ? amount * 0.5 : // tie
-              amount // win
-            ))
-            await observer.applyScore(userData, guildData, userData.score + (
-              state ? amount : // win
-              state == null ? amount * -0.5 : // tie
-              -amount // lose
-            ))
-
-            await neutrinoData.writeBatch()
-          }
-
+    // Create the collector
         const collector: Component = response.createMessageComponentCollector({
           filter: observer.componentsFilter(['hit', 'stay']),
           time: 30e3,

@@ -484,6 +484,7 @@ interface GameInterface {
   hit(who: 'player' | 'dealer'): CardData
   sumCards(cards: Array<CardData>): number
   busted(sum: number): boolean
+  updateScores(state: number, amount: number): Promise<void>
 }
 interface TableInterface {
   readonly amount: number

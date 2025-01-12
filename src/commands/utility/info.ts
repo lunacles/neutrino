@@ -35,7 +35,7 @@ const Info: CommandInterface = {
       **Ping:** \`${interaction.client.ws.ping < 0 ? 'Unknown ' : interaction.client.ws.ping}ms\`
       **Repository:** [Github Link](<https://github.com/lunacles/neutrino>)`)
 
-    interaction.editReply({
+    interaction.reply({
       embeds: [embed],
     })
   },

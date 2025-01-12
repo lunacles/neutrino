@@ -154,7 +154,10 @@ const DownTime: CommandInterface = {
       name: 'downtime.png'
     })
 
-    await interaction.editReply('Downtime setup')
+    await interaction.reply({
+      content: 'Downtime setup',
+      ephemeral: true,
+    })
     await targetChannel.send({
       content: '',
       files: [attachment]

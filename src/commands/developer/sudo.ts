@@ -52,8 +52,10 @@ const Sudo: CommandInterface = {
     }
 
     await targetChannel.send(targetMessage)
-
-    await interaction.editReply('Sudo successful')
+    await interaction.reply({
+      content: 'Sudo successful',
+      ephemeral: true,
+    })
   },
   test(): boolean {
     return true

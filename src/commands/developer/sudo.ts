@@ -25,12 +25,16 @@ const Sudo: CommandInterface = {
       .setDescription('The message to sudo.')
     ).setDMPermission(false),
   async execute(interaction: ChatInputCommandInteraction<CacheType>): Promise<void> {
-    const observer = await new InteractionObserver(interaction).defer()
+    const observer = new InteractionObserver(interaction)
     const targetChannelOption = interaction.options.getChannel('channel', false)
     const targetChannelId = interaction.options.getString('channel-id', false)
     const targetMessage: string = interaction.options.getString('message')
 
-    if (interaction.user.id !== config.ownerId) return await observer.abort(Abort.InsufficientPermissions)
+    if (interaction.user.id !== config.ownerId) {
+      await observer.killInteraction(Abort.InsufficientPermissions)
+      return
+    }
+
     let targetChannel: TextChannel
 
     if (targetChannelOption instanceof TextChannel) {
@@ -39,10 +43,13 @@ const Sudo: CommandInterface = {
       try {
         targetChannel = await interaction.client.channels.fetch(targetChannelId) as TextChannel
       } catch (err) {
-        return await observer.abort(Abort.InvalidChannelType)
+        return await observer.killInteraction(Abort.InvalidChannelType)
       }
     }
-    if (!targetChannel) return await observer.abort(Abort.InvalidChannelType)
+    if (!targetChannel) {
+      await observer.killInteraction(Abort.InvalidChannelType)
+      return
+    }
 
     await targetChannel.send(targetMessage)
 

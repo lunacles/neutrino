@@ -1,4 +1,4 @@
-import { ShardingManager, Shard, /*Status, Client*/ } from 'discord.js'
+import { ShardingManager, Shard } from 'discord.js'
 import config from './config.js'
 import path from 'path'
 import { fileURLToPath } from 'url'

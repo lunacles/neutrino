@@ -28,10 +28,9 @@ import Color from '../../canvas/color.js'
 import * as util from '../../utilities/util.js'
 import { Abort } from '../../types/enum.js'
 
-type Trio = [number, number, number]
 type Colour = typeof Color | Array<number> | string | object
-type LineData = [Trio, Colour]
-type CircleData = [Trio, Colour, number, boolean]
+type LineData = [Tuple<number>, Colour]
+type CircleData = [Tuple<number>, Colour, number, boolean]
 
 let drawLines = (offset: number, data: Array<LineData>): void => {
   for (let [[x1, x2, y], color] of data) {
@@ -68,14 +67,26 @@ const DownTime: CommandInterface = {
       .setDescription('The reason behind the downtime. Default is "Unspecified".')
     ).setDMPermission(false),
   async execute(interaction: ChatInputCommandInteraction<CacheType>): Promise<void> {
-    const observer = await new InteractionObserver(interaction).defer()
+    const observer = new InteractionObserver(interaction)
     const duration: number = interaction.options.getInteger('duration')
     //const reason: string = interaction.options.getString('reason') ?? 'Unspecified'
     const targetChannel = interaction.options.getChannel('channel')
 
-    if (interaction.user.id !== config.ownerId) return await observer.abort(Abort.InsufficientPermissions)
-    if (targetChannel.type !== ChannelType.GuildText) return await observer.abort(Abort.InvalidChannelType)
-    if (!targetChannel || !((channel: any): channel is TextChannel | NewsChannel | VoiceChannel | StageChannel | ForumChannel => 'permissionOverwrites' in channel)(targetChannel)) return await observer.abort(Abort.ChannelNoPermissionOverwrites)
+    if (interaction.user.id !== config.ownerId) {
+      await observer.killInteraction(Abort.InsufficientPermissions)
+      return
+    }
+    if (targetChannel.type !== ChannelType.GuildText) {
+      await observer.killInteraction(Abort.InvalidChannelType)
+      return
+    }
+    if (
+      !targetChannel ||
+      !((channel: any): channel is TextChannel | NewsChannel | VoiceChannel | StageChannel | ForumChannel => 'permissionOverwrites' in channel)(targetChannel)
+    ) {
+      await observer.killInteraction(Abort.ChannelNoPermissionOverwrites)
+      return
+    }
 
     await targetChannel.permissionOverwrites.edit(interaction.guild.roles.everyone, {
       SendMessages: false

@@ -6,12 +6,14 @@ import Database from './database.js'
 import GuildMemberInstance from './guildMember.js'
 import { Query } from 'firebase-admin/firestore'
 
+const GuildInstance = class extends FirebaseGuildInstance implements DatabaseGuildInstance {
   protected cache: Collection<string, DatabaseGuildMemberInstance>
-  public activity: Array<number>
+  public leaderboard: LeaderboardInterface
   constructor(guild: Guild) {
     super(guild)
     this.guild = guild
     this.cache = new Collection<string, DatabaseGuildMemberInstance>()
+    this.leaderboard = null
   }
   public async addIgnoredChannel(channel: string): Promise<void> {
     await this.union('ignored_channels', [channel])

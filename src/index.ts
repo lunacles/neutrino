@@ -28,7 +28,7 @@ import Database from './db/database.js'
 import Icon from './utilities/icon.js'
 import Colors from './canvas/palette.js'
 
-const Bot = class {
+const Bot = class implements BotInterface {
   public client: Client
   private rest: REST
   public commands: Collection<string, CommandInterface>

@@ -65,3 +65,34 @@ export const remove = (array: Array<unknown>, index: number): void => {
   if (index !== array.length)
     array[index] = last
 }
+
+export const extractTime = (time: string): number => {
+  let total: number = 0
+  let regex: RegExp = /(\d+)\s*(seconds?|s|months?|mo|minutes?|m|mins?|min|hours?|h|days?|d|weeks?|w|years?|y)/gi
+  let match: RegExpExecArray
+  while ((
+    match = regex.exec(time)
+  ) !== null) {
+    let value: number = parseInt(match[1], 10)
+    let unit: string = match[2].toLowerCase()
+
+    // i really hate this
+    if (/^(seconds?|s)$/i.test(unit)) {
+      total += value
+    } else if (/^(minutes?|m|mins?|min)$/i.test(unit)) {
+      total += value * 60
+    } else if (/^(hours?|h)$/i.test(unit)) {
+      total += value * 3600
+    } else if (/^(days?|d)$/i.test(unit)) {
+      total += value * 86400
+    } else if (/^(weeks?|w)$/i.test(unit)) {
+      total += value * 604800
+    } else if (/^(months?|mo)$/i.test(unit)) {
+      total += value * 30 * 86400
+    } else if (/^(years?|y)$/i.test(unit)) {
+      total += value * 365 * 86400
+    }
+  }
+
+  return total
+}

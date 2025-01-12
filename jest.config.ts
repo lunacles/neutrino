@@ -1,14 +1,12 @@
-module.exports = {
+export default {
+  preset: 'ts-jest',
   transform: {
-    '\\.[jt]sx?$': 'ts-jest'
-  },
-  globals: {
-    'ts-jest': {
-      useESM: true
-    }
+    '^.+\\.tsx?$': ['ts-jest', { tsconfig: 'tsconfig.json' }],
   },
   moduleNameMapper: {
-    '(.+)\\.js': '$1'
+    "^(\\.{1,2}/.*)\\.js$": "$1",
+    '^firebase-admin/(.*)$': '<rootDir>/__mocks__/firebase-admin/$1',
   },
-  extensionsToTreatAsEsm: ['.ts']
+  extensionsToTreatAsEsm: [".ts"],
+  testEnvironment: "node"
 };

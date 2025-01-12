@@ -24,6 +24,10 @@ const Colors = {
   error: Color.fromHex('#cc0000'),
 
   green: Color.fromHex('#116e5d'),
+
+  warn: Color.fromHex('#2a842e'),
+  mute: Color.fromHex('#d2a23a'),
+  ban: Color.fromHex('#d23a3a'),
 }
 Colors.darkGray = Color.blend(Colors.gray, Colors.black, 0.6)
 

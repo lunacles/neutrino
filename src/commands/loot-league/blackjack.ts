@@ -391,6 +391,8 @@ const Table = class implements TableInterface {
 }
 Table.neutrinoIcon = await loadImage('./src/utilities/assets/neutrino.png')
 
+const collectorLifetime: number = 30e3
+
 const Blackjack: CommandInterface = {
   name: 'blackjack',
   description: `Play Blackjack against Neutrino to and gamble some points! ${util.formatSeconds(config.cooldown.blackjack)} cooldown.`,

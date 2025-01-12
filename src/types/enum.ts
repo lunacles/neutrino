@@ -54,5 +54,15 @@ export enum Abort {
   ChannelNotGiven = 'No target user provided',
   MaxPersistence = 'Maximum number of persistence',
   EmptyLeaderboard = 'The leaderboard is empty! Something really bad must\'ve happened!',
-  NeutrinoNotAllowed = 'You cannot steal from Neutrino!'
+export enum EndState {
+  PlayerWin = 1,
+  HouseWin = 0,
+  Tie = null,
+}
+export enum EndMessage {
+  HouseBust = '# House busted. <@player> won **1x**!',
+  HouseLose = '# House loses. <@player> won **1x**!',
+  PlayerBust = '# Player busted. <@player> lost **1x**!',
+  PlayerLose = '# Player loses. <@player> lost **1x**!',
+  Tie = '# Tie.\n<@player> lost **0.5x**!\n<@bot> won **0.5x**!',
 }

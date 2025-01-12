@@ -22,9 +22,7 @@ import NodeCanvas from '../../canvas/canvas.js'
 import Interpolator from '../../canvas/interpolator.js'
 import { loadImage } from 'canvas'
 import { GIFEncoder, pnnQuant, Palettize } from '../../gifenc/index.js'
-import { Ease, FaceCard, Suits } from '../../types/enum.js'
-import Database from '../../db/database.js'
-import bot from '../../index.js'
+import { Ease, EndMessage, EndState, FaceCard, Suits } from '../../types/enum.js'
 
 const Game = class implements GameInterface {
   public static activeMatches = new Map<string, TableInterface>()
@@ -445,20 +443,7 @@ const Blackjack: CommandInterface = {
           time: 30e3,
         })
 
-        collector.on('collect', async (action: Action): Promise<void> => {
-          const table: TableInterface = Game.activeMatches.get(action.user.id)
-          enum EndState {
-            PlayerWin = 1,
-            HouseWin = 0,
-            Tie = null,
-          }
-          enum EndMessage {
-            HouseBust = '# House busted. <@player> won **1x**!',
-            HouseLose = '# House loses. <@player> won **1x**!',
-            PlayerBust = '# Player busted. <@player> lost **1x**!',
-            PlayerLose = '# Player loses. <@player> lost **1x**!',
-            Tie = '# Tie.\n<@player> lost **0.5x**!\n<@bot> won **0.5x**!',
-          }
+      const table: TableInterface = Game.activeMatches.get(action.user.id)
 
           let endGame = async (state: number, message: string, attachment: AttachmentBuilder): Promise<void> => {
             await updateScores(state, table.amount)

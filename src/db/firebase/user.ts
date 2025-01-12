@@ -41,7 +41,7 @@ const FirebaseUserInstance = class extends FirebaseAction implements FirebaseIns
 
     // Recommended PRNG is PRNG.crypto()
     // Much harder to exploit than Math.random()
-    this.prng = PRNG.crypto()//.sfc32(...this.data.prng)
+    this.prng = PRNG.crypto()
     this.ran = new Random(this.prng)
 
     this.xp = this.data.xp_data.xp

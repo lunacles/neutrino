@@ -40,7 +40,7 @@ const FirebaseGuildInstance = class extends FirebaseAction implements FirebaseIn
 
     // Recommended PRNG is PRNG.crypto()
     // Much harder to exploit than Math.random()
-    this.prng = PRNG.crypto()//.sfc32(...this.data.prng)
+    this.prng = PRNG.crypto()
     this.ran = new Random(this.prng)
     // TODO: Store role persistence in a better way idk
     this.rolePersist = new Set(this.data.role_persist)

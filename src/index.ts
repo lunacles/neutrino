@@ -72,12 +72,14 @@ const Bot = class {
       body: commands,
     })
   }
-  private async handleError(interaction: ChatInputCommandInteraction<CacheType>, error: Error) {
-    let message: InteractionResponse<boolean> = await interaction.reply({
-      content: 'Oopsie! Something went wrong. The bot creator has been notified!',
-      components: [],
-      flags: MessageFlags.Ephemeral,
-    })
+  public async handleError(interaction: ChatInputCommandInteraction<CacheType>, error: Error, hidden: boolean = false) {
+    if (!hidden) {
+      await interaction.followUp({
+        content: 'Oopsie! Something went wrong. The bot creator has been notified!',
+        components: [],
+        ephemeral: true,
+      })
+    }
 
     let errorTrace = await interaction.client.channels.fetch(config.errorTraceChannel) as TextChannel
     await errorTrace.send({
@@ -112,7 +114,6 @@ const Bot = class {
       } catch (err) {
         Log.error(`Command execution ${interaction.commandName} failed`, err)
         await this.handleError(interaction, err)
-        Log.error(`Command execution ${interaction.commandName} failed`,)
       }
     })
   }

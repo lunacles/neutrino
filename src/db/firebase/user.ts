@@ -16,6 +16,7 @@ const FirebaseUserInstance = class extends FirebaseAction implements FirebaseIns
   public id: string
   public data: DiscordUserData
   public neutrinoUserId: string
+  public bans: Array<BanInfo>
   protected prng: Function
   protected ran: RandomInterface
    constructor(user: User) {
@@ -40,21 +41,14 @@ const FirebaseUserInstance = class extends FirebaseAction implements FirebaseIns
     // Much harder to exploit than Math.random()
     this.prng = PRNG.crypto()
     this.ran = new Random(this.prng)
+    this.bans = this.data.bans
 
-    this.xp = this.data.xp_data.xp
-    this.level = this.data.xp_data.level
-    this.cooldown = this.data.xp_data.cooldown
-    this.score = this.data.loot_league.score
-    this.shieldEnd = this.data.loot_league.shield_end
-    // TODO: Change how role persist is stored
-    this.rolePersist = new Set(this.data.role_persist)
     this.neutrinoUserId = this.data.neutrino_id
   }
   // Create a user doc
   protected async create(): Promise<DocumentReference> {
     return await this.db.cd('~/').touch(this.user.id, {
       neutrino_id: Secret.id(`neutrino::${this.user.id}`, 'user'),
-
       avatar: this.user.avatarURL(),
       avatar_decoration: this.user.avatarDecoration,
       banner: this.user.bannerURL(),
@@ -62,27 +56,8 @@ const FirebaseUserInstance = class extends FirebaseAction implements FirebaseIns
       display_name: this.user.displayName,
       id: this.user.id,
       username: this.user.username,
-      xp_data: {
-        level: 0,
-        xp: 0,
-        cooldown: 0,
-      },
-      loot_league: {
-        score: 0,
-        shield_end: 0,
-      },
-      role_persist: [],
       db_timestamp: Date.now(),
-      // TODO: Redo this shit this is like only here for using SFC32
-      prng: ((): Quaple<number> => {
-        let hash = Secret.hash(this.user.id)
-        let seeds = []
-        for (let i = 0; i < 4; i++)
-          // Treated it as unsigned 32-bit integer
-          seeds.push(parseInt(hash.substring(i * 8, (i + 1) * 8), 16) >>> 0)
-
-        return seeds as Quaple<number>
-      })()
+      bans: [],
     } satisfies DiscordUserData)
   }
   // TODO: I can just not repeat this in every guild/user file

@@ -5,6 +5,9 @@ const UserInstance = class extends FirebaseUserInstance implements DatabaseUserI
   constructor(user: User) {
     super(user)
   }
+  public async appendBan(info: BanInfo): Promise<void> {
+    console.log('sending ban', info)
+    await this.union('bans', [info])
     this.bans.push(info)
   }
 }

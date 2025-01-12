@@ -5,7 +5,7 @@ import { fileURLToPath } from 'url'
 import Log from './utilities/log.js'
 
 const manager = new ShardingManager(path.join(path.dirname(fileURLToPath(import.meta.url)), 'index.ts'), {
-  execArgv: ['--loader', 'ts-node/esm', '--enable-source-maps'],
+  execArgv: ['--no-warnings=ExperimentalWarning', '--loader', 'ts-node/esm', '--enable-source-maps'],
   totalShards: 'auto',
   mode: 'process',
   respawn: true,

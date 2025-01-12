@@ -36,9 +36,7 @@ const Shield: CommandInterface = {
   async execute(interaction: ChatInputCommandInteraction<CacheType>): Promise<void> {
     const observer = await new InteractionObserver(interaction).defer()
     const user: User = await bot.fetchUser(interaction.user.id)
-    const guildData: DatabaseGuildInstance = await Database.discord.guilds.fetch(interaction.guild)
-
-    let userData: DatabaseUserInstance = await Database.discord.users.fetch(user.id)
+    const userData = await observer.getGuildUserData()
 
     if (userData.shieldEnd > Date.now()) {
       await interaction.editReply(`You cannot create a shield while one is active!\nRemaining shield time: **${util.formatSeconds(Math.floor((userData.shieldEnd - Date.now()) / 1e3), true)}!**`)
@@ -111,18 +109,8 @@ const Shield: CommandInterface = {
             components: []
           })
 
-
-          await observer.applyScore(userData, guildData, Math.floor(userData.score * 0.8))
-          await userData.setShield(Date.now() + config.shieldDuration * 1e3)
-          observer.resetCooldown('shield')
-
-        } else if (action.customId === 'cancelShield') {
-          await action.update({
-            content: 'Shield activation canceled.',
-            components: []
-          })
-        }
-      })
+        await userData.setScore(Math.floor(userData.score * 0.8))
+        await userData.setShield(Date.now() + config.shieldDuration * 1e3)
       observer.resetCooldown('shield')
 
       collector.on('end', async (collected: Collection<string, CollectedInteraction<CacheType>>): Promise<void> => {

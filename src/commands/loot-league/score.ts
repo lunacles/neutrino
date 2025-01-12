@@ -11,7 +11,6 @@ import {
 import InteractionObserver from '../interactionobserver.js'
 import * as util from '../../utilities/util.js'
 import Icon from '../../utilities/icon.js'
-import Database from '../../db/database.js'
 import config from '../../config.js'
 import bot from '../../index.js'
 
@@ -38,15 +37,7 @@ const Score: CommandInterface = {
     if (observer.isOnCooldown('score')) {
       await interaction.editReply(`This command is on cooldown for **${util.formatSeconds(observer.getCooldown('score'), true)}!**`)
       return
-    } else {
-      const embed = new EmbedBuilder()
-        .setColor(user.accentColor)
-        .setAuthor({
-          name: `${user.username}`,
-          iconURL: user.avatarURL(),
-        })
-        .setThumbnail(`attachment://${Icon.PiggyBank}`)
-        .setDescription(`# <@${typeof targetUserOption === 'string' ? targetUserOption : targetUserOption.id}>'s current balance is **${targetData.score.toLocaleString()}!**`)
+    const targetData = await observer.getGuildUserData(targetUserOption.id)
 
       await interaction.editReply({
         embeds: [embed],

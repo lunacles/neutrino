@@ -39,10 +39,7 @@ const Gamble: CommandInterface = {
     const observer = await new InteractionObserver(interaction).defer()
     const amount = interaction.options.getInteger('amount', true)
     const user: User = await bot.fetchUser(interaction.user.id)
-    const guildData: DatabaseGuildInstance = await Database.discord.guilds.fetch(interaction.guild)
-
-    let userData: DatabaseUserInstance = await Database.discord.users.fetch(user)
-
+    const userData = await observer.getGuildUserData()
     if (userData.shieldEnd > Date.now()) {
       interaction.editReply('You cannot gamble while you have a shield active!')
       return
@@ -94,7 +91,7 @@ const Gamble: CommandInterface = {
           `lost **${Math.floor(Math.abs(netResult)).toLocaleString()}**!`
         let roll: string = icon.match(/dice-(\w+)\.png/)[1]
 
-        await observer.applyScore(userData, guildData, Math.floor(userData.score - amount + result))
+    await userData.setScore(Math.floor(userData.score - amount + result))
 
         const embed = new EmbedBuilder()
           .setColor(user.accentColor)

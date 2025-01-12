@@ -403,7 +403,7 @@ const Blackjack: CommandInterface = {
   async execute(interaction: ChatInputCommandInteraction<CacheType>): Promise<void> {
     const observer = await new InteractionObserver(interaction).defer()
     const amount: number = interaction.options.getInteger('amount', true)
-    const [ userData, neutrinoData] = await Promise.all([observer.getUserData(), observer.getUserData(config.botId)])
+    const [ userData, neutrinoData ] = await Promise.all([observer.getGuildUserData(), observer.getGuildUserData(config.botId)])
 
     if (userData.shieldEnd > Date.now()) {
       interaction.editReply('You cannot play blackjack while you have a shield active!')

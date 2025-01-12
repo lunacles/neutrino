@@ -34,10 +34,7 @@ const Steal: CommandInterface = {
     const targetUserOption = interaction.options.getUser('user', true)
     const guildData: DatabaseGuildInstance = await Database.discord.guilds.fetch(interaction.guild)
 
-    if (targetUserOption.id === user.id) return await observer.abort(Abort.SelfTargetNotAllowed)
-    if (targetUserOption.id === config.botId) return await observer.abort(Abort.NeutrinoNotAllowed)
-    let userData: DatabaseUserInstance = await Database.discord.users.fetch(user.id)
-    let targetData: DatabaseUserInstance = await Database.discord.users.fetch(targetUserOption.id)
+    const [ userData, targetData] = await Promise.all([observer.getGuildUserData(), observer.getGuildUserData(targetUserOption.id)])
 
     if (userData.shieldEnd > Date.now()) {
       await interaction.editReply('You cannot steal from someone while you have a shield active!')
@@ -81,8 +78,8 @@ const Steal: CommandInterface = {
         // lose at least 12.5% of own score, at most 35% of own score,
         -(await userData.fromRange(userData.score * clamp.minLoss, userData.score * clamp.maxLoss, 'Integer'))
 
-      await observer.applyScore(userData, guildData, userData.score + stolenScore)
-      await observer.applyScore(targetData, guildData, targetData.score - stolenScore)
+    await userData.setScore(userData.score + stolenScore)
+    await targetData.setScore(targetData.score - stolenScore)
 
       let icon = succeed ? Icon.Robber : Icon.Amputation
 

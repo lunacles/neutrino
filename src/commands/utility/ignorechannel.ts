@@ -8,7 +8,6 @@ import {
   TextChannel,
 } from 'discord.js'
 import InteractionObserver from '../interactionobserver.js'
-import Database from '../../db/database.js'
 import { Abort } from '../../types/enum.js'
 
 const IgnoreChannel: CommandInterface = {
@@ -40,6 +39,7 @@ const IgnoreChannel: CommandInterface = {
 
     // defer it
     await observer.defer(true)
+    const guildData: DatabaseGuildInstance = await observer.getGuildData()
 
     if (guildData.ignoredChannels.has(channel.id)) {
       await observer.killInteraction(Abort.AlreadyIgnored)

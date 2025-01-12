@@ -27,23 +27,8 @@ const Claim: CommandInterface = {
     if (observer.isOnCooldown('claim')) {
       await interaction.editReply(`This command is on cooldown for **${util.formatSeconds(observer.getCooldown('claim'), true)}!**`)
       return
-    } else {
-      // Get a random score between 15 and 200
-      let claimedScore: number = await userData.fromRange(15, 200, 'Integer')//Math.floor(Math.random() * (200 - 15) + 15)
-      let icon: string
-      if (claimedScore < 40) {
-        icon = Icon.ReceiveMoney
-      } else if (claimedScore < 80) {
-        icon = Icon.Cash
-      } else if (claimedScore < 120) {
-        icon = Icon.Coins
-      } else if (claimedScore < 160) {
-        icon = Icon.GoldBar
-      } else {
-        icon = Icon.OpenTreasureChest
-      }
-      await userData.setScore(userData.score + claimedScore)
-      observer.resetCooldown('claim')
+    const userData = await observer.getGuildUserData()
+    await userData.setScore(userData.score + claimedScore)
 
       const embed = new EmbedBuilder()
         .setColor(user.accentColor)

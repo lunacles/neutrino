@@ -20,14 +20,7 @@ const Leaderboard: CommandInterface = {
   async execute(interaction: ChatInputCommandInteraction<CacheType>): Promise<void> {
     const observer = await new InteractionObserver(interaction).defer()
     const user: User = await bot.fetchUser(interaction.user.id)
-    const guildData: DatabaseGuildInstance = await Database.discord.guilds.fetch(interaction.guild)
-    await Database.discord.users.fetch(user.id)
-
-    if (guildData.leaderboard.heap.length <= 0)
-      return await observer.abort(Abort.EmptyLeaderboard)
-
-    guildData.leaderboard.refresh()
-    await guildData.refreshLeaderboard()
+    const guildData = await observer.getGuildData()
 
     let top: Array<string> = []
     for (let [index, user] of await Promise.all(guildData.leaderboard.heap.slice(0, 10).map((user: string): DatabaseUserInstance => {

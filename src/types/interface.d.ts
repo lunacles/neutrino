@@ -376,7 +376,7 @@ interface DatabaseInterface {
       append(ban: BanInfo): Promise<void>
       addToCache(data: BanInfo): Promise<void>
       archive(ban: BanInfo): Promise<void>
-      collect(startAfter?: number): Promise<void>
+      collect(/* startAfter?: number */): Promise<void>
     }
   },
 }

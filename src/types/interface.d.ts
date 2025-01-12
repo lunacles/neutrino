@@ -631,12 +631,6 @@ interface DiscordGuildOptions {
   logs: LogOptions
 }
 
-interface GuildPriority {
-  next_task_due: number
-  pending_tasks: number
-  activity: number // message per minute
-}
-
 interface DiscordGuildData {
   neutrino_guild_id: string
   owner_id: string
@@ -646,7 +640,6 @@ interface DiscordGuildData {
   db_timestamp: number
   ignored_channels: Array<string>
   options: DiscordGuildOptions
-  priority: GuildPriority
 }
 
 interface DatabaseGuildMemberInstance extends FirebaseAction, FirebaseInstanceInterface {
@@ -682,8 +675,6 @@ interface DatabaseGuildInstance extends FirebaseInstanceInterface {
   data: DiscordGuildData
   ignoredChannels: Set<string>
   options: DiscordGuildOptions
-  priority: GuildPriority
-  activity: Array<number>
   id: string
   neutrinoGuildId: string
   leaderboard: LeaderboardInterface

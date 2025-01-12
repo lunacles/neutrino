@@ -1,0 +1,47 @@
+{
+    "compilerOptions": {
+        "target": "es2022",
+        "module": "es2022",
+        "sourceMap": true,
+        "esModuleInterop": true,
+        "resolveJsonModule": true,
+        "lib": [
+            "ESNext",
+            "ES2022",
+            "DOM"
+        ],
+        "noUnusedLocals": true,
+        "moduleResolution": "node",
+        "rootDir": "./src",
+        "outDir": "./dist",
+
+        "removeComments": true,
+        "forceConsistentCasingInFileNames": true,
+        "skipLibCheck": true,
+        "types": ["jest", "node", "discord.js"],
+        "baseUrl": "./",
+        "paths": {
+          "*": ["src/*"]
+        }
+    },
+    "ts-node": {
+        "esm": true,
+        "transpileOnly": true,
+        "compilerOptions": {
+            "module": "ESNext"
+        },
+    },
+    "include": [
+        "src/**/*",
+        "src/config.ts",
+        "src/types/*.d.ts"
+    ],
+    "paths": {
+        "*": ["src/types/*.d.ts"]
+    },
+    "exclude": [
+      "node_modules",
+      "dist",
+      "src/legacy",
+    ]
+}

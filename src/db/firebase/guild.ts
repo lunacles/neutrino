@@ -47,7 +47,7 @@ const FirebaseGuildInstance = class extends FirebaseAction implements FirebaseIn
     this.neutrinoGuildId = this.data.neutrino_guild_id
   }
   // Create a guild doc
-  public async create(): Promise<DocumentReference> {
+  protected async create(): Promise<DocumentReference> {
     // Tbh idk why I added neutrino IDs
     // Maybe it'll be useful later idk
     let neutrinoGuildId = `guild-${Secret.hash('neutrino::' + this.guild.id).slice(0, 8)}`

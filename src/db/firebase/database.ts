@@ -120,7 +120,7 @@ export const FirebaseDatabase = class implements FirebaseDatabaseInterface {
     return this
   }
   // Make a new directory
-  public async mkdir(name: string, data: object = {}): Promise<DocumentReference> {
+  public async touch(name: string, data: object = {}): Promise<DocumentReference> {
     try {
       if (!this.collection) throw new Error('Collection has not been set.')
 

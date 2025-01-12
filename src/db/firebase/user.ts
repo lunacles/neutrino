@@ -55,7 +55,7 @@ const FirebaseUserInstance = class extends FirebaseAction implements FirebaseIns
   }
   // Create a user doc
   public async create(): Promise<DocumentReference> {
-    return await this.db.cd('~/').mkdir(this.user.id, {
+    return await this.db.cd('~/').touch(this.user.id, {
       neutrino_id: Secret.id(`neutrino::${this.user.id}`, 'user'),
 
       avatar: this.user.avatarURL(),

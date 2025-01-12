@@ -53,9 +53,7 @@ const FirebaseGuildInstance = class extends FirebaseAction implements FirebaseIn
     let neutrinoGuildId = `guild-${Secret.hash('neutrino::' + this.guild.id).slice(0, 8)}`
 
     // Publish it to the database
-    return await this.db.cd('~/').mkdir(this.id, {
-      leaderboard: [],
-      neutrino_guild_id: neutrinoGuildId,
+    return await this.db.cd('~/').touch(this.id, {
       owner_id: this.guild.ownerId,
       icon: this.guild.iconURL(),
       creation_date: this.guild.createdTimestamp,

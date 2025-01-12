@@ -19,7 +19,6 @@ const FirebaseGuildInstance = class extends FirebaseAction implements FirebaseIn
   public ignoredChannels: Set<string>
   public neutrinoGuildId: string
   public options: DiscordGuildOptions
-  public priority: GuildPriority
   public id: string
   constructor(guild: Guild) {
     super(guild.id, 'guilds')
@@ -44,7 +43,6 @@ const FirebaseGuildInstance = class extends FirebaseAction implements FirebaseIn
     this.prng = PRNG.crypto()
     this.ran = new Random(this.prng)
     this.options = this.data.options
-    this.priority = this.data.priority
 
     this.ignoredChannels = new Set(this.data.ignored_channels)
     this.neutrinoGuildId = this.data.neutrino_guild_id
@@ -79,11 +77,6 @@ const FirebaseGuildInstance = class extends FirebaseAction implements FirebaseIn
           members: null,
         },
       },
-      priority: {
-        next_task_due: 0,
-        pending_tasks: 0,
-        activity: 1,
-      }
     } satisfies DiscordGuildData)
   }
   // TODO: I can just not repeat this in every guild/user file

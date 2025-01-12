@@ -475,8 +475,10 @@ const Blackjack: CommandInterface = {
           components: [],
         })
 
-            Game.activeMatches.delete(action.user.id)
-          }
+        // stop the collector with an indicator that the game didn't time out
+        // special thanks CX88 for gatekeeping this exploit from me for like 3 months...
+        collector.stop('ඞ')
+      }
 
       let runDealer = async (): Promise<void> => {
         let attachment = new AttachmentBuilder(await table.hitAnimation(action.user, 'dealer'), {
@@ -563,15 +565,14 @@ const Blackjack: CommandInterface = {
       }
     })
 
-        collector.on('end', async (collected: Collection<string, CollectedInteraction<CacheType>>): Promise<void> => {
-          if (collected.size === 0) {
-            await updateScores(0, amount)
-            await interaction.editReply({
-              content: 'No response received, blackjack timed out.\nYou have 30 seconds to make a decision before the interaction expires.',
-              components: []
-            })
-            Game.activeMatches.delete(interaction.user.id)
-          }
+    collector.on('end', async (_: Collection<string, CollectedInteraction<CacheType>>, reason: string): Promise<void> => {
+      const table: TableInterface = Game.activeMatches.get(interaction.user.id)
+      // if the game doesn't end successfully, penalize the player
+      if (reason !== 'ඞ') {
+        await table.game.updateScores(0, amount)
+        await interaction.editReply({
+          content: 'No response received, blackjack timed out.\nYou have 30 seconds to make a decision before the interaction expires.',
+          components: []
         })
       }
 

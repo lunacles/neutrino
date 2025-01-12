@@ -35,17 +35,12 @@ const Leaderboard: CommandInterface = {
     const guildData = await observer.getGuildData()
 
     let top: Array<string> = []
-    for (let [index, user] of await Promise.all(guildData.leaderboard.heap.slice(0, 10).map((user: string): DatabaseUserInstance => {
-      let cache = Database.discord.users.cache.get(user)
-      return cache
-    }).entries())) {
-      top.push(`**${index + 1}:** <@${user.data.id}> - **${user.score.toLocaleString()}**`)
+    for (let [rank, user] of (relative ?
+      await guildData.leaderboard.getPosition(interaction.member) :
+      await guildData.leaderboard.top()
+    ).entries()) {
+      top.push(`**${rank + 1}:** <@${user.data.id}> - **${user.score.toLocaleString()}**`)
     }
-
-    if (observer.isOnCooldown('leaderboard')) {
-      await interaction.editReply(`This command is on cooldown for **${util.formatSeconds(observer.getCooldown('leaderboard'), true)}!**`)
-      return
-    } else {
 
     const embed = new EmbedBuilder()
       .setColor(user.accentColor)

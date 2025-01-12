@@ -214,9 +214,8 @@ interface ObserverInterface {
   finishFilter(): Collection<string, GuildBasedChannel>
   componentsFilter(components: Array<string>): (component: Action) => Promise<boolean>
   checkPermissions(permissions: Array<bigint>, channel: GuildChannel): boolean
-  abort(code: Enumeral<Abort>): Promise<void>
   defer(ephemeral: boolean): Promise<this>
-  fetchAbort(): Promise<void>
+  killInteraction(reason: string): Promise<void>
   isOnCooldown(type: keyof Cooldown): boolean
   resetCooldown(type: keyof Cooldown): void
   getCooldown(type: keyof Cooldown): number

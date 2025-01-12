@@ -42,16 +42,6 @@ const Task = {
       await this.sendEvalOutput(message, `# Eval Error\n\`\`\`js\n${err.message}\n\`\`\``)
     }
   },
-  handleActivity(timestamp: number, guildInstance: DatabaseGuildInstance): void {
-    // if the last message in the array was from an hour ago then get rid of it
-    // this helps offload work from the PriorityQueue
-    let last = guildInstance.activity[0]
-    if (Date.now() - last > 1e3 * 60 * 60)
-      guildInstance.activity.shift()
-
-    // p-p-push it real goood do dodo do do do dododo ooo baby baby - b-baby baby
-    guildInstance.activity.push(timestamp)
-  }
 }
 
 export default {
@@ -63,9 +53,5 @@ export default {
     // do evals
     if (message.content.startsWith(`${config.prefix}eval`))
       await Task.eval(bot, message, db)
-
-    let guildInstance: DatabaseGuildInstance = await db.discord.guilds.fetch(message.guild)
-    // handle guild activity for the priority queue
-    Task.handleActivity(message.createdTimestamp, guildInstance)
   }
 }

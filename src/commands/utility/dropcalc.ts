@@ -236,8 +236,6 @@ const DropCalc: CommandInterface = {
     .setRequired(true)
   ).setDMPermission(false),
   async execute(interaction: ChatInputCommandInteraction<CacheType>): Promise<void> {
-    console.log('a')
-
     await interaction.deferReply()
     const velocity: number = interaction.options.getInteger('velocity')
     const altitude: number = interaction.options.getInteger('altitude')

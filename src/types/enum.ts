@@ -54,6 +54,9 @@ export enum Abort {
   ChannelNotGiven = 'No target user provided',
   MaxPersistence = 'Maximum number of persistence',
   EmptyLeaderboard = 'The leaderboard is empty! Something really bad must\'ve happened!',
+  NeutrinoNotAllowed = 'You cannot steal from Neutrino!',
+  InvalidTime = 'Invalid time given'
+}
 export enum EndState {
   PlayerWin = 1,
   HouseWin = 0,

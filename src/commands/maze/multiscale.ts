@@ -70,6 +70,7 @@ const MultiScaleNoiseMaze: CommandInterface = {
       .setMaxValue(Max.FrequencyMultiplier)
     ).setDMPermission(false),
   async execute(interaction: ChatInputCommandInteraction<CacheType>): Promise<void> {
+    await interaction.deferReply()
     const seed: string = interaction.options.getString('seed') ?? ''
     const width: number = interaction.options.getNumber('width') ?? 32
     const height: number = interaction.options.getNumber('height') ?? 32

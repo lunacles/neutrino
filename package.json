@@ -1,20 +1,18 @@
 {
   "name": "neutrino",
-  "version": "0.1.6",
+  "version": "0.1.7",
   "description": "Multi-purpose bot, tailored for utility, fun, and personal use.",
   "main": "main.js",
   "type": "module",
   "scripts": {
     "dev": "NODE_ENV=DEV node --no-warnings=ExperimentalWarning --loader ts-node/esm src/main.ts",
-    "prod": "NODE_ENV=PROD node --no-warnings=ExperimentalWarning --loader ts-node/esm src/main.ts --minify --format esm,cjs --dts",
-    "test": "jest",
-    "inspect": "NODE_ENV=DEV tsx watch --inspect src/main.ts",
-    "start": "node dist/main.js",
-    "build": "tsup src/main.ts --format esm,cjs --dts"
+    "prod": "NODE_ENV=PROD node --no-warnings=ExperimentalWarning --loader ts-node/esm src/main.ts",
+    "test": "NODE_ENV=DEV jest",
+    "inspect": "NODE_ENV=DEV tsx watch --inspect src/main.ts"
   },
   "keywords": [],
-  "author": "",
-  "license": "ISC",
+  "author": "lunacles",
+  "license": "Other",
   "devDependencies": {
     "@jest/globals": "^29.7.0",
     "@types/jest": "^29.5.14",

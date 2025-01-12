@@ -54,7 +54,7 @@ const FirebaseUserInstance = class extends FirebaseAction implements FirebaseIns
     this.neutrinoUserId = this.data.neutrino_id
   }
   // Create a user doc
-  public async create(): Promise<DocumentReference> {
+  protected async create(): Promise<DocumentReference> {
     return await this.db.cd('~/').touch(this.user.id, {
       neutrino_id: Secret.id(`neutrino::${this.user.id}`, 'user'),
 

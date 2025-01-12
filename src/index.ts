@@ -59,6 +59,9 @@ const Bot = class implements BotInterface {
       this.awaitInteractions()
 
       this.events()
+
+      // collect the first 100 bans from the db
+      await Database.discord.bans.collect()
     })
   }
   private async compileCommands(): Promise<void> {

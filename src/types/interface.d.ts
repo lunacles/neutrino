@@ -403,7 +403,7 @@ interface FirebaseDatabaseInterface {
   getdoc(name: string): DocumentReference
   write(data: object): Promise<this>
   rm(name?: string): Promise<this>
-  query(data: QueryInterface): Promise<QuerySnapshot<DocumentData, DocumentData>>
+  query(data: QueryInterface): Promise<Snapshot>
 }
 
 interface OperationInterface {

@@ -7,7 +7,7 @@ const envVar = (key: string): string => process.env[`${process.env.NODE_ENV}_${k
 const devConfig: DevConfig = Object.freeze({
   ownerId: '342038795757027329',
   botId: '1195601709909692486',
-  testServerId: '954026848361254993',
+  testServerId: '1120372465252700331',
   errorTraceChannel: '1244402813870669885',
   prefix: '!$',
   build: Build,

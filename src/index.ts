@@ -1,3 +1,4 @@
+// magic code dont touch..
 let config = (await import('./config.js')).default
 import {
   Client,

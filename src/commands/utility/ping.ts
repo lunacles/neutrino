@@ -9,7 +9,7 @@ const PingCommand: CommandInterface = {
   description: 'Replies with Pong!',
   data: new SlashCommandBuilder().setDMPermission(false),
   async execute(interaction: ChatInputCommandInteraction<CacheType>): Promise<void> {
-    await interaction.editReply('Pong!')
+    await interaction.reply('Pong!')
   },
   test(): boolean {
     return true

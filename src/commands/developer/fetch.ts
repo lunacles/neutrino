@@ -27,12 +27,15 @@ const FetchUserData: CommandInterface = {
       .setDescription('Redact sensitive info. True by default.')
     ).setDMPermission(false),
   async execute(interaction: ChatInputCommandInteraction<CacheType>): Promise<void> {
-    const observer = await new InteractionObserver(interaction).defer()
+    const observer = new InteractionObserver(interaction)
     const targetUserOption: User = interaction.options.getUser('user', false)
     const targetUserId: string = interaction.options.getString('user-id', false)
     const redact: boolean = interaction.options.getBoolean('redact', false) ?? true
 
-    if (interaction.user.id !== config.ownerId) return await observer.abort(Abort.InsufficientPermissions)
+    if (interaction.user.id !== config.ownerId) {
+      await observer.killInteraction(Abort.InsufficientPermissions)
+      return
+    }
     let targetUser: string
 
     if (targetUserOption) {
@@ -40,8 +43,10 @@ const FetchUserData: CommandInterface = {
     } else if (targetUserId) {
       targetUser = targetUserId
     } else {
-      return await observer.abort(Abort.TargetNotGiven)
+      return await observer.killInteraction(Abort.TargetNotGiven)
     }
+
+    await observer.defer(true)
 
     let userData: string = JSON.stringify((await Database.discord.users.fetch(targetUser)).data, null, 2)
     if (redact)

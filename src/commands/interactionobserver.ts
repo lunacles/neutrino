@@ -17,8 +17,10 @@ const Observer = class implements ObserverInterface {
 
   public readonly interaction: CommandInteraction
   public filter: Collection<string, GuildBasedChannel>
+  private guildData: DatabaseGuildInstance
   public constructor(interaction: CommandInteraction) {
     this.interaction = interaction
+    this.guildData = null
 
     this.filter = new Collection()
   }
@@ -104,18 +106,18 @@ const Observer = class implements ObserverInterface {
       [type]: Date.now()
     })
   }
-  public async applyScore(user: DatabaseUserInstance, guild: DatabaseGuildInstance, score: number): Promise<void> {
-    await user.setScore(score)
+  public async getGuildData(): Promise<DatabaseGuildInstance> {
+    this.guildData = await Database.discord.guilds.fetch(this.interaction.guild)
+    return this.guildData
+  }
+  public async getGuildUserData(user?: string | GuildMember): Promise<DatabaseGuildMemberInstance> {
+    if (!this.guildData)
+      await this.getGuildData()
 
-    if (!guild.leaderboard.has(user.id)) {
-      if (guild.leaderboard.belongs(user.id)) {
-        guild.leaderboard.insert(user.id)
-        await guild.refreshLeaderboard()
-      }
-    } else if (guild.leaderboard.belongs(user.id)) {
-      guild.leaderboard.refresh()
-      await guild.refreshLeaderboard()
-    }
+    return await this.guildData.fetchMember(user ?? this.interaction.member)
+  }
+  public async getUserData(user?: string | User): Promise<DatabaseUserInstance> {
+    return await Database.discord.users.fetch(user ?? this.interaction.user)
   }
 }
 

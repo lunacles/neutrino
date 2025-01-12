@@ -57,6 +57,43 @@ const GuildInstance = class extends Type implements DatabaseGuildInstance {
 
     return cached
   }
+  // Query for data
+  public async queryMembers({
+    field,
+    orderBy = null,
+    limit = null,
+    startAt = null,
+    startAfter = null,
+    endAt = null,
+    endBefore = null,
+    comparator = null,
+    operand = null,
+  }: QueryInterface): Promise<Snapshot> {
+    try {
+      let query: Query = this.ref.collection(`users`)
+
+      // I fucking hate this
+      if (field && comparator && operand)
+        query = query.where(field, comparator, operand)
+      if (field && orderBy)
+        query = query.orderBy(field, orderBy)
+      if (limit)
+        query = query.limit(limit)
+      if (startAt)
+        query = query.startAt(startAt)
+      if (startAfter)
+        query = query.startAfter(startAfter)
+      if (endAt)
+        query = query.endAt(endAt)
+      if (endBefore)
+        query = query.endBefore(endBefore)
+
+      return await query.get()
+    } catch (err) {
+      Log.error(`Failed to query documents from path "${this.ref.path}"`, err)
+    }
+  }
+
 }
 
 export default GuildInstance

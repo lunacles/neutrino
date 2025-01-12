@@ -699,7 +699,7 @@ interface DatabaseGuildInstance extends FirebaseInstanceInterface {
     endBefore = null,
     comparator = null,
     operand = null,
-  }: QueryInterface): Promise<QuerySnapshot<DocumentData, DocumentData>>
+  }: QueryInterface): Promise<Snapshot>
   removeIgnoredChannel(channel: string): Promise<void>
   fetchMember(member: string | GuildMember): Promise<DatabaseGuildMemberInstance>
 }

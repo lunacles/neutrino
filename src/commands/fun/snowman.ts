@@ -15,11 +15,14 @@ import {
 } from '../../canvas/elements.js'
 import Color from '../../canvas/color.js'
 
+// this command was made so i could test out the node canvas lol
 const Snowman: CommandInterface = {
   name: 'snowman',
   description: 'Sends a snowman.',
   data: new SlashCommandBuilder().setDMPermission(false),
   async execute(interaction: ChatInputCommandInteraction<CacheType>): Promise<void> {
+    await interaction.deferReply()
+
     let size: number = 256
     let radii: number = size * 0.5
     let c: NodeCanvasInterface = new NodeCanvas(size, size)

@@ -25,6 +25,7 @@ import { GIFEncoder, pnnQuant, Palettize } from '../../gifenc/index.js'
 import { Ease, EndMessage, EndState, FaceCard, Suits } from '../../types/enum.js'
 
 const Game = class implements GameInterface {
+  // NOTE: maybe allocate this to the guild data instead?
   public static activeMatches = new Map<string, TableInterface>()
   public playerCards: Array<CardData>
   public dealerCards: Array<CardData>
@@ -415,127 +416,137 @@ const Blackjack: CommandInterface = {
       if (amount > userData.score) {
     // Create a new active match
     Game.activeMatches.set(interaction.user.id, new Table(amount, userData, neutrinoData))
-        Game.activeMatches.set(interaction.user.id, new Table(amount))
-        observer.resetCooldown('blackjack')
+    // reset their cooldown
+    observer.resetCooldown('blackjack')
 
-        const row = new ActionRowBuilder<ButtonBuilder>()
-        .addComponents(
-          new ButtonBuilder()
-            .setCustomId('hit')
-            .setLabel('Hit')
-            .setStyle(ButtonStyle.Danger), // 99% of gamblers quit before they hit it big
-          new ButtonBuilder()
-            .setCustomId('stay')
-            .setLabel('Stay')
-            .setStyle(ButtonStyle.Success) // refuse gambling (they are part of the 99%)
-        )
+    const row = new ActionRowBuilder<ButtonBuilder>()
+    .addComponents(
+      new ButtonBuilder()
+        .setCustomId('hit')
+        .setLabel('Hit')
+        .setStyle(ButtonStyle.Danger), // 99% of gamblers quit before they hit it big
+      new ButtonBuilder()
+        .setCustomId('stay')
+        .setLabel('Stay')
+        .setStyle(ButtonStyle.Success) // refuse gambling (they are part of the 99%)
+    )
 
-        let response: Message = await interaction.editReply({
-          files: [new AttachmentBuilder(await Game.activeMatches.get(interaction.user.id).initialAnimation(interaction.user), {
-            name: 'table.gif'
-          })],
-          components: [row],
-        })
+    // Send the initial animation
+    let response: Message = await interaction.editReply({
+      files: [new AttachmentBuilder(await Game.activeMatches.get(interaction.user.id).initialAnimation(interaction.user), {
+        name: 'table.gif'
+      })],
+      components: [row],
+    })
 
     // Create the collector
-        const collector: Component = response.createMessageComponentCollector({
-          filter: observer.componentsFilter(['hit', 'stay']),
-          time: 30e3,
-        })
+    const collector: Component = response.createMessageComponentCollector({
+      filter: observer.componentsFilter(['hit', 'stay']),
+      time: collectorLifetime,
+    })
 
+    collector.on('collect', async (action: Action): Promise<void> => {
       const table: TableInterface = Game.activeMatches.get(action.user.id)
 
-          let endGame = async (state: number, message: string, attachment: AttachmentBuilder): Promise<void> => {
-            await updateScores(state, table.amount)
-            await action.editReply({
-              content: message
-                .replace('player', action.user.id)
-                .replace('bot', config.botId)
-                .replace('1x', table.amount.toLocaleString())
-                .replace('0.5x', Math.floor(table.amount * 0.5).toLocaleString()),
-              files: [attachment],
-              components: [],
-            })
+      let endGame = async (state: number, message: string, attachment: AttachmentBuilder): Promise<void> => {
+        await table.game.updateScores(state, table.amount)
+        await action.editReply({
+          content: message
+            .replace('player', action.user.id)
+            .replace('bot', config.botId)
+            .replace('1x', table.amount.toLocaleString())
+            .replace('0.5x', Math.floor(table.amount * 0.5).toLocaleString()),
+          files: [attachment],
+          components: [],
+        })
 
             Game.activeMatches.delete(action.user.id)
           }
 
-          let runDealer = async (): Promise<void> => {
-            let attachment = new AttachmentBuilder(await table.hitAnimation(action.user, 'dealer'), {
-              name: 'table.gif'
-            })
-            let dealerTotal: number = table.game.sumCards(table.game.dealerCards)
-            let playerTotal: number = table.game.sumCards(table.game.playerCards)
-
-            if (table.game.busted(dealerTotal)) {
-              await endGame(
-                EndState.PlayerWin,
-                EndMessage.HouseBust,
-                attachment,
-              )
-            } else if (dealerTotal < playerTotal) {
-              await endGame(
-                EndState.PlayerWin,
-                EndMessage.HouseLose,
-                attachment,
-              )
-            } else if (dealerTotal === playerTotal) {
-              await endGame(
-                EndState.Tie,
-                EndMessage.Tie,
-                attachment,
-              )
-            } else {
-              await endGame(
-                EndState.HouseWin,
-                EndMessage.PlayerLose,
-                attachment,
-              )
-            }
-          }
-
-          if (action.customId === 'hit') {
-            let attachment = new AttachmentBuilder(await table.hitAnimation(action.user, 'player'), {
-              name: 'table.gif'
-            })
-            let newSum: number = table.game.sumCards(table.game.playerCards)
-            if (!table.game.busted(newSum)) {
-              if (table.game.playerCards.length === 5) {
-                await endGame(
-                  EndState.PlayerWin,
-                  EndMessage.HouseLose,
-                  attachment,
-                )
-              } else if (newSum === 21) {
-                await runDealer()
-              } else {
-                await action.editReply({
-                  files: [attachment],
-                  components: [new ActionRowBuilder<ButtonBuilder>()
-                    .addComponents(
-                      new ButtonBuilder()
-                        .setCustomId('hit')
-                        .setLabel('Hit')
-                        .setStyle(ButtonStyle.Danger), // 99% of gamblers quit before they hit it big
-                      new ButtonBuilder()
-                        .setCustomId('stay')
-                        .setLabel('Stay')
-                        .setStyle(ButtonStyle.Success) // refuse gambling (they are part of the 99%)
-                    )]
-                })
-              }
-            } else {
-              await endGame(
-                EndState.HouseWin,
-                EndMessage.PlayerBust,
-                attachment,
-              )
-            }
-
-          } else if (action.customId === 'stay') {
-            await runDealer()
-          }
+      let runDealer = async (): Promise<void> => {
+        let attachment = new AttachmentBuilder(await table.hitAnimation(action.user, 'dealer'), {
+          name: 'table.gif'
         })
+        let dealerTotal: number = table.game.sumCards(table.game.dealerCards)
+        let playerTotal: number = table.game.sumCards(table.game.playerCards)
+
+        // if neutrino busted, give the user the win
+        if (table.game.busted(dealerTotal)) {
+          await endGame(
+            EndState.PlayerWin,
+            EndMessage.HouseBust,
+            attachment,
+          )
+        // if the user has a higher sum than neutrino, give them the win
+        } else if (dealerTotal < playerTotal) {
+          await endGame(
+            EndState.PlayerWin,
+            EndMessage.HouseLose,
+            attachment,
+          )
+        // if neutrino and the user have the same amount, end in a tie
+        } else if (dealerTotal === playerTotal) {
+          await endGame(
+            EndState.Tie,
+            EndMessage.Tie,
+            attachment,
+          )
+        // if none of the above, give neutrino the win
+        } else {
+          await endGame(
+            EndState.HouseWin,
+            EndMessage.PlayerLose,
+            attachment,
+          )
+        }
+      }
+
+      if (action.customId === 'hit') {
+        let attachment = new AttachmentBuilder(await table.hitAnimation(action.user, 'player'), {
+          name: 'table.gif'
+        })
+        let newSum: number = table.game.sumCards(table.game.playerCards)
+        // if the user hasn't busted
+        if (!table.game.busted(newSum)) {
+          // if they have drawn 5 cards, give them a win
+          if (table.game.playerCards.length === 5) {
+            await endGame(
+              EndState.PlayerWin,
+              EndMessage.HouseLose,
+              attachment,
+            )
+          // if their card total is 21, run neutrino's turn
+          } else if (newSum === 21) {
+            await runDealer()
+          } else {
+            await action.editReply({
+              files: [attachment],
+              components: [new ActionRowBuilder<ButtonBuilder>()
+                .addComponents(
+                  new ButtonBuilder()
+                    .setCustomId('hit')
+                    .setLabel('Hit')
+                    .setStyle(ButtonStyle.Danger), // 99% of gamblers quit before they hit it big
+                  new ButtonBuilder()
+                    .setCustomId('stay')
+                    .setLabel('Stay')
+                    .setStyle(ButtonStyle.Success) // refuse gambling (they are part of the 99%)
+                )]
+            })
+          }
+        // if they busted, give neutrino the win
+        } else {
+          await endGame(
+            EndState.HouseWin,
+            EndMessage.PlayerBust,
+            attachment,
+          )
+        }
+      // if they choose to stay, run neutrino's turn
+      } else if (action.customId === 'stay') {
+        await runDealer()
+      }
+    })
 
         collector.on('end', async (collected: Collection<string, CollectedInteraction<CacheType>>): Promise<void> => {
           if (collected.size === 0) {
@@ -548,7 +559,10 @@ const Blackjack: CommandInterface = {
           }
         })
       }
-    }
+
+      // remove the game from the active matches
+      Game.activeMatches.delete(interaction.user.id)
+    })
   },
   test(): boolean {
     return true

@@ -1,8 +1,4 @@
 import {
-  Guild,
-  User,
-} from 'discord.js'
-import {
   FirebaseDatabase
 } from './database.js'
 import {
@@ -16,16 +12,11 @@ import { OperationType } from '../../types/enum.js'
 let operations: Array<OperationInterface> = []
 
 const FirebaseAction = class implements DatabaseActions {
-  public instance: User | Guild
-  public id: string
-  public db: FirebaseDatabaseInterface
+  protected db: FirebaseDatabaseInterface
   public ref: DocumentReference
-  constructor(instance: User | Guild) {
-    this.instance = instance
-    this.id = instance.id
-
-    this.db = new FirebaseDatabase(instance instanceof Guild ? 'guilds' : 'users')
-    this.ref = this.db.cd('~/').getdoc(this.id)
+  constructor(doc: string, home: string, path?: string) {
+    this.db = new FirebaseDatabase(home)
+    this.ref = this.db.cd(`~/${path ?? ''}`).getdoc(doc)
   }
   // Push an operation to update a field
   public async updateField(field: DataKeys, data: unknown): Promise<void> {

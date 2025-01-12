@@ -22,33 +22,37 @@ const Score: CommandInterface = {
       .setName('user')
       .setDescription('The user to check the points of.')
     ).addStringOption((option: SlashCommandStringOption): SlashCommandStringOption => option
-      .setName('neutrino-id')
-      .setDescription('The neutrino id to fetch.')
+      .setName('id')
+      .setDescription('The user id to fetch.')
     ).setDMPermission(false),
   async execute(interaction: ChatInputCommandInteraction<CacheType>): Promise<void> {
-    const observer = await new InteractionObserver(interaction).defer()
-    const user: User = await bot.fetchUser(interaction.user.id)
-    const targetUserOption = interaction.options.getUser('user', false) ?? interaction.options.getString('neutrino-id', false) ?? user
-    interaction.guild.members.cache
-    await Database.discord.guilds.fetch(interaction.guild)
-
-    let targetData: DatabaseUserInstance = await Database.discord.users.fetch(typeof targetUserOption === 'string' ? targetUserOption : targetUserOption.id)
+    const observer = new InteractionObserver(interaction)
+    const user: User = await bot.fetchUser(interaction.options.getString('id', false) ?? interaction.user.id)
+    const targetUserOption = interaction.options.getUser('user', false) ?? user
 
     if (observer.isOnCooldown('score')) {
       await interaction.editReply(`This command is on cooldown for **${util.formatSeconds(observer.getCooldown('score'), true)}!**`)
       return
     const targetData = await observer.getGuildUserData(targetUserOption.id)
 
-      await interaction.editReply({
-        embeds: [embed],
-        files: [{
-          attachment: `./src/utilities/assets/${Icon.PiggyBank}`,
-          name: Icon.PiggyBank,
-        }]
-      })
+    observer.resetCooldown('score')
 
-      observer.resetCooldown('score')
-    }
+    const embed = new EmbedBuilder()
+      .setColor(user.accentColor)
+      .setAuthor({
+        name: `${user.username}`,
+        iconURL: user.avatarURL(),
+      })
+      .setThumbnail(`attachment://${Icon.PiggyBank}`)
+      .setDescription(`# <@${typeof targetUserOption === 'string' ? targetUserOption : targetUserOption.id}>'s current balance is **${targetData.score.toLocaleString()}!**`)
+
+    await interaction.editReply({
+      embeds: [embed],
+      files: [{
+        attachment: `./src/utilities/assets/${Icon.PiggyBank}`,
+        name: Icon.PiggyBank,
+      }]
+    })
   },
   test(): boolean {
     return true

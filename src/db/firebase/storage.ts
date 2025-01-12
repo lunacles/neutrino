@@ -1,6 +1,7 @@
 
 import {
   getDownloadURL,
+  getStorage,
 } from 'firebase-admin/storage'
 import https from 'https'
 import {
@@ -8,9 +9,8 @@ import {
   File,
 } from '@google-cloud/storage'
 import Log from '../../utilities/log.js'
-import {
-  bucket,
-} from './database.js'
+
+const bucket = getStorage().bucket()
 
 const FireStorage = class FireStorageInterface {
   private storage: Bucket

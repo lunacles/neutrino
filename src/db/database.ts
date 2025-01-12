@@ -2,20 +2,7 @@ import { Collection, Guild, User } from 'discord.js'
 import bot from '../index.js'
 import UserInstance from './user.js'
 import GuildInstance from './guild.js'
-
-interface DatabaseInterface {
-  readonly version: number
-  discord: {
-    users: {
-      cache: Collection<string, DatabaseUserInstance>
-      fetch(user: string | User): Promise<DatabaseUserInstance>
-    },
-    guilds: {
-      cache: Collection<string, DatabaseGuildInstance>
-      fetch(guild: string | Guild): Promise<DatabaseGuildInstance>
-    },
-  },
-}
+const emptySnapshotRefreshRate: number = 60 ** 2 * 15 * 1e3
 
 const Database: DatabaseInterface = {
   version: 1,

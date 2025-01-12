@@ -14,35 +14,38 @@ import {
   WriteResult,
   Timestamp,
   FieldValue,
-  QuerySnapshot,
-  DocumentData,
+  Query,
 } from 'firebase-admin/firestore'
-import serviceAccount from './serviceaccount.js'
-import {
-  getStorage,
-} from 'firebase-admin/storage'
 import Log from '../../utilities/log.js'
 import { Collection } from 'discord.js'
 
-// Initialize the app with our credentials
-const app: App = initializeApp({
-  credential: cert(serviceAccount as ServiceAccount),
-  storageBucket: `${serviceAccount.project_id}.appspot.com`
-})
-// Export our bucket
-// TODO: Is this even necessary?
-export const bucket = getStorage().bucket()
-// Get the db
-const db: Firestore = getFirestore(app)
-// Apply our settings
-db.settings({
-  ignoreUndefinedProperties: true
-})
+const serviceAccount = structuredClone((await import(`../../../${process.env.NODE_ENV.toLowerCase()}-serviceaccount.json`, {
+  assert: { type: 'json' }
+})).default)
+
+export const initApp = async (): Promise<Firestore> => {
+  // Initialize the app with our credentials
+  const app: App = initializeApp({
+    credential: cert(serviceAccount as ServiceAccount),
+    storageBucket: `${serviceAccount.project_id}.appspot.com`
+  })
+
+  // Get the db
+  const database = getFirestore(app)
+  // Apply our settings
+  database.settings({
+    ignoreUndefinedProperties: true
+  })
+
+  return database
+}
 
 export const FirebaseDatabase = class implements FirebaseDatabaseInterface {
+  public static database: Firestore
+
   // Write a batch to the database
   static batchWrite(operations: any): Promise<Array<WriteResult>> {
-    let batch: WriteBatch = db.batch()
+    let batch: WriteBatch = FirebaseDatabase.database.batch()
 
     for (let { type, ref, data } of operations) {
       switch (type) {
@@ -115,7 +118,8 @@ export const FirebaseDatabase = class implements FirebaseDatabaseInterface {
     } else {
       this.path = this.normalizePath(this.path + '/' + dir)
     }
-    this.collection = db.collection(this.path)
+
+    this.collection = FirebaseDatabase.database.collection(this.path)
 
     return this
   }

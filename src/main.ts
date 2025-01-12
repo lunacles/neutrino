@@ -38,24 +38,5 @@ manager.on('shardCreate', async (shard: Shard): Promise<void> => {
 await manager.spawn({
   amount: 'auto',
 })
-/*
-setInterval(async () => {
-  let responses: Array<Status> = await manager.broadcastEval((client: Client<boolean>): Status => client.ws.ping)
-  let statuses = {
-    ready: 0,
-    connecting: 0,
-    reconnecting: 0,
-    idle: 0,
-    nearly: 0,
-    disconnected: 0,
-    waiting: 0,
-    identifying: 0,
-    resuming: 0,
-  }
-  for (let response of responses)
-    statuses[response]++
 
-  console.log('shard heartbeat req', statuses)
-}, config.heartbeatInterval)
-*/
 export default manager

@@ -50,70 +50,63 @@ const Steal: CommandInterface = {
       return
     }
 
-    if (observer.isOnCooldown('steal')) {
-      await interaction.editReply(`This command is on cooldown for **${util.formatSeconds(observer.getCooldown('steal'), true)}!**`)
-      return
-    } else {
-      const factor: number = 1.65
-      const maxChance: number = 0.65
-      const clamp: { [key: string]: number } = {
-        minGain: 0.05,
-        maxGain: 0.3,
+    const factor: number = 1.65
+    const maxChance: number = 0.65
+    const clamp: { [key: string]: number } = {
+      minGain: 0.05,
+      maxGain: 0.3,
+      minLoss: 0.125,
+      maxLoss: 0.35,
+    }
 
-        minLoss: 0.125,
-        maxLoss: 0.35,
-      }
+    let chance: number = userData.score / targetData.score * Math.sqrt(factor)
+    // penalize players stealing from players with a lower score than theirs
+    if (targetData.score <= userData.score)
+      chance = targetData.score / userData.score / Math.sqrt(factor)
 
-      let chance: number = userData.score / targetData.score * Math.sqrt(factor)
-      // pentalize players stealing from players with a lower score than theirs
-      if (targetData.score <= userData.score)
-        chance = targetData.score / userData.score / Math.sqrt(factor)
+    // cap the chance at at 65%
+    let succeed: boolean = await userData.random() < Math.min(chance, maxChance)
 
-      // cap the chance at at 65%
-      let succeed: boolean = await userData.random() < Math.min(chance, maxChance)
-
-      let stolenScore: number = succeed ?
-        // steal at least 5% of target score, at most 30% of target score,
-        await userData.fromRange(targetData.score * clamp.minGain, targetData.score * clamp.maxGain, 'Integer') :
-        // lose at least 12.5% of own score, at most 35% of own score,
-        -(await userData.fromRange(userData.score * clamp.minLoss, userData.score * clamp.maxLoss, 'Integer'))
+    let stolenScore: number = succeed ?
+      // steal at least 5% of target score, at most 30% of target score,
+      await userData.fromRange(targetData.score * clamp.minGain, targetData.score * clamp.maxGain, 'Integer') :
+      // lose at least 12.5% of own score, at most 35% of own score,
+      -(await userData.fromRange(userData.score * clamp.minLoss, userData.score * clamp.maxLoss, 'Integer'))
 
     await userData.setScore(userData.score + stolenScore)
     await targetData.setScore(targetData.score - stolenScore)
+    observer.resetCooldown('score')
 
-      let icon = succeed ? Icon.Robber : Icon.Amputation
+    let icon = succeed ? Icon.Robber : Icon.Amputation
 
-      const embed = new EmbedBuilder()
-        .setColor(user.accentColor)
-        .setAuthor({
-          name: `${user.username}`,
-          iconURL: user.avatarURL(),
-        })
-        .setThumbnail(`attachment://${icon}`)
-        .setDescription(succeed ?
-          `# You successfully stole __${stolenScore.toLocaleString()}__ from <@${targetUserOption.id}>!` :
-          `# You failed to steal from <@${targetUserOption.id}> and lost __${stolenScore.toLocaleString()}__!`
-        )
-        .addFields({
-          name: 'Your New Points',
-          value: userData.score.toLocaleString(),
-          inline: true,
-        }, {
-          name: `${targetUserOption.username}'s New Points`,
-          value: targetData.score.toLocaleString(),
-          inline: true,
-        })
-
-      await interaction.editReply({
-        embeds: [embed],
-        files: [{
-          attachment: `./src/utilities/assets/${icon}`,
-          name: icon,
-        }]
+    const embed = new EmbedBuilder()
+      .setColor(user.accentColor)
+      .setAuthor({
+        name: `${user.username}`,
+        iconURL: user.avatarURL(),
+      })
+      .setThumbnail(`attachment://${icon}`)
+      .setDescription(succeed ?
+        `# You successfully stole __${stolenScore.toLocaleString()}__ from <@${targetUserOption.id}>!` :
+        `# You failed to steal from <@${targetUserOption.id}> and lost __${stolenScore.toLocaleString()}__!`
+      )
+      .addFields({
+        name: 'Your New Points',
+        value: userData.score.toLocaleString(),
+        inline: true,
+      }, {
+        name: `${targetUserOption.username}'s New Points`,
+        value: targetData.score.toLocaleString(),
+        inline: true,
       })
 
-      observer.resetCooldown('score')
-    }
+    await interaction.editReply({
+      embeds: [embed],
+      files: [{
+        attachment: `./src/utilities/assets/${icon}`,
+        name: icon,
+      }]
+    })
   },
   test(): boolean {
     return true

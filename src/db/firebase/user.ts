@@ -13,19 +13,16 @@ import Secret from '../../utilities/secret.js'
 
 const FirebaseUserInstance = class extends FirebaseAction implements FirebaseInstanceInterface {
   public user: User
+  public id: string
   public data: DiscordUserData
   public neutrinoUserId: string
-  public prng: Function
-  public ran: RandomInterface
-  public xp: number
-  public level: number
-  public cooldown: number
-  public score: number
-  public shieldEnd: number
-  public rolePersist: Set<string>
-   constructor(instance: User) {
-    super(instance)
-    this.user = instance as User
+  protected prng: Function
+  protected ran: RandomInterface
+   constructor(user: User) {
+    super(user.id, 'users')
+
+    this.user = user as User
+    this.id = user.id
   }
   // Fetch the user doc
   public async fetch(): Promise<void> {

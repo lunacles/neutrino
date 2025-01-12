@@ -4,19 +4,23 @@ import {
   SlashCommandBuilder,
   EmbedBuilder,
   User,
+  SlashCommandBooleanOption,
 } from 'discord.js'
 import InteractionObserver from '../interactionobserver.js'
 import * as util from '../../utilities/util.js'
 import Icon from '../../utilities/icon.js'
-import Database from '../../db/database.js'
-import { Abort } from '../../types/enum.js'
 import config from '../../config.js'
 import bot from '../../index.js'
 
 const Leaderboard: CommandInterface = {
   name: 'leaderboard',
   description: `Shows the top 10 users. ${util.formatSeconds(config.cooldown.score)} cooldown.`,
-  data: new SlashCommandBuilder().setDMPermission(false),
+  data: new SlashCommandBuilder()
+  .addBooleanOption((option: SlashCommandBooleanOption ): SlashCommandBooleanOption => option
+    .setName('relative')
+    .setDescription('Checks the leaderboard relative to your position.')
+    .setRequired(false)
+  ).setDMPermission(false),
   async execute(interaction: ChatInputCommandInteraction<CacheType>): Promise<void> {
     const observer = await new InteractionObserver(interaction).defer()
     const user: User = await bot.fetchUser(interaction.user.id)
@@ -35,26 +39,25 @@ const Leaderboard: CommandInterface = {
       return
     } else {
 
-      const embed = new EmbedBuilder()
-        .setColor(user.accentColor)
-        .setAuthor({
-          name: `${user.username}`,
-          iconURL: user.avatarURL(),
-        })
-        .setTitle('Top 10 Users')
-        .setThumbnail(`attachment://${Icon.Podium}`)
-        .setDescription(top.join('\n'))
-
-      await interaction.editReply({
-        embeds: [embed],
-        files: [{
-          attachment: `./src/utilities/assets/${Icon.Podium}`,
-          name: Icon.Podium,
-        }]
+    const embed = new EmbedBuilder()
+      .setColor(user.accentColor)
+      .setAuthor({
+        name: `${user.username}`,
+        iconURL: user.avatarURL(),
       })
+      .setTitle('Top 10 Users')
+      .setThumbnail(`attachment://${Icon.Podium}`)
+      .setDescription(top.join('\n'))
 
-      observer.resetCooldown('leaderboard')
-    }
+    await interaction.editReply({
+      embeds: [embed],
+      files: [{
+        attachment: `./src/utilities/assets/${Icon.Podium}`,
+        name: Icon.Podium,
+      }]
+    })
+
+    observer.resetCooldown('leaderboard')
   },
   test(): boolean {
     return true

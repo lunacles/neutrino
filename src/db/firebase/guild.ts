@@ -10,21 +10,22 @@ import Secret from '../../utilities/secret.js'
 import FirebaseAction from './action.js'
 import PRNG from '../../utilities/prng.js'
 import Random from '../../utilities/random.js'
-import BinaryHeap from '../../utilities/heap.js'
-import Database from '../database.js'
 
 const FirebaseGuildInstance = class extends FirebaseAction implements FirebaseInstanceInterface {
+  protected prng: Function
+  protected ran: RandomInterface
   public guild: Guild
   public data: DiscordGuildData
-  public prng: Function
-  public ran: RandomInterface
-  public leaderboard: BinaryHeapInterface<string>
-  public rolePersist: Set<string>
   public ignoredChannels: Set<string>
   public neutrinoGuildId: string
-  constructor(instance: Guild) {
-    super(instance)
-    this.guild = instance as Guild
+  public options: DiscordGuildOptions
+  public priority: GuildPriority
+  public id: string
+  constructor(guild: Guild) {
+    super(guild.id, 'guilds')
+
+    this.guild = guild as Guild
+    this.id = guild.id
   }
   // Fetch a guild doc
   public async fetch(): Promise<void> {
@@ -42,6 +43,8 @@ const FirebaseGuildInstance = class extends FirebaseAction implements FirebaseIn
     // Much harder to exploit than Math.random()
     this.prng = PRNG.crypto()
     this.ran = new Random(this.prng)
+    this.options = this.data.options
+    this.priority = this.data.priority
 
     this.ignoredChannels = new Set(this.data.ignored_channels)
     this.neutrinoGuildId = this.data.neutrino_guild_id
@@ -50,27 +53,37 @@ const FirebaseGuildInstance = class extends FirebaseAction implements FirebaseIn
   protected async create(): Promise<DocumentReference> {
     // Tbh idk why I added neutrino IDs
     // Maybe it'll be useful later idk
-    let neutrinoGuildId = `guild-${Secret.hash('neutrino::' + this.guild.id).slice(0, 8)}`
 
     // Publish it to the database
     return await this.db.cd('~/').touch(this.id, {
+      neutrino_guild_id: Secret.id(`neutrino::${this.guild.id}`, 'guild'),
       owner_id: this.guild.ownerId,
       icon: this.guild.iconURL(),
       creation_date: this.guild.createdTimestamp,
       id: this.guild.id,
-      role_persist: [],
       db_timestamp: Date.now(),
-      // TODO: Redo this shit this is like only here for using SFC32
-      prng: ((): Quaple<number> => {
-        let hash = Secret.hash(this.guild.id)
-        let seeds = []
-        for (let i = 0; i < 4; i++)
-          // Treated it as unsigned 32-bit integer
-          seeds.push(parseInt(hash.substring(i * 8, (i + 1) * 8), 16) >>> 0)
-
-        return seeds as Quaple<number>
-      })(),
-      ignored_channels: []
+      ignored_channels: [],
+      options: {
+        apply_persistence: false,
+        logs: {
+          moderation: null,
+          invite: null,
+          reactions: null,
+          messages: null,
+          content: null,
+          poll: null,
+          channels: null,
+          roles: null,
+          voice_channels: null,
+          webhooks: null,
+          members: null,
+        },
+      },
+      priority: {
+        next_task_due: 0,
+        pending_tasks: 0,
+        activity: 1,
+      }
     } satisfies DiscordGuildData)
   }
   // TODO: I can just not repeat this in every guild/user file

@@ -23,7 +23,6 @@ import InteractionObserver from '../interactionobserver.js'
 import config from '../../config.js'
 import * as util from '../../utilities/util.js'
 import Icon from '../../utilities/icon.js'
-import Database from '../../db/database.js'
 import bot from '../../index.js'
 
 type Action = StringSelectMenuInteraction<CacheType> | UserSelectMenuInteraction<CacheType> | RoleSelectMenuInteraction<CacheType> | MentionableSelectMenuInteraction<CacheType> | ChannelSelectMenuInteraction<CacheType> | ButtonInteraction<CacheType>
@@ -41,50 +40,49 @@ const Shield: CommandInterface = {
     if (userData.shieldEnd > Date.now()) {
       await interaction.editReply(`You cannot create a shield while one is active!\nRemaining shield time: **${util.formatSeconds(Math.floor((userData.shieldEnd - Date.now()) / 1e3), true)}!**`)
       return
-    } else if (observer.isOnCooldown('shield')) {
-      await interaction.editReply(`This command is on cooldown for **${util.formatSeconds(observer.getCooldown('shield'), true)}!**`)
-      return
-    } else {
-      const row = new ActionRowBuilder<ButtonBuilder>()
-        .addComponents(
-          new ButtonBuilder()
-            .setCustomId('confirmShield')
-            .setLabel('Confirm')
-            .setStyle(ButtonStyle.Success), // Use Success style for confirm
-          new ButtonBuilder()
-            .setCustomId('cancelShield')
-            .setLabel('Cancel')
-            .setStyle(ButtonStyle.Danger) // Use Danger style for cancel
-        )
+    }
 
-      const confirmationEmbed = new EmbedBuilder()
-        .setColor(user.accentColor)
-        .setAuthor({
-          name: `${user.username}`,
-          iconURL: user.avatarURL(),
-        })
-        .setThumbnail(`attachment://${Icon.HazardSign}`)
-        .setDescription(`# Are you sure you want to activate a shield <@${user.id}> for ${util.formatSeconds(config.shieldDuration), true}?\nThis action will cost __20%__ of your total points!`)
-        .addFields({
-          name: 'WARNING!',
-          value: 'If you activate a shield, you forfeit your ability to gamble and steal!',
-        })
+    const row = new ActionRowBuilder<ButtonBuilder>()
+      .addComponents(
+        new ButtonBuilder()
+          .setCustomId('confirmShield')
+          .setLabel('Confirm')
+          .setStyle(ButtonStyle.Success), // Use Success style for confirm
+        new ButtonBuilder()
+          .setCustomId('cancelShield')
+          .setLabel('Cancel')
+          .setStyle(ButtonStyle.Danger) // Use Danger style for cancel
+      )
 
-      await interaction.editReply({
-        embeds: [confirmationEmbed],
-        files: [{
-          attachment: `./src/utilities/assets/${Icon.HazardSign}`,
-          name: Icon.HazardSign,
-        }],
-        components: [row],
+    const confirmationEmbed = new EmbedBuilder()
+      .setColor(user.accentColor)
+      .setAuthor({
+        name: `${user.username}`,
+        iconURL: user.avatarURL(),
+      })
+      .setThumbnail(`attachment://${Icon.HazardSign}`)
+      .setDescription(`# Are you sure you want to activate a shield <@${user.id}> for ${util.formatSeconds(config.shieldDuration), true}?\nThis action will cost __20%__ of your total points!`)
+      .addFields({
+        name: 'WARNING!',
+        value: 'If you activate a shield, you forfeit your ability to gamble and steal!',
       })
 
-      const collector: Component = interaction.channel.createMessageComponentCollector({
-        filter: observer.componentsFilter(['confirmShield', 'cancelShield']),
-        time: 15e3,
-      })
+    await interaction.editReply({
+      embeds: [confirmationEmbed],
+      files: [{
+        attachment: `./src/utilities/assets/${Icon.HazardSign}`,
+        name: Icon.HazardSign,
+      }],
+      components: [row],
+    })
 
-      collector.on('collect', async (action: Action): Promise<void> => {
+    const collector: Component = interaction.channel.createMessageComponentCollector({
+      filter: observer.componentsFilter(['confirmShield', 'cancelShield']),
+      time: 15e3,
+    })
+
+    collector.on('collect', async (action: Action): Promise<void> => {
+      if (action.customId === 'confirmShield') {
         let expireTime: number = Math.floor(Date.now() / 1e3 + config.shieldDuration)
         const confirmatedEmbed = new EmbedBuilder()
           .setColor(user.accentColor)
@@ -99,29 +97,33 @@ const Shield: CommandInterface = {
             value: `<t:${expireTime}> (<t:${expireTime}:R>)`,
           })
 
-        if (action.customId === 'confirmShield') {
-          await action.update({
-            embeds: [confirmatedEmbed],
-            files: [{
-              attachment: `./src/utilities/assets/${Icon.TemporaryShield}`,
-              name: Icon.TemporaryShield,
-            }],
-            components: []
-          })
+        await action.update({
+          embeds: [confirmatedEmbed],
+          files: [{
+            attachment: `./src/utilities/assets/${Icon.TemporaryShield}`,
+            name: Icon.TemporaryShield,
+          }],
+          components: []
+        })
 
         await userData.setScore(Math.floor(userData.score * 0.8))
         await userData.setShield(Date.now() + config.shieldDuration * 1e3)
-      observer.resetCooldown('shield')
+        collector.stop('ඞ')
+      } else if (action.customId === 'cancelShield') {
+        await action.update({
+          content: 'Shield activation canceled.',
+          components: []
+        })
+        collector.stop('ඞ')
+      }
+    })
 
-      collector.on('end', async (collected: Collection<string, CollectedInteraction<CacheType>>): Promise<void> => {
-        if (collected.size === 0) {
-          await interaction.editReply({
-            content: 'No response received, shield activation timed out.',
-            components: []
-          })
-        }
-      })
-    }
+    collector.on('end', async (_: Collection<string, CollectedInteraction<CacheType>>, reason: string): Promise<void> => {
+      if (reason !== 'ඞ')
+        await observer.killInteraction('No response received, shield activation timed out.')
+
+      observer.resetCooldown('shield')
+    })
   },
   test(): boolean {
     return true

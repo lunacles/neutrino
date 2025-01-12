@@ -17,15 +17,13 @@ import {
   TextChannel,
   EmbedBuilder,
   ColorResolvable,
-  MessageFlags,
-  InteractionResponse,
 } from 'discord.js'
 import Log from './utilities/log.js'
 import {
   Commands,
 } from './commands.js'
 import Build from './utilities/repo.js'
-import EventObservers from './observer/observers.js'
+import EventObservers from './events/observers.js'
 import Database from './db/database.js'
 import Icon from './utilities/icon.js'
 import Colors from './canvas/palette.js'
@@ -89,9 +87,9 @@ const Bot = class {
         .setThumbnail(`attachment://${Icon.HazardSign}`)
         .setDescription([
           `# ${error.name}`,
-          `**Server ID**: ${message.guildId}`,
-          `**Channel ID**: ${message.channelId}`,
-          `**Link**: ${message.url}`,
+          `**Server ID**: ${interaction.guildId}`,
+          `**Channel ID**: ${interaction.channelId}`,
+          `**Link**: ${(await interaction.channel.messages.fetch({ limit: 1 })).first().url}`,
           `**User**: <@${interaction.user.id}> (${interaction.user.id})`,
           `**Command**: ${interaction.commandName}`,
           `**Stack Trace**: \`\`\`${error.stack}\`\`\``
@@ -112,15 +110,19 @@ const Bot = class {
       try {
         await command.execute(interaction)
       } catch (err) {
+        Log.error(`Command execution ${interaction.commandName} failed`, err)
         await this.handleError(interaction, err)
         Log.error(`Command execution ${interaction.commandName} failed`,)
       }
     })
   }
-  public events(): void {
+  private events(): void {
     for (let event of Object.values(EventObservers)) {
       this.client.on(event.id as never, async (data) => {
         try {
+          // pass the database in through the react function
+          // made it do this like months ago but idr why
+          // TODO: see if I can import instead
           await event.react(this, data, Database)
         } catch (err) {
           Log.error(`Client event ${event.id} failed`, err)
@@ -128,45 +130,44 @@ const Bot = class {
       })
     }
   }
-  async fetchGuild(id: string): Promise<Guild> {
+  public async fetchGuild(id: string): Promise<Guild> {
     return this.client.guilds.cache.get(id) ?? await this.client.guilds.fetch(id)
   }
-  async fetchUser(id: string): Promise<User> {
+  // TODO: uhhhh is this even necessary
+  public async fetchUser(id: string): Promise<User> {
     let reqs = this.cacheRequests.get(id) ?? 0
-    const user = await bot.client.users.fetch(id, { force: reqs <= 0 })
+    const user = await this.client.users.fetch(id, { force: reqs <= 0 })
     this.cacheRequests.set(id, (reqs + 1) % 6) // reset to 0 after 5 requests
-
     return user
   }
-  async fetchGuildMember(id: string, guild: Guild): Promise<GuildMember> {
-    let member = guild.members.cache.get(id)
-    return member ?? await guild.members.fetch(id)
+  public async fetchGuildMember(id: string, guild: Guild): Promise<GuildMember> {
+    return guild.members.cache.get(id) ?? await guild.members.fetch(id)
   }
 }
 const bot = new Bot(new Client({
   intents: [
-    GatewayIntentBits.AutoModerationConfiguration,
-    GatewayIntentBits.AutoModerationExecution,
-    GatewayIntentBits.GuildEmojisAndStickers,
-    GatewayIntentBits.DirectMessageReactions,
+    //GatewayIntentBits.AutoModerationConfiguration,
+    //GatewayIntentBits.AutoModerationExecution,
+    //GatewayIntentBits.GuildEmojisAndStickers,
+    //GatewayIntentBits.DirectMessageReactions,
     GatewayIntentBits.GuildMessageReactions,
-    GatewayIntentBits.GuildScheduledEvents,
+    //GatewayIntentBits.GuildScheduledEvents,
     GatewayIntentBits.DirectMessageTyping,
     GatewayIntentBits.GuildMessageTyping,
-    GatewayIntentBits.GuildIntegrations,
+    //GatewayIntentBits.GuildIntegrations,
     GatewayIntentBits.GuildVoiceStates,
     GatewayIntentBits.GuildModeration,
     GatewayIntentBits.GuildPresences,
-    GatewayIntentBits.DirectMessages,
+    //GatewayIntentBits.DirectMessages,
     GatewayIntentBits.MessageContent,
-    GatewayIntentBits.GuildWebhooks,
+    //GatewayIntentBits.GuildWebhooks,
     GatewayIntentBits.GuildMessages,
     GatewayIntentBits.GuildMembers,
     GatewayIntentBits.GuildInvites,
     GatewayIntentBits.Guilds,
   ],
   partials: [
-    Partials.GuildScheduledEvent,
+    //Partials.GuildScheduledEvent,
     Partials.ThreadMember,
     Partials.GuildMember,
     Partials.Reaction,
@@ -179,5 +180,6 @@ const bot = new Bot(new Client({
   },
 }))
 await bot.init()
+
 
 export default bot

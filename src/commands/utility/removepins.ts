@@ -32,14 +32,20 @@ const RemovePins: CommandInterface = {
       .setDescription('Users to remove the pins of. Non-discriminatory if left empty.')
     ).setDMPermission(false),
   async execute(interaction: ChatInputCommandInteraction<CacheType>): Promise<void> {
-    const observer = await new InteractionObserver(interaction).defer()
+    const observer = new InteractionObserver(interaction)
     const targetChannel: TextChannel = interaction.options.getChannel('target')
     const amount: number = interaction.options.getInteger('amount') ?? 50
     const user: User = interaction.options.getUser('user')
 
     const pinnedMessages: Collection<string, Message<true>> = await targetChannel.messages.fetchPinned()
 
-    if (!observer.checkPermissions([PermissionsBitField.Flags.ManageMessages], targetChannel)) return await observer.abort(Abort.InsufficientPermissions)
+    if (!observer.checkPermissions([PermissionsBitField.Flags.ManageMessages], targetChannel)) {
+      await observer.killInteraction(Abort.InsufficientPermissions)
+      return
+    }
+
+    // defer it
+    await observer.defer()
 
     let userAmount = pinnedMessages.filter((value: Message<true>) => value.author.id === user?.id)
     await interaction.editReply(`Unpinning ${user != null ? userAmount.size : pinnedMessages.size} message(s) ${user != null ? `by <@${user.id}> ` : '' }from <#${targetChannel.id}>...`)

@@ -404,18 +404,31 @@ const Blackjack: CommandInterface = {
     .setRequired(true)
   ).setDMPermission(false),
   async execute(interaction: ChatInputCommandInteraction<CacheType>): Promise<void> {
-    const observer = await new InteractionObserver(interaction).defer()
+    const observer = new InteractionObserver(interaction)
     const amount: number = interaction.options.getInteger('amount', true)
+
+    // if we are on cooldown, reject it
+    if (observer.isOnCooldown('blackjack')) {
+      await observer.killInteraction(`This command is on cooldown for **${util.formatSeconds(observer.getCooldown('blackjack'), true)}!**`)
+      return
+    }
+
+    // defer it
+    await observer.defer()
     const [ userData, neutrinoData ] = await Promise.all([observer.getGuildUserData(), observer.getGuildUserData(config.botId)])
 
+    // if we have a shield active, reject it
     if (userData.shieldEnd > Date.now()) {
-      interaction.editReply('You cannot play blackjack while you have a shield active!')
+      await observer.killInteraction('You cannot play blackjack while you have a shield active!')
       return
-    } else if (observer.isOnCooldown('blackjack')) {
-      interaction.editReply(`This command is on cooldown for **${util.formatSeconds(observer.getCooldown('blackjack'), true)}!**`)
+    }
+
+    // if we try to gamble more than we have, reject it
+    if (amount > userData.score) {
+      await observer.killInteraction('You cannot gamble more points than what you currently have!')
       return
-    } else {
-      if (amount > userData.score) {
+    }
+
     // Create a new active match
     Game.activeMatches.set(interaction.user.id, new Table(amount, userData, neutrinoData))
     // reset their cooldown

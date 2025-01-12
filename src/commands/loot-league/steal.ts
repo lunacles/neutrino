@@ -12,7 +12,6 @@ import InteractionObserver from '../interactionobserver.js'
 import config from '../../config.js'
 import * as util from '../../utilities/util.js'
 import Icon from '../../utilities/icon.js'
-import Database from '../../db/database.js'
 import { Abort } from '../../types/enum.js'
 import bot from '../../index.js'
 
@@ -29,24 +28,38 @@ const Steal: CommandInterface = {
     .setDescription('The neutrino id to fetch.')
   ).setDMPermission(false),
   async execute(interaction: ChatInputCommandInteraction<CacheType>): Promise<void> {
-    const observer = await new InteractionObserver(interaction).defer()
+    const observer = new InteractionObserver(interaction)
     const user: User = await bot.fetchUser(interaction.user.id)
     const targetUserOption = interaction.options.getUser('user', true)
-    const guildData: DatabaseGuildInstance = await Database.discord.guilds.fetch(interaction.guild)
 
+    if (targetUserOption.id === user.id) {
+      await observer.killInteraction(Abort.SelfTargetNotAllowed)
+      return
+    }
+    if (targetUserOption.id === config.botId) {
+      await observer.killInteraction(Abort.NeutrinoNotAllowed)
+      return
+    }
+
+    if (observer.isOnCooldown('steal')) {
+      await observer.killInteraction(`This command is on cooldown for **${util.formatSeconds(observer.getCooldown('steal'), true)}!**`)
+      return
+    }
+
+    await observer.defer()
     const [ userData, targetData] = await Promise.all([observer.getGuildUserData(), observer.getGuildUserData(targetUserOption.id)])
 
     if (userData.shieldEnd > Date.now()) {
-      await interaction.editReply('You cannot steal from someone while you have a shield active!')
+      await observer.killInteraction('You cannot steal from someone while you have a shield active!')
       return
     } else if (targetData.score < 250) {
-      await interaction.editReply('You cannot steal from someone with less than 250 points!')
+      await observer.killInteraction('You cannot steal from someone with less than 250 points!')
       return
-    } else if (targetData.score < 250) {
-      await interaction.editReply('You cannot steal from someone if you have less than 250 points!')
+    } else if (userData.score < 250) {
+      await observer.killInteraction('You cannot steal from someone if you have less than 250 points!')
       return
     } else if (targetData.shieldEnd > Date.now()) {
-      await interaction.editReply(`You cannot steal from someone who has a shield active!\nTheir shield will expire <t:${Math.floor(targetData.shieldEnd / 1e3)}:R>`)
+      await observer.killInteraction(`You cannot steal from someone who has a shield active!\nTheir shield will expire <t:${Math.floor(targetData.shieldEnd / 1e3)}:R>`)
       return
     }
 

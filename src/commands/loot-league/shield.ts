@@ -33,12 +33,20 @@ const Shield: CommandInterface = {
   description: `Shield yourself from thieves for ${util.formatSeconds(config.shieldDuration)}! ${util.formatSeconds(config.cooldown.shield)} cooldown.`,
   data: new SlashCommandBuilder().setDMPermission(false),
   async execute(interaction: ChatInputCommandInteraction<CacheType>): Promise<void> {
-    const observer = await new InteractionObserver(interaction).defer()
+    const observer = new InteractionObserver(interaction)
     const user: User = await bot.fetchUser(interaction.user.id)
+
+    if (observer.isOnCooldown('shield')) {
+      await observer.killInteraction(`This command is on cooldown for **${util.formatSeconds(observer.getCooldown('shield'), true)}!**`)
+      return
+    }
+
+    await observer.defer()
     const userData = await observer.getGuildUserData()
 
     if (userData.shieldEnd > Date.now()) {
-      await interaction.editReply(`You cannot create a shield while one is active!\nRemaining shield time: **${util.formatSeconds(Math.floor((userData.shieldEnd - Date.now()) / 1e3), true)}!**`)
+      let remainingTime: string = util.formatSeconds(Math.floor((userData.shieldEnd - Date.now()) / 1e3), true)
+      await observer.killInteraction(`You cannot create a shield while one is active!\nRemaining shield time: **${remainingTime}!**`)
       return
     }
 

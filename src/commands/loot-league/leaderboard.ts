@@ -22,8 +22,16 @@ const Leaderboard: CommandInterface = {
     .setRequired(false)
   ).setDMPermission(false),
   async execute(interaction: ChatInputCommandInteraction<CacheType>): Promise<void> {
-    const observer = await new InteractionObserver(interaction).defer()
+    const observer = new InteractionObserver(interaction)
     const user: User = await bot.fetchUser(interaction.user.id)
+    const relative: boolean = interaction.options.getBoolean('relative', true)
+
+    if (observer.isOnCooldown('leaderboard')) {
+      await observer.killInteraction(`This command is on cooldown for **${util.formatSeconds(observer.getCooldown('leaderboard'), true)}!**`)
+      return
+    }
+
+    await observer.defer()
     const guildData = await observer.getGuildData()
 
     let top: Array<string> = []

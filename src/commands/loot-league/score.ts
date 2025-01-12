@@ -31,8 +31,11 @@ const Score: CommandInterface = {
     const targetUserOption = interaction.options.getUser('user', false) ?? user
 
     if (observer.isOnCooldown('score')) {
-      await interaction.editReply(`This command is on cooldown for **${util.formatSeconds(observer.getCooldown('score'), true)}!**`)
+      await observer.killInteraction(`This command is on cooldown for **${util.formatSeconds(observer.getCooldown('score'), true)}!**`)
       return
+    }
+
+    await observer.defer(true)
     const targetData = await observer.getGuildUserData(targetUserOption.id)
 
     observer.resetCooldown('score')

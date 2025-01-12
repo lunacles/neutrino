@@ -19,16 +19,17 @@ const Claim: CommandInterface = {
   description: `Claim some points! ${util.formatSeconds(config.cooldown.claim)} cooldown.`,
   data: new SlashCommandBuilder().setDMPermission(false),
   async execute(interaction: ChatInputCommandInteraction<CacheType>): Promise<void> {
-    const observer = await new InteractionObserver(interaction).defer()
+    const observer = new InteractionObserver(interaction)
     const user: User = await bot.fetchUser(interaction.user.id)
-    const guildData: DatabaseGuildInstance = await Database.discord.guilds.fetch(interaction.guild)
 
-    try {
-      let userData: DatabaseUserInstance = await Database.discord.users.fetch(user)
-
+    // if we are on cooldown, reject it
     if (observer.isOnCooldown('claim')) {
-      await interaction.editReply(`This command is on cooldown for **${util.formatSeconds(observer.getCooldown('claim'), true)}!**`)
+      await observer.killInteraction(`This command is on cooldown for **${util.formatSeconds(observer.getCooldown('claim'), true)}!**`)
       return
+    }
+
+    // defer it
+    await observer.defer()
     const userData = await observer.getGuildUserData()
 
     // Get a random score between the claim range

@@ -35,16 +35,32 @@ const Gamble: CommandInterface = {
     .setRequired(true)
   ).setDMPermission(false),
   async execute(interaction: ChatInputCommandInteraction<CacheType>): Promise<void> {
-    const observer = await new InteractionObserver(interaction).defer()
+    const observer = new InteractionObserver(interaction)
     const amount = interaction.options.getInteger('amount', true)
     const user: User = await bot.fetchUser(interaction.user.id)
+
+    // if we are on cooldown, reject it
+    if (observer.isOnCooldown('gamble')) {
+      await observer.killInteraction(`This command is on cooldown for **${util.formatSeconds(observer.getCooldown('gamble'), true)}!**`)
+      return
+    }
+
+    // defer it
+    await observer.defer()
     const userData = await observer.getGuildUserData()
+
+    // if we have a shield active, reject it
     if (userData.shieldEnd > Date.now()) {
-      interaction.editReply('You cannot gamble while you have a shield active!')
+      await observer.killInteraction('You cannot gamble while you have a shield active!')
       return
-    } else if (observer.isOnCooldown('gamble')) {
-      await interaction.editReply(`This command is on cooldown for **${util.formatSeconds(observer.getCooldown('gamble'), true)}!**`)
+    }
+
+    // if we try to gamble more than we have, reject it
+    if (amount > userData.score) {
+      await observer.killInteraction('You cannot gamble more points than what you currently have!')
       return
+    }
+
     let result: number
     let win: boolean
     let chance = await userData.random()//crypto.getRandomValues(new Uint32Array(1))[0] / 0x100000000
